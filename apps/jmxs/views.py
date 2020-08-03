@@ -8,6 +8,9 @@ from rest_framework import status
 from rest_framework import generics
 
 class JmxUpload(APIView):
+    """
+    上传jmx文件
+    """
 
     def post(self, request):
         data = {
@@ -64,6 +67,9 @@ class JmxUpload(APIView):
 
 
 class JmxListView(generics.ListAPIView):
+    """
+    查询jmx文件
+    """
     queryset = Jmxs.objects.all()
     serializer_class = JmxsSerializer
 
