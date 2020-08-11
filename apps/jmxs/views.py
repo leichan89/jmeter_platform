@@ -25,6 +25,7 @@ class JmxUpload(APIView):
         jmx = request.FILES.get('jmx')
         if jmx:
             jmx_name = jmx.name.split('.')[0]
+            data['jmx_name'] = jmx_name
             jmx_ext = jmx.name.split('.')[-1]
             if jmx_ext not in settings.ALLOWED_FILE_TYPE:
                 return Response({
