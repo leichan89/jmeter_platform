@@ -75,9 +75,7 @@ class Tools:
         sapmler_root_xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy'
         # 请求的节点信息
         samplers = tree.xpath(f'{sapmler_root_xpath}')
-
-        samplers_params = {}
-
+        # 保存所有sampler请求的信息
         sapmlers_info = []
 
         for sidx, sampler in enumerate(samplers):
