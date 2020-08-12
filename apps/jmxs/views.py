@@ -16,6 +16,7 @@ class JmxUpload(APIView):
         data = {
         'jmx_name': "1",
         'jmx_setup_thread_name': "1",
+        'mulit_sampler': 0,
         'sample_url': "1",
         'sample_method': "1",
         'sample_params': "1",
@@ -39,6 +40,15 @@ class JmxUpload(APIView):
             with open(path, 'wb') as f:
                 for i in jmx.chunks():
                     f.write(i)
+
+            jmxinfo = Tools.analysis_jmx(path)
+
+            jmx_setup_thread_name = jmxinfo[0]
+
+            samplerinfo = jmxinfo[1]
+            if samplerinfo:
+                if len(samplerinfo) > 1:
+                    sample_url = "多sampler"
 
             data['jmx'] = jmxfile
 
