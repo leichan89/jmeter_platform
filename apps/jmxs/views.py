@@ -106,7 +106,8 @@ class JmxView(generics.RetrieveAPIView):
     """
     查询单独某个jmx信息
     """
-    queryset = Jmxs.objects.all()
+    # 查询指定列的数据，必须和Serializer中指定的指定相匹配
+    queryset = Jmxs.objects.values('id', 'samplers_info')
     serializer_class = JmxSerializer
 
     def get(self, request, *args, **kwargs):
