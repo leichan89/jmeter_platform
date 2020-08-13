@@ -6,27 +6,22 @@ from jmxs.serializer import JmxsSerializer
 from .models import Jmxs
 from rest_framework import status
 from rest_framework import generics
+import json
 
 class JmxUpload(APIView):
     """
-    上传jmx文件
+    上传jmx文件，
+    上传后，将jmx持久化
+    在页面修改参数时，需要修改jmx文件，修改完后，重新获取参数信息，然后重新更新到数据库
     """
 
-    def post(self, request):
-        data = {
-        'jmx_name': "1",
-        'jmx_setup_thread_name': "1",
-        'mulit_sampler': 0,
-        'sample_url': "1",
-        'sample_method': "1",
-        'sample_params': "1",
-        'sample_raw': "1"
-        }
 
+    def post(self, request):
+        data = {}
+        user = request.POST.get('user')
         jmx = request.FILES.get('jmx')
         if jmx:
             jmx_name = jmx.name.split('.')[0]
-            data['jmx_name'] = jmx_name
             jmx_ext = jmx.name.split('.')[-1]
             if jmx_ext not in settings.ALLOWED_FILE_TYPE:
                 return Response({
@@ -35,26 +30,35 @@ class JmxUpload(APIView):
                     "data": ""
                 }, status=status.HTTP_205_RESET_CONTENT)
             jmxfile = jmx_name + "-" + str(Tools.datetime2timestamp()) + '.' + jmx_ext
-            path = settings.JMX_URL + jmxfile
+            jmxpath = settings.JMX_URL + jmxfile
 
-            with open(path, 'wb') as f:
+            with open(jmxpath, 'wb') as f:
                 for i in jmx.chunks():
                     f.write(i)
 
-            jmxinfo = Tools.analysis_jmx(path)
+            jmxinfo = Tools.analysis_jmx(jmxpath)
 
-            jmx_setup_thread_name = jmxinfo[0]
+            samplers_info = jmxinfo[1]
+            if samplers_info:
+                if len(samplers_info) == 1:
+                    data['jmx_setup_thread_name'] = jmxinfo[0]
+                    data['sampler_name'] = samplers_info[0]['name']
+                    data['sampler_url'] = samplers_info[0]['url']
+            else:
+                return Response({
+                    "code": 400,
+                    "msg": "jmx文件未解析出任何信息",
+                    "data": ""
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-            samplerinfo = jmxinfo[1]
-            if samplerinfo:
-                if len(samplerinfo) > 1:
-                    sample_url = "多sampler"
 
             data['jmx'] = jmxfile
+            # 将list转为str
+            data['samplers_info'] = json.dumps(samplers_info)
+            # user的id不存在时，会校验失败
+            data['add_user'] = user
 
             obj = JmxsSerializer(data=data)
-
-            print(data)
 
             if obj.is_valid():
                 obj.save()
@@ -66,7 +70,7 @@ class JmxUpload(APIView):
 
             return Response({
                 "code": 400,
-                "msg": "添加失败",
+                "msg": "添加失败，校验未通过",
                 "data": ""
             }, status=status.HTTP_400_BAD_REQUEST)
         else:
