@@ -8,5 +8,5 @@ from django.urls import path
 
 urlpatterns = [
     path('uploadcsv', views.CsvUpload.as_view()),
-    path('listcsvs', views.CsvListView.as_view()),
+    path('csvs', views.CsvListView.as_view()),
 ]

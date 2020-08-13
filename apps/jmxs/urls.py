@@ -8,7 +8,8 @@ from django.urls import path
 
 urlpatterns = [
     path('uploadjmx', views.JmxUpload.as_view()),
-    path('listjmxs', views.JmxListView.as_view())
+    path('jmxs', views.JmxListView.as_view()),
+    path('jmx/<int:pk>', views.JmxView.as_view())
 ]
 
 

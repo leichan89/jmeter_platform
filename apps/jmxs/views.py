@@ -2,7 +2,7 @@ from common.Tools import Tools
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from jmeter_platform import settings
-from jmxs.serializer import JmxsSerializer
+from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer
 from .models import Jmxs
 from rest_framework import status
 from rest_framework import generics
@@ -49,6 +49,7 @@ class JmxUpload(APIView):
                     data['jmx_setup_thread_name'] = jmxinfo[0]
                     data['sampler_name'] = samplers_info[0]['name']
                     data['sampler_url'] = samplers_info[0]['url']
+                    data['is_mulit_samplers'] = False
             else:
                 return Response({
                     "code": 400,
@@ -91,7 +92,7 @@ class JmxListView(generics.ListAPIView):
     查询jmx文件
     """
     queryset = Jmxs.objects.all()
-    serializer_class = JmxsSerializer
+    serializer_class = JmxListSerializer
 
     def get(self, request, *args, **kwargs):
         rsp_data = self.list(request, *args, **kwargs)
@@ -100,3 +101,19 @@ class JmxListView(generics.ListAPIView):
         else:
             rsp_data.data = {"code": rsp_data.status_code, "msg": "error", "data": rsp_data.data}
         return rsp_data
+
+class JmxView(generics.RetrieveAPIView):
+    """
+    查询单独某个jmx信息
+    """
+    queryset = Jmxs.objects.all()
+    serializer_class = JmxSerializer
+
+    def get(self, request, *args, **kwargs):
+        rsp_data = self.retrieve(request, *args, **kwargs)
+        if rsp_data.status_code == 200:
+            rsp_data.data = {"code": rsp_data.status_code, "msg": "", "data": rsp_data.data}
+        else:
+            rsp_data.data = {"code": rsp_data.status_code, "msg": "error", "data": rsp_data.data}
+        return rsp_data
+

@@ -12,6 +12,7 @@ class Jmxs(models.Model):
 
     jmx = models.CharField("jmx存放路径", max_length=200)
     jmx_setup_thread_name = models.CharField("setup线程组名称", default="", max_length=200, null=True, blank=True)
+    is_mulit_samplers = models.BooleanField("判断是否是多个sampler的jmx", default=True)
     sampler_name = models.CharField("单sampler的名称", default="", max_length=1000, null=True, blank=True)
     sampler_url = models.CharField("单sample请求的url地址", default="", max_length=1000, null=True, blank=True)
     samplers_info = models.TextField("线程组下sampler请求和参数信息")
