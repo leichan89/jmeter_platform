@@ -9,7 +9,6 @@ class Csvs(models.Model):
     csv文件
     """
 
-    csv_name = models.CharField("csv文件名称", max_length=100)
     csv = models.CharField("csv文件路径", max_length=200)
     jmx = models.ForeignKey(Jmxs, on_delete=models.CASCADE)
     add_user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name="用户名")
@@ -20,4 +19,4 @@ class Csvs(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return f"{self.csv_name}:{self.csv}"
+        return f"{self.csv}"

@@ -17,6 +17,11 @@ class JmxUpload(APIView):
 
 
     def post(self, request):
+        """
+
+        :param request: {'jmx': , 'user': 1}
+        :return:
+        """
         data = {}
         user = request.POST.get('user')
         jmx = request.FILES.get('jmx')

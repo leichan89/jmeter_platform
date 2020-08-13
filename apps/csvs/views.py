@@ -10,14 +10,14 @@ from rest_framework import status
 class CsvUpload(APIView):
 
     def post(self, request):
-
-        data = {
-            "csv_name": "1",
-            'add_user': 1,
-            "jmx": 1
-        }
-
+        """
+        :param request: :param request: {'csv': ,'jmx': , 'user': 1}
+        :return:
+        """
+        data = {}
         csv = request.FILES.get('csv')
+        jmx = request.POST.get('jmx')
+        user = request.POST.get('user')
         if csv:
             csv_name = csv.name.split('.')[0]
             csv_ext = csv.name.split('.')[-1]
@@ -35,6 +35,10 @@ class CsvUpload(APIView):
                     f.write(i)
 
             data['csv'] = csvfile
+            # jmx不存在时，接口会报错
+            data['jmx'] = jmx
+            # user不存在时，接口会报错
+            data['add_user'] = user
 
             obj = CsvSerializer(data=data)
 
@@ -48,7 +52,7 @@ class CsvUpload(APIView):
 
             return Response({
                 "code": 400,
-                "msg": "添加失败",
+                "msg": "添加失败，参数校验失败",
                 "data": ""
             }, status=status.HTTP_400_BAD_REQUEST)
         else:
