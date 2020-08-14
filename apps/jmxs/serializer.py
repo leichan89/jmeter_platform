@@ -34,3 +34,11 @@ class JmxSerializer(serializers.ModelSerializer):
         model = Jmxs
         fields = ['id', 'samplers_info']
 
+
+class JmxsRunSerializer(serializers.ModelSerializer):
+    """
+    单个jmx的数据
+    """
+    class Meta:
+        model = Jmxs
+        fields = ['id', 'jmx']
