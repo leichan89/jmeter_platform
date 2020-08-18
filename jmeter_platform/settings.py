@@ -13,6 +13,17 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import sys
 
+# celery配置redis作为broker。redis有16个数据库，编号0~15，这里使用第1个。
+BROKER_URL = 'redis://127.0.0.1:6379/0'
+# 设置存储结果的后台
+RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+# 可接受的内容格式
+ACCEPT_CONTENT = "json"
+# 任务序列化数据格式
+TASK_SERIALIZER = "json"
+# 结果序列化数据格式
+RESULT_SERIALIZER = "json"
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -45,6 +56,7 @@ INSTALLED_APPS = [
     'jmxs',
     'users',
     'rest_framework',
+    'flower'
 ]
 
 MIDDLEWARE = [
@@ -158,6 +170,11 @@ STATIC_URL = '/static/'
 
 JMX_URL = "performance_files/jmx/"
 CSV_URL = "performance_files/csv/"
+JTL_URL = "performance_files/jtl/"
+OUTPUT_URL = "performance_files/output/"
 JMX_CSV_DIR = os.path.join(BASE_DIR, "performance_files")
+JMETER = os.path.join(BASE_DIR, "jmeter5/bin/jmeter.sh")
 
-ALLOWED_FILE_TYPE = ['jmx', 'csv']
+
+JMX_ALLOWED_FILE_TYPE = ['.jmx']
+CSV_ALLOWED_FILE_TYPE = ['.csv']

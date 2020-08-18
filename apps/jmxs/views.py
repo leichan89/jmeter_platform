@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework import generics
 import json
 import os
+from .tasks import run_jmx
 
 class JmxUpload(APIView):
     """
@@ -28,15 +29,16 @@ class JmxUpload(APIView):
         user = request.POST.get('user')
         jmx = request.FILES.get('jmx')
         if jmx and user:
-            jmx_name = jmx.name.split('.')[0]
-            jmx_ext = jmx.name.split('.')[-1]
-            if jmx_ext not in settings.ALLOWED_FILE_TYPE:
+            jmx_name_ext = os.path.splitext(jmx.name)
+            jmx_name = jmx_name_ext[0]
+            jmx_ext = jmx_name_ext[1]
+            if jmx_ext not in settings.JMX_ALLOWED_FILE_TYPE:
                 return Response({
                     "code": 205,
-                    "msg": "无效的格式，请上传.jmx或.csv格式的文件",
+                    "msg": "无效的格式，请上传.jmx格式的文件",
                     "data": ""
                 }, status=status.HTTP_205_RESET_CONTENT)
-            jmxfile = jmx_name + "-" + str(Tools.datetime2timestamp()) + '.' + jmx_ext
+            jmxfile = jmx_name + "-" + str(Tools.datetime2timestamp()) + jmx_ext
             jmxpath = settings.JMX_URL + jmxfile
 
             with open(jmxpath, 'wb') as f:
@@ -141,9 +143,14 @@ class JmxRun(APIView):
                     "data": ""
                 }, status=status.HTTP_400_BAD_REQUEST)
             jmxs = Jmxs.objects.values('id', 'jmx').filter(pk__in=ids)
+            cmds = {}
             for jmx in jmxs:
-                jmx_abs_path = settings.JMX_URL + jmx['jmx']
-                # os.system()
+                jmx = jmx['jmx']
+                jname = os.path.splitext(jmx)[0] + '-' + str(Tools.datetime2timestamp()) + '.jtl'
+                jtl = f"{settings.JTL_URL + jname}"
+                cmd = f"{settings.JMETER} -n -t {settings.JMX_URL + jmx} -l {jtl}"
+                cmds[jtl] = cmd
+            run_jmx.delay(cmds)
             ser = JmxsRunSerializer(jmxs, many=True)
             data = ser.data
             return Response(data, status=status.HTTP_200_OK)
