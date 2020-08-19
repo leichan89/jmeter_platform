@@ -8,6 +8,7 @@ Users = get_user_model()
 class Jmxs(models.Model):
     """
     jmx文件模型
+    在生成了jtl后需要更新JtlsDetails表中的jtl_url_created字段
     """
 
     jmx = models.CharField("jmx存放路径", max_length=200)

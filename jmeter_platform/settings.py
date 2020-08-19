@@ -56,7 +56,11 @@ INSTALLED_APPS = [
     'jmxs',
     'users',
     'rest_framework',
-    'flower'
+    'flower',
+    'jtls_summary',
+    'jtls_details',
+    'tasks',
+    'reports',
 ]
 
 MIDDLEWARE = [
