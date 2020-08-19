@@ -3,11 +3,10 @@ from tasks.models import Tasks
 
 class JtlsSummary(models.Model):
     """
-    jtl汇总表，将多个jtl汇总生成一个jtl
+    jtl汇总表，将多个jtl汇总生成一个jtl，通过在report表中查询是否存在这个jtl的信息来判断是否已经生成过报告
     """
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="关联的任务id")
     jtl_url = models.CharField("生成的汇总的jtl地址", max_length=100)
-    report_created = models.BooleanField("是否已经通过汇总的jtl生成了报告", default=False)
     add_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:

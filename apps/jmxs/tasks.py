@@ -16,6 +16,14 @@ def run_jmx(cmds):
     :param cmds: 一个字段，key是jtl文件路径，value是jmx执行命令
     :return:
     """
+    import django
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
+    django.setup()
+
+    # from csvs.models import Csvs
+    #
+    # print(Csvs.objects.all())
+
     for jtl, cmd in cmds.items():
         os.popen(cmd)
         while True:

@@ -52,14 +52,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'flower',
     'csvs',
     'jmxs',
     'users',
-    'rest_framework',
-    'flower',
+    'tasks',
+    'tasks_details',
     'jtls_summary',
     'jtls_details',
-    'tasks',
     'reports',
 ]
 
