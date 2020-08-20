@@ -4,7 +4,8 @@
 # @File    : serializer.py
 
 from rest_framework import serializers
-from .models import Tasks
+from .models import Tasks, TasksDetails
+
 
 class TaskSerializer(serializers.ModelSerializer):
 
@@ -14,7 +15,10 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 
-
+class TasksDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TasksDetails
+        fields = "__all__"
 
 
 

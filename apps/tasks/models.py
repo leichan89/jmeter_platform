@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from jmxs.models import Jmxs
 
 Users = get_user_model()
 
@@ -17,3 +18,19 @@ class Tasks(models.Model):
 
     def __str__(self):
         return f"{self.task_name}"
+
+
+class TasksDetails(models.Model):
+    """
+    任务详情表，任务与jmx的关联表
+    """
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE)
+    jmx = models.ForeignKey(Jmxs, on_delete=models.CASCADE)
+    add_time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "任务详情表"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f"{self.task}"

@@ -21,6 +21,6 @@ urlpatterns = [
     path('', include('jmxs.urls')),
     path('', include('csvs.urls')),
     path('', include('tasks.urls')),
-    path('', include('tasks_details.urls')),
-    path('', include('jtls_details.urls'))
+    path('', include('tasks.urls')),
+    path('', include('jtls.urls'))
 ]

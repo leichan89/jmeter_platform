@@ -1,6 +1,6 @@
 from django.db import models
 from tasks.models import Tasks
-from jtls_summary.models import JtlsSummary
+from jtls.models import JtlsSummary
 
 class Reports(models.Model):
     """

@@ -8,6 +8,8 @@ from django.urls import path
 
 urlpatterns = [
     path('createtask', views.CreateTask.as_view()),
+    path('runtask/<int:taskid>', views.RunTask.as_view()),
+    path('jmxbindtask', views.JmxBindTask.as_view()),
 ]
 
 

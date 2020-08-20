@@ -58,9 +58,7 @@ INSTALLED_APPS = [
     'jmxs',
     'users',
     'tasks',
-    'tasks_details',
-    'jtls_summary',
-    'jtls_details',
+    'jtls',
     'reports',
 ]
 
