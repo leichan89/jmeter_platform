@@ -135,8 +135,9 @@ class Tools:
         name = os.path.splitext(file)[0]
         return name
 
-    def summary_jtls(self, jtls_stnames):
-        with open('new', 'w') as w:
+    @staticmethod
+    def summary_jtls(summary_jtl, jtls_stnames):
+        with open(summary_jtl, 'w') as w:
             for idx, jtl_stname in enumerate(jtls_stnames):
                 if idx == 0:
                     with open(jtl_stname[0], 'r') as first:
@@ -144,8 +145,8 @@ class Tools:
                         w.write(line)
                 with open(jtl_stname[0], 'r') as f:
                     lines = f.readlines()
-                    for line in lines:
-                        if line.find(jtl_stname[1]) == -1:
+                    for idx2, line in enumerate(lines):
+                        if line.find(jtl_stname[1]) == -1 and idx2 != 0:
                             w.write(line)
 
 

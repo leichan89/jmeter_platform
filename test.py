@@ -75,18 +75,18 @@ django.setup()
 from jtls.models import JtlsDetails
 
 
-j = list(JtlsDetails.objects.select_related('jmx').filter(task_id=1))
+j = list(JtlsDetails.objects.select_related('jmx').filter(task_id=1, flow_id=34))
 
-# for i in j:
-#     print(i.jtl_url)
-#     print(i.jmx)
+for i in j:
+    print(i.jmx.add_time)
+
 
 # from common.Tools import Tools
 #
 # for i in range(1,5):
 #     print(Tools.random_str())
 
-s = '/python-project/jmeter_platform/test.py'
+# s = '/python-project/jmeter_platform/test.py'
 
 
 

@@ -4,10 +4,11 @@
 # @File    : urls.py
 
 from django.urls import path
-from .views import RecordJtl
+from .views import RecordJtl, SummaryJtls
 
 urlpatterns = [
-    path('recordjtl', RecordJtl.as_view())
+    path('recordjtl', RecordJtl.as_view()),
+    path('jtls/summary/<int:taskid>/<int:flowid>', SummaryJtls.as_view())
 ]
 
 
