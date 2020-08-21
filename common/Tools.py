@@ -129,6 +129,26 @@ class Tools:
           sa.append(random.choice(seed))
         return ''.join(sa)
 
+    @staticmethod
+    def filename(filepath):
+        file = os.path.basename(filepath)
+        name = os.path.splitext(file)[0]
+        return name
+
+    def summary_jtls(self, jtls_stnames):
+        with open('new', 'w') as w:
+            for idx, jtl_stname in enumerate(jtls_stnames):
+                if idx == 0:
+                    with open(jtl_stname[0], 'r') as first:
+                        line = first.readline()
+                        w.write(line)
+                with open(jtl_stname[0], 'r') as f:
+                    lines = f.readlines()
+                    for line in lines:
+                        if line.find(jtl_stname[1]) == -1:
+                            w.write(line)
+
+
 
 
 
@@ -149,6 +169,6 @@ if __name__ == "__main__":
     # s = os.popen("ps -ef|grep applessdstatistics | grep -v grep")
     # for i in s.readlines():
     #     print(i)
-    print(Tools.random_str())
+    print(Tools.filename('/Users/chenlei/jmeter5/jmx_folder/jjxt2.jmx'))
 
 

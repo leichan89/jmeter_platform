@@ -31,6 +31,8 @@ class TasksDetails(models.Model):
     class Meta:
         verbose_name = "任务详情表"
         verbose_name_plural = verbose_name
+        # 设置联合主键，一个jmx和一个task是一对一关系
+        unique_together = ['task', 'jmx']
 
     def __str__(self):
         return f"{self.task}"
@@ -41,3 +43,10 @@ class TaskFlow(models.Model):
     randomstr = models.CharField("随机字符串", max_length=30)
     celery_task_id = models.CharField("celery任务的id", max_length=40)
     add_time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "任务流水表"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f"{self.randomstr}"

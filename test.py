@@ -69,8 +69,27 @@ import os, sys
 # sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
 
-# import django
-# django.setup()
+import django
+django.setup()
+
+from jtls.models import JtlsDetails
+
+
+j = list(JtlsDetails.objects.select_related('jmx').filter(task_id=1))
+
+# for i in j:
+#     print(i.jtl_url)
+#     print(i.jmx)
+
+# from common.Tools import Tools
+#
+# for i in range(1,5):
+#     print(Tools.random_str())
+
+s = '/python-project/jmeter_platform/test.py'
+
+
+
 #
 # from tasks.models import TasksDetails
 # from jmxs.models import Jmxs
@@ -91,11 +110,4 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
 #
 # print(s)
 #
-# print(len(s))
-dir = '/Users/chenlei/python-project/jmeter_platform/performance_files/jtl/'
-s = os.listdir(dir)
-ss = 'test-1597299607336-15979111320258430.jtl'
-for i in s:
-    if i == ss:
-        print(f'{dir}{i}')
 

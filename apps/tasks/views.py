@@ -36,12 +36,12 @@ class RunTask(APIView):
         task = []
         cmds = {}
         task_flow_str = Tools.random_str()
-        for jmx in jmxs:
-            jmx = jmx['jmx']
-            jname = f"{os.path.splitext(jmx)[0]}-{task_flow_str}.jtl"
+        for sj in jmxs:
+            jmx = sj['jmx']
+            jname = f"{Tools.filename(jmx)}-{task_flow_str}.jtl"
             jtl = f"{settings.JTL_URL + jname}"
-            cmd = f"{settings.JMETER} -n -t {settings.JMX_URL + jmx} -l {jtl}"
-            cmds[jtl] = cmd
+            cmd = f"{settings.JMETER} -n -t {jmx} -l {jtl}"
+            cmds[jtl] = [sj['id'], cmd]
         task.append(taskid)
         task.append(cmds)
         task.append(task_flow_str)

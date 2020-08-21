@@ -61,7 +61,7 @@ class JmxUpload(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
 
 
-            data['jmx'] = jmxfile
+            data['jmx'] = jmxpath
             # 将list转为str
             data['samplers_info'] = json.dumps(samplers_info)
             # user的id不存在时，会校验失败

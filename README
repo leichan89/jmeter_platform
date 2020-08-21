@@ -1,0 +1,12 @@
+启动celery
+Celery -A jmeter_platform worker -l info
+
+启动flower
+celery flower --broker='redis://127.0.0.1:6379/0'  -A jmeter_platform --address=127.0.0.1 --port=5558
+
+启动redis
+redis-server
+
+
+前端页面参考：
+https://testerhome.com/topics/17986

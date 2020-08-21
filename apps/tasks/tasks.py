@@ -21,12 +21,12 @@ def run_task(task):
     from jtls.models import JtlsDetails
     from tasks.models import TaskFlow
 
-    for jtl, cmd in task[1].items():
-        code = os.system(cmd)
+    for jtl, jmxcmd in task[1].items():
+        code = os.system(jmxcmd[1])
         if os.path.exists(jtl) and code == 0:
             # 参数是数据库中的字段，不是模型中的字段
             flow_id = TaskFlow.objects.values('id').get(randomstr=task[2])['id']
-            jtl = JtlsDetails(task_id=task[0], flow_id=flow_id, jtl_url=jtl)
+            jtl = JtlsDetails(task_id=task[0], jmx_id=jmxcmd[0], flow_id=flow_id, jtl_url=jtl)
             jtl.save()
 
 @shared_task
