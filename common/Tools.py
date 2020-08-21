@@ -6,9 +6,8 @@
 import time
 from datetime import datetime
 from lxml import etree
-import asyncio
+import random
 import os
-import threading
 
 class Tools:
 
@@ -122,35 +121,13 @@ class Tools:
         return setup_thread_name, sapmlers_info
 
 
-    def run_jmx(self, cmds):
-        # 启动一个线程
-        t = threading.Thread(target=self._run, args=(cmds,))
-        t.start()
-        # t.join()
-
-    def _run(self, cmds):
-        for jtl, cmd in cmds.items():
-            os.popen(cmd)
-            while True:
-                time.sleep(15)
-                if os.path.exists(jtl):
-                    break
-                elif self._check_jmx_process(jtl):
-                    break
-
-
-    def _check_jmx_process(self, process_name):
-        """
-        查询jmx进程是否存在，存在则返回False，不存在则返回True
-        :param process_name:
-        :return:
-        """
-        if process_name:
-            check = os.popen(f"ps -ef|grep {process_name}|grep -v grep")
-            for c in check:
-                if c.find(process_name) != -1:
-                    return True
-        return False
+    @staticmethod
+    def random_str(slen=30):
+        seed = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        sa = []
+        for i in range(slen):
+          sa.append(random.choice(seed))
+        return ''.join(sa)
 
 
 
@@ -172,7 +149,6 @@ if __name__ == "__main__":
     # s = os.popen("ps -ef|grep applessdstatistics | grep -v grep")
     # for i in s.readlines():
     #     print(i)
-    t = Tools()
-    s = t.check_jmx_process('applessdsttistics')
-    print(s)
+    print(Tools.random_str())
+
 

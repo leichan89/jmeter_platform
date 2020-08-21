@@ -34,3 +34,10 @@ class TasksDetails(models.Model):
 
     def __str__(self):
         return f"{self.task}"
+
+
+class TaskFlow(models.Model):
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="任务流水id")
+    randomstr = models.CharField("随机字符串", max_length=30)
+    celery_task_id = models.CharField("celery任务的id", max_length=40)
+    add_time = models.DateTimeField(auto_now_add=True)

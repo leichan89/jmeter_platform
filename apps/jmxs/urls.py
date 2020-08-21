@@ -13,7 +13,6 @@ urlpatterns = [
     path('jmxs', views.JmxListView.as_view()),
     # 查询单个jmx信息
     path('jmx/<int:pk>', views.JmxView.as_view()),
-    path('runjmxs', views.JmxRun.as_view())
 ]
 
 

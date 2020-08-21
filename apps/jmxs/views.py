@@ -10,7 +10,6 @@ from rest_framework import status
 from rest_framework import generics
 import json
 import os
-from .tasks import run_jmx
 
 class JmxUpload(APIView):
     """
@@ -125,41 +124,41 @@ class JmxView(generics.RetrieveAPIView):
             rsp_data.data = {"code": rsp_data.status_code, "msg": "error", "data": rsp_data.data}
         return rsp_data
 
-class JmxRun(APIView):
-    """
-    查询jmx文件的路径
-    """
-    def post(self, request):
-        # 获取到的空的参数也返回空
-        ids = request.POST.get('ids')
-        if ids:
-            try:
-                # 传入的是一个list，但是get到的是一个str，需要转换为list
-                ids = json.loads(ids)
-            except:
-                return Response({
-                    "code": 400,
-                    "msg": "请传入一个list参数",
-                    "data": ""
-                }, status=status.HTTP_400_BAD_REQUEST)
-            jmxs = Jmxs.objects.values('id', 'jmx').filter(pk__in=ids)
-            cmds = {}
-            for jmx in jmxs:
-                jmx = jmx['jmx']
-                jname = os.path.splitext(jmx)[0] + '-' + str(Tools.datetime2timestamp()) + '.jtl'
-                jtl = f"{settings.JTL_URL + jname}"
-                cmd = f"{settings.JMETER} -n -t {settings.JMX_URL + jmx} -l {jtl}"
-                cmds[jtl] = cmd
-            run_jmx.delay(cmds)
-            ser = JmxsRunSerializer(jmxs, many=True)
-            data = ser.data
-            return Response(data, status=status.HTTP_200_OK)
-        else:
-            return Response({
-                "code": 400,
-                "msg": "ids不能为空",
-                "data": ""
-            }, status=status.HTTP_400_BAD_REQUEST)
+# class JmxRun(APIView):
+#     """
+#     查询jmx文件的路径
+#     """
+#     def post(self, request):
+#         # 获取到的空的参数也返回空
+#         ids = request.POST.get('ids')
+#         if ids:
+#             try:
+#                 # 传入的是一个list，但是get到的是一个str，需要转换为list
+#                 ids = json.loads(ids)
+#             except:
+#                 return Response({
+#                     "code": 400,
+#                     "msg": "请传入一个list参数",
+#                     "data": ""
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+#             jmxs = Jmxs.objects.values('id', 'jmx').filter(pk__in=ids)
+#             cmds = {}
+#             for jmx in jmxs:
+#                 jmx = jmx['jmx']
+#                 jname = os.path.splitext(jmx)[0] + '-' + str(Tools.datetime2timestamp()) + '.jtl'
+#                 jtl = f"{settings.JTL_URL + jname}"
+#                 cmd = f"{settings.JMETER} -n -t {settings.JMX_URL + jmx} -l {jtl}"
+#                 cmds[jtl] = cmd
+#             run_jmx.delay(cmds)
+#             ser = JmxsRunSerializer(jmxs, many=True)
+#             data = ser.data
+#             return Response(data, status=status.HTTP_200_OK)
+#         else:
+#             return Response({
+#                 "code": 400,
+#                 "msg": "ids不能为空",
+#                 "data": ""
+#             }, status=status.HTTP_400_BAD_REQUEST)
 
 
 

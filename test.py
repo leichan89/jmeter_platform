@@ -46,7 +46,15 @@
 #
 # # https://docs.python.org/zh-cn/3.7/library/asyncio-task.html
 
+from jmeter_platform import celery_app
 
+celery_app.control.revoke('5c57090c-5a09-4da3-a2da-9bb0e2d84648', terminate=True)
+
+# print(s)
+#
+# from celery.result import AsyncResult
+# res = AsyncResult('0bbb2926-656b-4df8-a8e6-53941ba4793f')
+# res.ready()
 
 import os, sys
 #
@@ -61,12 +69,33 @@ import os, sys
 # sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
 
-import django
-django.setup()
+# import django
+# django.setup()
+#
+# from tasks.models import TasksDetails
+# from jmxs.models import Jmxs
+# from tasks.models import Tasks, TaskFlow
+#
+# # m = TasksDetails.objects.values('jmx').filter(task_id=1)
+#
+# # j = Jmxs.objects.values('id').get(id=2)
+#
+# m = TaskFlow.objects.values('id').get(randomstr='uXSwdxgHZ63dSMAS3V')['id']
+#
+# print(type(m))
 
-from csvs import models
 
-# m = models.Tasks(task_name="我是第二个task", add_user=1)
-# m.save()
-m = models.Csvs.objects.all()
-print(m)
+# cmd = os.popen('ps -ef|grep xx|grep -v grep')
+#
+# s = cmd.readlines()
+#
+# print(s)
+#
+# print(len(s))
+dir = '/Users/chenlei/python-project/jmeter_platform/performance_files/jtl/'
+s = os.listdir(dir)
+ss = 'test-1597299607336-15979111320258430.jtl'
+for i in s:
+    if i == ss:
+        print(f'{dir}{i}')
+

@@ -1,2 +1,0 @@
-timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
-1597401875820,932,baidu,200,OK,mytest 1-1,text,true,,2559,117,1,1,https://www.baidu.com,932,0,880

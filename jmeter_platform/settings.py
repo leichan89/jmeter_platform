@@ -23,6 +23,9 @@ ACCEPT_CONTENT = "json"
 TASK_SERIALIZER = "json"
 # 结果序列化数据格式
 RESULT_SERIALIZER = "json"
+# celery时区设置
+CELERY_TIMEZONE = 'Asia/Shanghai'
+CELERY_ENABLE_UTC = False
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
