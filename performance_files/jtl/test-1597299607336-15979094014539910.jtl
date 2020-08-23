@@ -1,0 +1,2 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1597909563700,47,百度,400,Bad Request,线程组 1-1,text,false,,330,191,1,1,http://127.0.0.1:8000/uploadjmx,47,0,34

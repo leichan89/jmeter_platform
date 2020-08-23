@@ -8,7 +8,7 @@ class JtlsDetails(models.Model):
     在生成来jtl之后，更新这个表的jtl_url，通过判断jtl_url是否为空来判断是否生成来jtl
     """
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="关联的任务id")
-    jmx = models.ForeignKey(Jmxs, on_delete=models.CASCADE, verbose_name="关联的jmx的id")
+    jmx = models.ForeignKey(Jmxs, on_delete=models.DO_NOTHING, verbose_name="关联的jmx的id")
     flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE, verbose_name="task任务流水表")
     jtl_url = models.CharField("单个jtl存放地址", default="", max_length=100)
     add_time = models.DateTimeField(auto_now_add=True)

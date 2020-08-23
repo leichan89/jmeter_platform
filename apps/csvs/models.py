@@ -11,7 +11,7 @@ class Csvs(models.Model):
 
     csv = models.CharField("csv文件路径", max_length=200)
     jmx = models.ForeignKey(Jmxs, on_delete=models.CASCADE)
-    add_user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name="用户名")
+    add_user = models.ForeignKey(Users, on_delete=models.DO_NOTHING, verbose_name="用户名")
     add_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
