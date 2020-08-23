@@ -1,4 +1,3 @@
-import os
 from .serializer import TaskSerializer, TasksDetailsSerializer
 from .models import Tasks, TaskFlow
 from rest_framework import generics
@@ -10,6 +9,8 @@ from common.Tools import Tools
 from .tasks import run_task, kill_task
 from rest_framework.response import Response
 from rest_framework import status
+import logging
+logger = logging.getLogger('collect')
 
 class CreateTask(generics.CreateAPIView):
     """
@@ -33,7 +34,6 @@ class RunTask(APIView):
             jmxs = Jmxs.objects.values('id', 'jmx').filter(id__in=jmxs_id)
         except:
             return Response({'code': 400}, status=status.HTTP_400_BAD_REQUEST)
-        task = []
         cmds = {}
         task_flow_str = Tools.random_str()
         for sj in jmxs:
@@ -42,10 +42,9 @@ class RunTask(APIView):
             jtl = f"{settings.JTL_URL + jname}"
             cmd = f"{settings.JMETER} -n -t {jmx} -l {jtl}"
             cmds[jtl] = [sj['id'], cmd]
-        task.append(taskid)
-        task.append(cmds)
-        task.append(task_flow_str)
-        celery_task_id = run_task.delay(task)
+
+        logger.info(task_flow_str)
+        celery_task_id = run_task.delay(taskid, task_flow_str, cmds)
         flow = TaskFlow(task_id=taskid, celery_task_id=celery_task_id, randomstr=task_flow_str)
         flow.save()
 

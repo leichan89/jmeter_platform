@@ -6,28 +6,46 @@
 import os
 import time
 import django
+from common.Tools import Tools
 from celery import shared_task
+from jmeter_platform import settings
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger('cellect')
 
 
 @shared_task
-def run_task(task):
+def run_task(taskid, task_flow_str, cmds):
     """
+    执行一个任务，并汇总生成的jtl文件，执行任务前会先插入一条任务的flow流水记录
     :param cmds: 一个字段，key是jtl文件路径，value是jmx执行命令
     :return:
     """
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
     django.setup()
 
-    from jtls.models import JtlsDetails
+    from jtls.models import JtlsDetails, JtlsSummary
     from tasks.models import TaskFlow
 
-    for jtl, jmxcmd in task[1].items():
+    flow_id = TaskFlow.objects.values('id').get(randomstr=task_flow_str)['id']
+    for jtl, jmxcmd in cmds.items():
         code = os.system(jmxcmd[1])
         if os.path.exists(jtl) and code == 0:
             # 参数是数据库中的字段，不是模型中的字段
-            flow_id = TaskFlow.objects.values('id').get(randomstr=task[2])['id']
-            jtl = JtlsDetails(task_id=task[0], jmx_id=jmxcmd[0], flow_id=flow_id, jtl_url=jtl)
+            jtl = JtlsDetails(task_id=taskid, jmx_id=jmxcmd[0], flow_id=flow_id, jtl_url=jtl)
             jtl.save()
+
+    # 聚合jtl文件
+    jtls_stnames = []
+    qs = list(JtlsDetails.objects.select_related('jmx').filter(task_id=taskid, flow_id=flow_id))
+    for q in qs:
+        jtl = q.jtl_url
+        stname = q.jmx.jmx_setup_thread_name
+        jtls_stnames.append([jtl, stname])
+    summary_jtl = settings.JTL_URL + Tools.random_str() + '.jtl'
+    Tools.summary_jtls(summary_jtl, jtls_stnames)
+    js = JtlsSummary(task_id=taskid, flow_id=flow_id, jtl_url=summary_jtl)
+    js.save()
 
 @shared_task
 def kill_task(celery_task_id, task_flow_str):
@@ -51,7 +69,7 @@ def kill_task(celery_task_id, task_flow_str):
             for pid in pids:
                 code = os.system(f"kill -9 {pid}")
                 if code == 0:
-                    print('killed')
+                    logger.info(f'{task_flow_str}:进程已被杀死')
         count += 1
         if count == 3:
             jtls = os.listdir(jtl_dir)

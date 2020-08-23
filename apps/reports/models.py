@@ -1,5 +1,5 @@
 from django.db import models
-from tasks.models import Tasks
+from tasks.models import Tasks, TaskFlow
 from jtls.models import JtlsSummary
 
 class Reports(models.Model):
@@ -8,7 +8,7 @@ class Reports(models.Model):
     报告生成成功后，更新jtls_summary表中report_created字段
     """
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="关联的任务id")
-    jtl_summary = models.ForeignKey(JtlsSummary, on_delete=models.CASCADE, verbose_name="汇总的jtlid")
+    flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE, verbose_name="流水id")
     report_url = models.CharField("报告地址", max_length=100)
     add_time = models.DateTimeField(auto_now_add=True)
 

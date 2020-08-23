@@ -31,7 +31,7 @@ class TasksDetails(models.Model):
     class Meta:
         verbose_name = "任务详情表"
         verbose_name_plural = verbose_name
-        # 设置联合主键，一个jmx和一个task是一对一关系
+        # 设置联合主键，一个jmx和一个task是一对一关系，同一个taks只能有一个jmx
         unique_together = ['task', 'jmx']
 
     def __str__(self):
