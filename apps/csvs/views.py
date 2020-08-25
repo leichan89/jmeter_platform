@@ -6,6 +6,7 @@ from common.Tools import Tools
 from rest_framework import generics
 from .models import Csvs
 from rest_framework import status
+from common.APIResponse import APIRsp
 import os
 
 class CsvUpload(APIView):
@@ -24,11 +25,7 @@ class CsvUpload(APIView):
             csv_name = csv_name_ext[0]
             csv_ext = csv_name_ext[1]
             if csv_ext not in settings.CSV_ALLOWED_FILE_TYPE:
-                return Response({
-                    "code": 205,
-                    "msg": "无效的格式，请上传.csv格式的文件",
-                    "data": ""
-                }, status=status.HTTP_205_RESET_CONTENT)
+                return APIRsp(code=205, msg='无效的格式，请上传.csv格式的文件', status=status.HTTP_205_RESET_CONTENT)
             csvfile = csv_name + "-" + str(Tools.datetime2timestamp()) + csv_ext
             path = settings.CSV_URL + csvfile
 
@@ -37,7 +34,7 @@ class CsvUpload(APIView):
                     f.write(i)
 
             data['csv'] = csvfile
-            # jmx不存在时，接口会报错
+            # csv不存在时，接口会报错
             data['jmx'] = jmx
             # user不存在时，接口会报错
             data['add_user'] = user
@@ -46,23 +43,11 @@ class CsvUpload(APIView):
 
             if obj.is_valid():
                 obj.save()
-                return Response({
-                    "code": 200,
-                    "msg": "上传成功",
-                    "data": ""
-                }, status=status.HTTP_200_OK)
+                return APIRsp()
 
-            return Response({
-                "code": 400,
-                "msg": "添加失败，参数校验失败",
-                "data": ""
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return APIRsp(code=400, msg='添加失败，校验未通过', status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({
-                "code": 400,
-                "msg": "添加失败，未获取到文件",
-                "data": ""
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return APIRsp(code=400, msg='添加失败，未获取到文件或用户id', status=status.HTTP_400_BAD_REQUEST)
 
 
 class CsvListView(generics.ListAPIView):
@@ -72,7 +57,6 @@ class CsvListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         rsp_data = self.list(request, *args, **kwargs)
         if rsp_data.status_code == 200:
-            rsp_data.data = {"code": rsp_data.status_code, "msg": "", "data": rsp_data.data}
+            return APIRsp(data=rsp_data.data)
         else:
-            rsp_data.data = {"code": rsp_data.status_code, "msg": "error", "data": rsp_data.data}
-        return rsp_data
+            return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)

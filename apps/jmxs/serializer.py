@@ -41,4 +41,4 @@ class JmxsRunSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Jmxs
-        fields = ['id', 'jmx']
+        fields = ['id']

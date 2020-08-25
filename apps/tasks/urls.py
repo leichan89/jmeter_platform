@@ -7,11 +7,12 @@ from tasks import views
 from django.urls import path
 
 urlpatterns = [
-    path('createtask', views.CreateTask.as_view()),
-    path('runtask/<int:taskid>', views.RunTask.as_view()),
-    path('jmxbindtask', views.JmxBindTask.as_view()),
-    path('killtask/<int:flowid>', views.KillTask.as_view()),
-    path('aggregateReport/<int:taskid>/<int:flowid>', views.FlowTaskAggregateReportView.as_view())
+    path('tasks/create', views.CreateTask.as_view()),
+    path('tasks/run/<int:taskid>', views.RunTask.as_view()),
+    path('tasks/bindjmxs', views.JmxBindTask.as_view()),
+    path('tasks/kill/<int:flowid>', views.KillTask.as_view()),
+    path('tasks/queryAggregateReport/<int:flowid>', views.FlowTaskAggregateReportView.as_view()),
+    path('tasks/delete/<int:pk>', views.DestoryTask.as_view())
 ]
 
 

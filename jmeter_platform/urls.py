@@ -22,6 +22,6 @@ urlpatterns = [
     path('', include('csvs.urls')),
     path('', include('tasks.urls')),
     path('', include('tasks.urls')),
-    path('', include('jtls.urls')),
+    # path('', include('jtls.urls')),
     path('', include('reports.urls'))
 ]

@@ -35,9 +35,7 @@ def run_task(taskid, task_flow_str, cmds):
             # 参数是数据库中的字段，不是模型中的字段
             jtl = JtlsDetails(task_id=taskid, jmx_id=jmxcmd[0], flow_id=flow_id, jtl_url=jtl)
             jtl.save()
-    logger.info('jmx文件执行完成')
 
-    logger.debug('开始聚合jtl文件')
     # 聚合jtl文件
     jtls_stnames = []
     qs = list(JtlsDetails.objects.select_related('jmx').filter(task_id=taskid, flow_id=flow_id))
@@ -52,7 +50,7 @@ def run_task(taskid, task_flow_str, cmds):
     try:
         js = JtlsSummary(task_id=taskid, flow_id=flow_id, jtl_url=summary_jtl)
         js.save()
-        logger.info('聚合jtl文件成功')
+        logger.debug('聚合jtl文件成功')
     except Exception as e:
         logger.exception(f'聚合jtl文件失败\n{e}')
         raise Exception
@@ -61,7 +59,6 @@ def run_task(taskid, task_flow_str, cmds):
     TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=2)
     logger.debug('修改流水任务状态为完成状态成功')
 
-    logger.debug('开始转换jtl为csv')
     summary_csv = settings.CSV_URL + summary_name + '.csv'
     cmd = f'{settings.JMETER_PLUGINS_CMD} --generate-csv {summary_csv} --input-jtl {summary_jtl} --plugin-type AggregateReport'
     os.system(cmd)
@@ -72,11 +69,11 @@ def run_task(taskid, task_flow_str, cmds):
             if idx == 0:
                 continue
             try:
-                s_csv = FlowTaskAggregateReport(task_id=taskid, flow_id=flow_id, label=info[0], samplers=info[1], average_req=info[2],
+                csv_to_db = FlowTaskAggregateReport(task_id=taskid, flow_id=flow_id, label=info[0], samplers=info[1], average_req=info[2],
                                   median_req=info[3], line90_req=info[4], line95_req=info[5], line99_req=info[6],
                                   min_req=info[7], max_req=info[8], error_rate=info[9],
                                   tps=str(float(info[10])), recieved_per=str(float(info[11])))
-                s_csv.save()
+                csv_to_db.save()
                 logger.info('保存csv到数据库成功')
                 os.remove(summary_csv)
             except Exception as e:
@@ -85,8 +82,6 @@ def run_task(taskid, task_flow_str, cmds):
                 raise Exception
     else:
         logger.error('jtl转为csvs失败')
-
-
 
 
 
@@ -109,7 +104,6 @@ def kill_task(celery_task_id, task_flow_str):
     jtl_dir = settings.JTL_URL
     celery_app.control.revoke(celery_task_id, terminate=True)
 
-    logger.info(f'开始查杀流水任务:{celery_task_id}')
     while True:
         time.sleep(1)
         pids = os.popen("ps -ef | grep -v grep | grep %s | awk -F ' ' '{print $2}'" % task_flow_str).readlines()
@@ -125,10 +119,10 @@ def kill_task(celery_task_id, task_flow_str):
                 if jtl.find(task_flow_str) != -1:
                     os.remove(f'{jtl_dir}{jtl}')
             break
-    logger.debug(f'完成查杀流水任务:{celery_task_id}')
+    logger.info(f'完成查杀流水任务:{celery_task_id}')
     # 更新流水任务的状态为1，已停止
     TaskFlow.objects.filter(celery_task_id=celery_task_id).update(task_status=1)
-    logger.debug(f'更新流水任务状态为已停止成功:{celery_task_id}')
+    logger.info(f'更新流水任务状态为已停止成功:{celery_task_id}')
 
 
 
