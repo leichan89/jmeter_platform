@@ -252,6 +252,7 @@ JTL_URL = "performance_files/jtl/"
 OUTPUT_URL = "performance_files/output/"
 JMX_CSV_DIR = os.path.join(BASE_DIR, "performance_files")
 JMETER = os.path.join(BASE_DIR, "jmeter5/bin/jmeter.sh")
+JMETER_PLUGINS_CMD = os.path.join(BASE_DIR, "jmeter5/bin/JMeterPluginsCMD.sh")
 
 
 JMX_ALLOWED_FILE_TYPE = ['.jmx']

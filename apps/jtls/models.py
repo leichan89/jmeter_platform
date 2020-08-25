@@ -10,7 +10,7 @@ class JtlsDetails(models.Model):
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="关联的任务id")
     jmx = models.ForeignKey(Jmxs, on_delete=models.DO_NOTHING, verbose_name="关联的jmx的id")
     flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE, verbose_name="task任务流水表")
-    jtl_url = models.CharField("单个jtl存放地址", default="", max_length=100)
+    jtl_url = models.CharField("单个jtl存放地址", default="", max_length=500)
     add_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -27,7 +27,7 @@ class JtlsSummary(models.Model):
     """
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="关联的任务id")
     flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE)
-    jtl_url = models.CharField("生成的汇总的jtl地址", max_length=100)
+    jtl_url = models.CharField("生成的汇总的jtl地址", max_length=500)
     add_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -36,3 +36,5 @@ class JtlsSummary(models.Model):
 
     def __str__(self):
         return f"{self.task}:{self.jtl_url}"
+
+

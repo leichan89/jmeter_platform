@@ -1,5 +1,5 @@
-from .serializer import TaskSerializer, TasksDetailsSerializer
-from .models import Tasks, TaskFlow
+from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer
+from .models import Tasks, TaskFlow, FlowTaskAggregateReport
 from rest_framework import generics
 from rest_framework.views import APIView
 from tasks.models import TasksDetails
@@ -7,8 +7,8 @@ from jmxs.models import Jmxs
 from jmeter_platform import settings
 from common.Tools import Tools
 from .tasks import run_task, kill_task
-from rest_framework.response import Response
 from rest_framework import status
+from common.APIResponse import APIRsp
 import logging
 logger = logging.getLogger('collect')
 
@@ -33,7 +33,7 @@ class RunTask(APIView):
             jmxs_id = TasksDetails.objects.values('jmx').filter(task_id=taskid)
             jmxs = Jmxs.objects.values('id', 'jmx').filter(id__in=jmxs_id)
         except:
-            return Response({'code': 400}, status=status.HTTP_400_BAD_REQUEST)
+            return APIRsp(code=400, msg='error', status=status.HTTP_400_BAD_REQUEST)
         cmds = {}
         task_flow_str = Tools.random_str()
         for sj in jmxs:
@@ -47,8 +47,7 @@ class RunTask(APIView):
         celery_task_id = run_task.delay(taskid, task_flow_str, cmds)
         flow = TaskFlow(task_id=taskid, celery_task_id=celery_task_id, randomstr=task_flow_str)
         flow.save()
-
-        return Response({'code': 200}, status=status.HTTP_200_OK)
+        return APIRsp()
 
 
 class KillTask(APIView):
@@ -59,10 +58,19 @@ class KillTask(APIView):
             task_flow_str = task_info['randomstr']
             celery_task_id = task_info['celery_task_id']
         except:
-            return Response({'code': 400}, status=status.HTTP_400_BAD_REQUEST)
+            return APIRsp(code=400, msg='error', status=status.HTTP_400_BAD_REQUEST)
         kill_task.delay(celery_task_id, task_flow_str)
-        return Response({'code': 200}, status=status.HTTP_200_OK)
+        return APIRsp()
 
+class FlowTaskAggregateReportView(APIView):
+
+    def get(self, request, taskid, flowid):
+        try:
+            qs = FlowTaskAggregateReport.objects.all().filter(task_id=taskid, flow_id=flowid)
+            serializer = FlowTaskAggregateReportSerializer(qs, many=True)
+            return APIRsp(data=serializer.data)
+        except:
+            return APIRsp(code=400, msg='error', status=status.HTTP_400_BAD_REQUEST)
 
 
 

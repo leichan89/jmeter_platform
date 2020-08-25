@@ -4,7 +4,7 @@
 # @File    : serializer.py
 
 from rest_framework import serializers
-from .models import Tasks, TasksDetails
+from .models import Tasks, TasksDetails, FlowTaskAggregateReport
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -19,6 +19,12 @@ class TasksDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TasksDetails
         fields = "__all__"
+
+
+class FlowTaskAggregateReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FlowTaskAggregateReport
+        exclude = ['id', 'task', 'flow']
 
 
 

@@ -40,8 +40,10 @@ class TasksDetails(models.Model):
 
 class TaskFlow(models.Model):
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="任务流水id")
-    randomstr = models.CharField("随机字符串", max_length=30)
+    randomstr = models.CharField("随机字符串", max_length=50)
     celery_task_id = models.CharField("celery任务的id", max_length=40)
+    # 0:进行中，1:已停止，2:已结束
+    task_status = models.IntegerField('任务流水状态', default=0)
     add_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -50,3 +52,29 @@ class TaskFlow(models.Model):
 
     def __str__(self):
         return f"{self.randomstr}"
+
+class FlowTaskAggregateReport(models.Model):
+    """
+    将csv报告数据存储到数据库
+    """
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="任务id")
+    flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE)
+    label = models.CharField("Label", max_length=1000)
+    samplers = models.CharField("样本名称", max_length=1000)
+    average_req = models.CharField("平均值", max_length=100)
+    median_req = models.CharField("中位数", max_length=100)
+    line90_req = models.CharField("90%百分位", max_length=100)
+    line95_req = models.CharField("95%百分位", max_length=100)
+    line99_req = models.CharField("99%百分位", max_length=100)
+    min_req = models.CharField("最小值", max_length=100)
+    max_req = models.CharField("最大值", max_length=100)
+    error_rate = models.CharField("异常比例", max_length=100)
+    tps = models.CharField("吞吐量", max_length=100)
+    recieved_per = models.CharField("每秒从服务器端接收到的数据量", max_length=100)
+
+    class Meta:
+        verbose_name = "jtl转换为csv聚合报告"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f"{self.task}:{self.flow}"

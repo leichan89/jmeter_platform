@@ -1,10 +1,9 @@
-from json import JSONDecodeError
-
+from common.APIResponse import APIRsp
 from common.Tools import Tools
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from jmeter_platform import settings
-from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, JmxsRunSerializer
+from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer
 from .models import Jmxs
 from rest_framework import status
 from rest_framework import generics
@@ -32,11 +31,7 @@ class JmxUpload(APIView):
             jmx_name = jmx_name_ext[0]
             jmx_ext = jmx_name_ext[1]
             if jmx_ext not in settings.JMX_ALLOWED_FILE_TYPE:
-                return Response({
-                    "code": 205,
-                    "msg": "无效的格式，请上传.jmx格式的文件",
-                    "data": ""
-                }, status=status.HTTP_205_RESET_CONTENT)
+                return APIRsp(code=205, msg='无效的格式，请上传.jmx格式的文件', status=status.HTTP_205_RESET_CONTENT)
             jmxfile = jmx_name + "-" + str(Tools.datetime2timestamp()) + jmx_ext
             jmxpath = settings.JMX_URL + jmxfile
 
@@ -54,11 +49,7 @@ class JmxUpload(APIView):
                     data['sampler_url'] = samplers_info[0]['url']
                     data['is_mulit_samplers'] = False
             else:
-                return Response({
-                    "code": 400,
-                    "msg": "jmx文件未解析出任何信息",
-                    "data": ""
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return APIRsp(code=400, msg='jmx文件未解析出任何信息', status=status.HTTP_400_BAD_REQUEST)
 
 
             data['jmx'] = jmxpath
@@ -71,17 +62,9 @@ class JmxUpload(APIView):
 
             if obj.is_valid():
                 obj.save()
-                return Response({
-                    "code": 200,
-                    "msg": "上传成功",
-                    "data": ""
-                }, status=status.HTTP_200_OK)
+                return APIRsp()
 
-            return Response({
-                "code": 400,
-                "msg": "添加失败，校验未通过",
-                "data": ""
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return APIRsp(code=400, msg='添加失败，校验未通过', status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({
                 "code": 400,

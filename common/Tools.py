@@ -8,6 +8,10 @@ from datetime import datetime
 from lxml import etree
 import random
 import os
+import csv
+import logging
+
+logger = logging.getLogger('collect')
 
 class Tools:
 
@@ -123,11 +127,12 @@ class Tools:
 
     @staticmethod
     def random_str(slen=30):
+        stime = str(time.time()).split('.')[0]
         seed = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         sa = []
         for i in range(slen):
           sa.append(random.choice(seed))
-        return ''.join(sa)
+        return f"{''.join(sa)}{stime}"
 
     @staticmethod
     def filename(filepath):
@@ -149,6 +154,22 @@ class Tools:
                         if line.find(jtl_stname[1]) == -1 and idx2 != 0:
                             w.write(line)
 
+    @staticmethod
+    def read_csv_info(filepath):
+        logging.debug(f'读取文件：{filepath}')
+        info = []
+        if os.path.exists(filepath):
+            with open(filepath, 'r') as f:
+                reader = csv.reader(f)
+                # 逐行读取csv文件
+                for i in reader:
+                    info.append(i)
+            if info:
+                return info
+            else:
+                raise Exception("文件数据为空")
+        else:
+            raise FileNotFoundError
 
 
 
@@ -170,6 +191,9 @@ if __name__ == "__main__":
     # s = os.popen("ps -ef|grep applessdstatistics | grep -v grep")
     # for i in s.readlines():
     #     print(i)
-    print(Tools.filename('/Users/chenlei/jmeter5/jmx_folder/jjxt2.jmx'))
+    s = Tools.read_csv_info('/Users/chenlei/python-project/jmeter_platform/performance_files/csv/Vz4HTLhDlujSS2dVkXQY4d5IwHyUd3-1598261765214.csv')
+
+    print(str(float(s[1][10])))
+    logger.exception()
 
 

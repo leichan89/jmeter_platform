@@ -33,10 +33,12 @@ def generate_report(taskid, flowid, jtl_url):
     logger.info(cmd)
     os.system(cmd)
     if os.path.exists(report_output):
+        logger.info(f'[{taskid}:{flowid}]报告生成成功')
         report = Reports(task_id=taskid, flow_id=flowid, report_url=report_output)
         report.save()
+        logger.info(f'[{taskid}:{flowid}]数据库插入数据成功')
     else:
-        logger.error('生成报告失败')
+        logger.error(f'[{taskid}:{flowid}]生成报告失败')
 
 
 
