@@ -172,28 +172,118 @@ class Tools:
             raise FileNotFoundError
 
 
+class ParseJmx():
+
+    def __init__(self, jmx):
+        # 让添加的节点自动换行
+        parser = etree.XMLParser(encoding="utf-8", strip_cdata=False, remove_blank_text=True)
+        self.tree = etree.parse(jmx, parser=parser)
+        self.jmx = jmx
+
+    def single_tag_text(self, xpath):
+        """
+        获取单个节点的text
+        :param xpath: 节点xpath
+        :return:
+        """
+        try:
+            return self.tree.xpath(xpath)[0].text
+        except:
+            logger.exception('未找到该节点')
+
+    def change_single_tag_text(self, xpath, text):
+        """
+        修改单个节点的text
+        :param xpath: 节点xpath
+        :param text: 节点text
+        :return:
+        """
+        try:
+            self.tree.xpath(xpath)[0].text = text
+            self._save_change()
+            logger.debug('修改tag的text成功')
+        except:
+            logger.exception('未找到该节点')
+
+    def remove_node(self, xpath):
+        """
+        删除节点
+        :param xpath:
+        :return:
+        """
+        try:
+            nodes = self.tree.xpath(xpath)
+            for node in nodes:
+                node.getparent().remove(node)
+            self._save_change()
+            logger.debug(f'删除节点成功')
+        except:
+            logger.exception('未找到该节点')
+
+    def add_peer_node(self, xpath, tagname, text="", **kwargs):
+        """
+        在同层级添加节点
+        :param xpath: 节点路径
+        :param tagname: 节点名称
+        :param text: 节点text
+        :param kwargs: 节点属性
+        :return:
+        """
+        try:
+            tnode = self.tree.xpath(xpath)[0]
+            tag = etree.SubElement(tnode.getparent(), tagname)
+            tag.text = text
+            for key, value in kwargs.items():
+                tag.attrib[key] = value
+            self._save_change()
+            logger.debug(f'添加同层级节点<{tagname}>成功')
+        except:
+            logger.exception('未找到该节点')
+
+    def add_sub_node(self, xpath, tagname, text="", **kwargs):
+        """
+        在添加子节点
+        :param xpath: 节点路径
+        :param tagname: 节点名称
+        :param text: 节点text
+        :param kwargs: 节点属性
+        :return:
+        """
+        try:
+            tnode = self.tree.xpath(xpath)[0]
+            tag = etree.SubElement(tnode, tagname)
+            tag.text = text
+            for key, value in kwargs.items():
+                tag.attrib[key] = value
+            self._save_change()
+            logger.debug(f'添加子节点<{tagname}>成功')
+        except:
+            logger.exception('未找到该节点')
+
+    def _save_change(self):
+        """
+        保存修改后的节点
+        :return:
+        """
+        # 让添加的节点自动换行：pretty_print=True, encoding='utf-8'
+        self.tree.write(self.jmx, pretty_print=True, encoding='utf-8')
+
+
 
 
 
 if __name__ == "__main__":
 
-    # print(Tools.datetime2timestamp())
-    # t = Tools()
-    # s = t.analysis_jmx('/Users/chenlei/jmeter5/jmx_folder/jjxt2.jmx')
-    # import json
-    # print(s)
-    # sss = json.dumps(s[1])
-    # a = json.loads(sss)
-    # print(a)
-    # # for i in s[1]:
-    # #     print(json.dumps(i))
-    # import os
-    # s = os.popen("ps -ef|grep applessdstatistics | grep -v grep")
-    # for i in s.readlines():
-    #     print(i)
-    s = Tools.read_csv_info('/Users/chenlei/python-project/jmeter_platform/performance_files/csv/Vz4HTLhDlujSS2dVkXQY4d5IwHyUd3-1598261765214.csv')
+    p = ParseJmx('/Users/chenlei/jmeter5/jmx_folder/study_api.jmx')
+    xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[1]/elementProp/collectionProp'
+    # p.change_node_text(xpath, 'aaaa')
+    # m = p.remove_single_node(xpath)
+    # p.save_change()
 
-    print(str(float(s[1][10])))
-    logger.exception()
+    s = p.add_sub_node(xpath, 'pppppppp', text='ahsdhahah', aa='aa')
+    # print(s)
+    #
+    # p.remove_single_node(xpath)
+    # p.single_node_text(xpath)
 
 
