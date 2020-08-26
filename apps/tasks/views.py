@@ -10,6 +10,9 @@ from .tasks import run_task, kill_task
 from rest_framework import status
 from common.APIResponse import APIRsp
 import logging
+import shutil
+import os
+
 logger = logging.getLogger(__file__)
 
 class CreateTask(generics.CreateAPIView):
@@ -56,19 +59,32 @@ class RunTask(APIView):
             return APIRsp(code=500, msg='获取任务信息失败', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         task_flow_str = Tools.random_str()
-        cmds = {}
-        for sj in jmxs:
-            jmx = sj['jmx']
-            jname = f"{Tools.filename(jmx)}-{task_flow_str}.jtl"
-            jtl = f"{settings.JTL_URL + jname}"
-            cmd = f"{settings.JMETER} -n -t {jmx} -l {jtl}"
-            cmds[jtl] = [sj['id'], cmd]
-
-        logger.info(task_flow_str)
+        cmds = self._temp_jmxs_cmds(jmxs, task_flow_str)
         celery_task_id = run_task.delay(taskid, task_flow_str, cmds)
         flow = TaskFlow(task_id=taskid, celery_task_id=celery_task_id, randomstr=task_flow_str)
         flow.save()
         return APIRsp()
+
+    def _temp_jmxs_cmds(self, jmxs, task_flow_str):
+        """
+        流水任务信息
+        :param jmxs: 数据库查询出来的jmx的id和路径
+        :param task_flow_str: 流水任务名称
+        :return:
+        """
+        cmds = {}
+        temp_dir = settings.TEMP_URL + task_flow_str
+        logger.info(f'创建临时目录{temp_dir}')
+        os.makedirs(temp_dir)
+        for sjmx in jmxs:
+            jmx = sjmx['jmx']
+            jmx_name = Tools.filename(jmx)
+            shutil.copy(jmx, temp_dir)
+            temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
+            temp_jtl = temp_dir + os.sep + jmx_name + '.jtl'
+            cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {temp_jtl}"
+            cmds[temp_jtl] = [sjmx['id'], cmd]
+        return cmds
 
 
 class KillTask(APIView):
