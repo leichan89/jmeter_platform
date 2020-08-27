@@ -44,9 +44,6 @@ def run_task(taskid, task_flow_str, jmxs):
             cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {temp_jtl}"
             cmds[temp_jtl] = [sjmx['id'], cmd]
 
-        if not cmds:
-            raise Exception('执行jmx的命令信息为空')
-
         flow_id = TaskFlow.objects.values('id').get(randomstr=task_flow_str)['id']
 
         logger.debug('开始执行jmx')
@@ -70,8 +67,9 @@ def run_task(taskid, task_flow_str, jmxs):
             js = JtlsSummary(task_id=taskid, flow_id=flow_id, jtl_url=summary_jtl)
             js.save()
             logger.debug('聚合jtl入库成功')
-        except Exception as e:
-            raise Exception(f'聚合jtl入库失败\n{e}')
+        except:
+            logger.error('聚合jtl入库失败')
+            raise
 
         # 更新流水任务的状态为3，完成状态
         logger.debug('更新流水任务状态为完成状态')
@@ -93,11 +91,13 @@ def run_task(taskid, task_flow_str, jmxs):
                                       min_req=info[7], max_req=info[8], error_rate=info[9],
                                       tps=str(float(info[10])), recieved_per=str(float(info[11])))
                     csv_to_db.save()
-                except Exception as e:
-                    raise Exception(f'保存聚合报告数据失败\n{e}')
+                except:
+                    logger.error('保存聚合报告数据失败')
+                    raise
             logger.debug('流水任务执行完成')
         else:
             logger.error('jtl转为csvs失败')
+            raise
     except:
         # 更新流水任务的状态为2，运行异常
         TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=2)

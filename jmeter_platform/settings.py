@@ -245,7 +245,7 @@ LOGGING = {
       'level': 'DEBUG',
     },
     'celery_task': { # 名为 'celery' 的logger还单独处理
-      'handlers': ['celery', 'celery_error'],
+      'handlers': ['celery', 'celery_error'], # 只将日志打印到指定的handler中
       'level': 'DEBUG',
     }
   },
