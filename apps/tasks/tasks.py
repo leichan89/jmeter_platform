@@ -102,7 +102,7 @@ def run_task(taskid, task_flow_str, jmxs):
         # 更新流水任务的状态为2，运行异常
         TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=2)
         # 这里会自动打印异常信息
-        logger.exception(f'执行流水任务异常')
+        logger.exception(f'执行流水任务失败')
     finally:
         try:
             logger.debug('删除任务流水目录')
