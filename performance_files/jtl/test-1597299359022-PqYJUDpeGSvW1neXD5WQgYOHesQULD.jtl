@@ -1,0 +1,12 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1598163580165,665,百度setup,200,OK,setUp线程组 1-1,text,true,,2559,149,1,1,https://www.baidu.com,665,0,604
+1598163581887,172,百度,200,OK,线程组 1-1,text,true,,2559,149,2,2,https://www.baidu.com,172,0,131
+1598163582891,158,百度,200,OK,线程组 1-2,text,true,,2559,149,2,2,https://www.baidu.com,158,0,119
+1598163583894,180,百度,200,OK,线程组 1-3,text,true,,2559,149,2,2,https://www.baidu.com,180,0,134
+1598163584892,150,百度,200,OK,线程组 1-4,text,true,,2559,149,2,2,https://www.baidu.com,150,0,115
+1598163585890,172,百度,200,OK,线程组 1-5,text,true,,2559,149,2,2,https://www.baidu.com,172,0,131
+1598163586885,172,百度,200,OK,线程组 1-6,text,true,,2559,149,2,2,https://www.baidu.com,172,0,127
+1598163587889,151,百度,200,OK,线程组 1-7,text,true,,2559,149,2,2,https://www.baidu.com,151,0,115
+1598163588886,153,百度,200,OK,线程组 1-8,text,true,,2559,149,2,2,https://www.baidu.com,153,0,116
+1598163589886,145,百度,200,OK,线程组 1-9,text,true,,2559,149,2,2,https://www.baidu.com,145,0,110
+1598163590885,170,百度,200,OK,线程组 1-10,text,true,,2559,149,1,1,https://www.baidu.com,170,0,126

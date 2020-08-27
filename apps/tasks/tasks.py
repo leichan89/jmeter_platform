@@ -12,11 +12,11 @@ from celery import shared_task
 from jmeter_platform import settings
 from celery.utils.log import get_task_logger
 
-logger = get_task_logger('cellect')
+logger = get_task_logger('celery_task')
 
 
 @shared_task
-def run_task(taskid, task_flow_str, cmds):
+def run_task(taskid, task_flow_str, jmxs):
     """
     执行一个任务，并汇总生成的jtl文件，执行任务前会先插入一条任务的flow流水记录
     :param cmds: 一个字段，key是jtl文件路径，value是jmx执行命令
@@ -29,9 +29,26 @@ def run_task(taskid, task_flow_str, cmds):
     from jmxs.models import Jmxs
     from tasks.models import TaskFlow, FlowTaskAggregateReport
 
-    flow_id = TaskFlow.objects.values('id').get(randomstr=task_flow_str)['id']
-
     try:
+        cmds = {}
+        temp_dir = settings.TEMP_URL + task_flow_str
+        logger.debug(f'创建临时目录{temp_dir}')
+        os.makedirs(temp_dir)
+        logger.debug('将jmx复制到临时目录下')
+        for sjmx in jmxs:
+            jmx = sjmx['jmx']
+            jmx_name = Tools.filename(jmx)
+            shutil.copy(jmx, temp_dir)
+            temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
+            temp_jtl = temp_dir + os.sep + jmx_name + '.jtl'
+            cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {temp_jtl}"
+            cmds[temp_jtl] = [sjmx['id'], cmd]
+
+        if not cmds:
+            raise Exception('执行jmx的命令信息为空')
+
+        flow_id = TaskFlow.objects.values('id').get(randomstr=task_flow_str)['id']
+
         logger.debug('开始执行jmx')
         for jtl, jmxcmd in cmds.items():
             code = os.system(jmxcmd[1])
@@ -54,11 +71,11 @@ def run_task(taskid, task_flow_str, cmds):
             js.save()
             logger.debug('聚合jtl入库成功')
         except Exception as e:
-            logger.exception(f'聚合jtl入库失败\n{e}')
+            raise Exception(f'聚合jtl入库失败\n{e}')
 
-        # 更新流水任务的状态为2，完成状态
+        # 更新流水任务的状态为3，完成状态
         logger.debug('更新流水任务状态为完成状态')
-        TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=2)
+        TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=3)
 
         logger.debug('将jtl文件转换为csv文件')
         summary_csv = settings.TEMP_URL + task_flow_str + os.sep + 'temp.csv'
@@ -76,14 +93,16 @@ def run_task(taskid, task_flow_str, cmds):
                                       min_req=info[7], max_req=info[8], error_rate=info[9],
                                       tps=str(float(info[10])), recieved_per=str(float(info[11])))
                     csv_to_db.save()
-                    logger.info('保存聚合报告数据成功')
                 except Exception as e:
-                    logger.exception(f'保存聚合报告数据失败\n{e}')
+                    raise Exception(f'保存聚合报告数据失败\n{e}')
             logger.debug('流水任务执行完成')
         else:
             logger.error('jtl转为csvs失败')
-    except Exception as e:
-        logger.exception(f'执行流水任务异常\n{e}')
+    except:
+        # 更新流水任务的状态为2，运行异常
+        TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=2)
+        # 这里会自动打印异常信息
+        logger.exception(f'执行流水任务异常')
     finally:
         try:
             logger.debug('删除任务流水目录')
@@ -129,7 +148,7 @@ def kill_task(celery_task_id, task_flow_str):
             break
     # 更新流水任务的状态为1，已停止
     logger.info(f'更新流水任务状态为已停止:{celery_task_id}')
-    TaskFlow.objects.filter(celery_task_id=celery_task_id).update(task_status=1)
+    TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=1)
 
     try:
         logger.debug('删除任务流水目录')

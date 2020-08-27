@@ -1,0 +1,12 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1598263264082,1576,百度,200,OK,线程组 1-1,text,true,,2559,149,3,3,https://www.baidu.com,1576,0,1500
+1598263265084,574,百度,200,OK,线程组 1-2,text,true,,2559,149,3,3,https://www.baidu.com,574,0,489
+1598263266086,379,百度,200,OK,线程组 1-3,text,true,,2559,149,2,2,https://www.baidu.com,379,0,291
+1598263267085,254,百度,200,OK,线程组 1-4,text,true,,2559,149,2,2,https://www.baidu.com,254,0,180
+1598263268083,272,百度,200,OK,线程组 1-5,text,true,,2559,149,2,2,https://www.baidu.com,272,0,229
+1598263269081,378,百度,200,OK,线程组 1-6,text,true,,2559,149,2,2,https://www.baidu.com,378,0,295
+1598263270084,452,百度,200,OK,线程组 1-7,text,true,,2559,149,2,2,https://www.baidu.com,452,0,316
+1598263271083,647,百度,200,OK,线程组 1-8,text,true,,2559,149,2,2,https://www.baidu.com,647,0,531
+1598263272083,404,百度,200,OK,线程组 1-9,text,true,,2559,149,2,2,https://www.baidu.com,404,0,345
+1598263273086,652,百度,200,OK,线程组 1-10,text,true,,2559,149,1,1,https://www.baidu.com,652,0,592
+1598263276876,54,百度,400,Bad Request,线程组 1-1,text,false,,330,191,1,1,http://127.0.0.1:8000/uploadjmx,54,0,41

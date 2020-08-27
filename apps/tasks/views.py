@@ -4,14 +4,11 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from tasks.models import TasksDetails
 from jmxs.models import Jmxs
-from jmeter_platform import settings
 from common.Tools import Tools
 from .tasks import run_task, kill_task
 from rest_framework import status
 from common.APIResponse import APIRsp
 import logging
-import shutil
-import os
 
 logger = logging.getLogger(__file__)
 
@@ -53,38 +50,19 @@ class RunTask(APIView):
     def post(self, request, taskid):
         try:
             jmxs_id = TasksDetails.objects.values('jmx').filter(task_id=taskid)
-            jmxs = Jmxs.objects.values('id', 'jmx').filter(id__in=jmxs_id)
+            rsp = Jmxs.objects.values('id', 'jmx').filter(id__in=jmxs_id)
+            jmxs = []
+            for jmx in rsp:
+                jmxs.append(jmx)
         except Exception as e:
             logger.exception(f'获取任务信息失败\n{e}')
             return APIRsp(code=500, msg='获取任务信息失败', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         task_flow_str = Tools.random_str()
-        cmds = self._temp_jmxs_cmds(jmxs, task_flow_str)
-        celery_task_id = run_task.delay(taskid, task_flow_str, cmds)
+        celery_task_id = run_task.delay(taskid, task_flow_str, jmxs)
         flow = TaskFlow(task_id=taskid, celery_task_id=celery_task_id, randomstr=task_flow_str)
         flow.save()
         return APIRsp()
-
-    def _temp_jmxs_cmds(self, jmxs, task_flow_str):
-        """
-        流水任务信息
-        :param jmxs: 数据库查询出来的jmx的id和路径
-        :param task_flow_str: 流水任务名称
-        :return:
-        """
-        cmds = {}
-        temp_dir = settings.TEMP_URL + task_flow_str
-        logger.info(f'创建临时目录{temp_dir}')
-        os.makedirs(temp_dir)
-        for sjmx in jmxs:
-            jmx = sjmx['jmx']
-            jmx_name = Tools.filename(jmx)
-            shutil.copy(jmx, temp_dir)
-            temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
-            temp_jtl = temp_dir + os.sep + jmx_name + '.jtl'
-            cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {temp_jtl}"
-            cmds[temp_jtl] = [sjmx['id'], cmd]
-        return cmds
 
 
 class KillTask(APIView):

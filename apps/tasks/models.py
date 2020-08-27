@@ -42,7 +42,7 @@ class TaskFlow(models.Model):
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="任务流水id")
     randomstr = models.CharField("随机字符串", max_length=50)
     celery_task_id = models.CharField("celery任务的id", max_length=40)
-    # 0:进行中，1:已停止，2:已结束
+    # 0:进行中，1:已停止，2:运行异常，3:已结束
     task_status = models.IntegerField('任务流水状态', default=0)
     add_time = models.DateTimeField(auto_now_add=True)
 

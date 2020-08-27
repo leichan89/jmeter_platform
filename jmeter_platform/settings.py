@@ -217,22 +217,36 @@ LOGGING = {
         # 'level': 'INFO',
         # 'class': 'logging.handlers.RotatingFileHandler',
         'level': 'DEBUG',
-        'formatter': 'simple',
+        'formatter': 'standard',
         'class': 'logging.handlers.TimedRotatingFileHandler',
         'filename': os.path.join(BASE_LOG_DIR, "celery_tasks.log"), # 日志文件
         'when': 'midnight',
         'encoding': 'utf-8',
     },
+    'celery_error': {
+      # 'level': 'INFO',
+      # 'class': 'logging.handlers.RotatingFileHandler',
+      'level': 'ERROR',
+      'formatter': 'standard',
+      'class': 'logging.handlers.TimedRotatingFileHandler',
+      'filename': os.path.join(BASE_LOG_DIR, "celery_tasks_error.log"),  # 日志文件
+      'when': 'midnight',
+      'encoding': 'utf-8',
+    }
   },
   'loggers': { # 日志实例
     '': { # 默认的logger应用如下配置
-      'handlers': ['SF', 'console', 'error', 'celery'], # 上线之后可以把'console'移除
+      'handlers': ['SF', 'console', 'error'], # 上线之后可以把'console'移除
       'level': 'DEBUG',
       'propagate': True, # 是否向上一级logger实例传递日志信息
     },
     'collect': { # 名为 'collect' 的logger还单独处理
-      'handlers': ['TF', 'console', 'collect', 'error', 'celery'],
-      'level': 'INFO',
+      'handlers': ['TF', 'console', 'collect', 'error'],
+      'level': 'DEBUG',
+    },
+    'celery_task': { # 名为 'celery' 的logger还单独处理
+      'handlers': ['celery', 'celery_error'],
+      'level': 'DEBUG',
     }
   },
 }
