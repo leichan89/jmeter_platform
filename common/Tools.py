@@ -9,6 +9,7 @@ from lxml import etree
 import random
 import os
 import csv
+import json
 import logging
 
 logger = logging.getLogger('collect')
@@ -190,6 +191,7 @@ class ParseJmx():
             return self.tree.xpath(xpath)[0].text
         except:
             logger.exception('未找到该节点')
+            raise
 
     def change_single_tag_text(self, xpath, text):
         """
@@ -200,10 +202,10 @@ class ParseJmx():
         """
         try:
             self.tree.xpath(xpath)[0].text = text
-            self._save_change()
             logger.debug('修改tag的text成功')
         except:
             logger.exception('未找到该节点')
+            raise
 
     def remove_node(self, xpath):
         """
@@ -215,72 +217,137 @@ class ParseJmx():
             nodes = self.tree.xpath(xpath)
             for node in nodes:
                 node.getparent().remove(node)
-            self._save_change()
             logger.debug(f'删除节点成功')
         except:
             logger.exception('未找到该节点')
 
-    def add_peer_node(self, xpath, tagname, text="", **kwargs):
+    def add_peer_node(self, xpath, new_tag_name, tag_idx=-1, text="", **kwargs):
         """
         在同层级添加节点
-        :param xpath: 节点路径
+        :param xpath: 同层级节点路径
         :param tagname: 节点名称
         :param text: 节点text
         :param kwargs: 节点属性
         :return:
         """
         try:
-            tnode = self.tree.xpath(xpath)[0]
-            tag = etree.SubElement(tnode.getparent(), tagname)
-            tag.text = text
+            accord_tag = self.tree.xpath(xpath)[0]
+            parent_tag = accord_tag.getparent()
+            new_tag = etree.SubElement(parent_tag, new_tag_name)
+            new_tag.text = text
             for key, value in kwargs.items():
-                tag.attrib[key] = value
-            self._save_change()
-            logger.debug(f'添加同层级节点<{tagname}>成功')
+                new_tag.attrib[key] = value
+            # 将tag插入到指定索引位置
+            parent_tag.insert(tag_idx, new_tag)
+            logger.debug(f'添加同层级节点<{new_tag_name}>成功')
         except:
             logger.exception('未找到该节点')
+            raise
 
-    def add_sub_node(self, xpath, tagname, text="", **kwargs):
+    def add_sub_node(self, xpath, new_tag_name, tag_idx=-1, text="", **kwargs):
         """
         在添加子节点
-        :param xpath: 节点路径
+        :param xpath: 父节点路径
         :param tagname: 节点名称
         :param text: 节点text
         :param kwargs: 节点属性
         :return:
         """
         try:
-            tnode = self.tree.xpath(xpath)[0]
-            tag = etree.SubElement(tnode, tagname)
+            parent_tag = self.tree.xpath(xpath)[0]
+            tag = etree.SubElement(parent_tag, new_tag_name)
             tag.text = text
             for key, value in kwargs.items():
                 tag.attrib[key] = value
-            self._save_change()
-            logger.debug(f'添加子节点<{tagname}>成功')
+            parent_tag.insert(tag_idx, tag)
+            logger.debug(f'添加子节点<{new_tag_name}>成功')
         except:
             logger.exception('未找到该节点')
+            raise
 
-    def _save_change(self):
+    def save_change(self):
         """
         保存修改后的节点
         :return:
         """
         # 让添加的节点自动换行：pretty_print=True, encoding='utf-8'
-        self.tree.write(self.jmx, pretty_print=True, encoding='utf-8')
+        try:
+            self.tree.write(self.jmx, pretty_print=True, encoding='utf-8')
+        except:
+            logger.exception('保存jmx失败')
+            raise
 
 
+class ModifyJMX(ParseJmx):
 
+    def __init__(self, jmx):
+        super().__init__(jmx)
+
+
+    def add_form_data(self, xpath, **kwargs):
+        count = 1
+        # xpath为sampler的路径
+        # elementProp为collectionProp的父路径
+        elementProp = xpath + '/elementProp'
+        collectionProp = elementProp + '/collectionProp'
+
+        # 先删除collectionProp节点，再添加所有节点
+        self.remove_node(collectionProp)
+
+        # 在elementProp节点下添加collectionProp节点
+        self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
+
+        for key, value in kwargs.items():
+            sub_elementProp = collectionProp + f'/elementProp[{count}]'
+            self.add_sub_node(collectionProp, new_tag_name='elementProp', name=value, elementType='HTTPArgument')
+            self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
+            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=value, name='Argument.value')
+            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
+            self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='true', name='HTTPArgument.use_equals')
+            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=key, name='Argument.name')
+            count += 1
+        self.save_change()
+
+    def add_json_data(self, xpath, raw):
+        # 先删除boolProp节点，xpath为sampler的路径
+        self.remove_node(xpath + '/boolProp[@name="HTTPSampler.postBodyRaw"]')
+
+        # 重新添加boolProp节点
+        self.add_sub_node(xpath, new_tag_name='boolProp', tag_idx=0, text='true', name='HTTPSampler.postBodyRaw')
+        elementProp = xpath + '/elementProp'
+        collectionProp = elementProp + '/collectionProp'
+
+        # 删除collectionProp节点，重新添加参数数据
+        self.remove_node(collectionProp)
+
+        try:
+            # 将raw格式转换为字符串
+            raw = json.dumps(raw)
+        except:
+            logger.exception('无效的json格式')
+            raise
+
+        self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
+        sub_elementProp = collectionProp + '/elementProp'
+        self.add_sub_node(collectionProp, new_tag_name='elementProp', name="", elementType='HTTPArgument')
+        self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
+        self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=raw, name='Argument.value')
+        self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
+        self.save_change()
 
 
 if __name__ == "__main__":
 
-    p = ParseJmx('/Users/chenlei/jmeter5/jmx_folder/study_api.jmx')
-    xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[1]/elementProp/collectionProp'
+    p = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/mytest.jmx')
+    xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[1]'
     # p.change_node_text(xpath, 'aaaa')
     # m = p.remove_single_node(xpath)
     # p.save_change()
+    a = {"task_name": "vvvvv", "add_user": 1}
+    p.add_json_data(xpath, a)
+    # p.add_get_param(xpath, aa='bbbbb', bb='bbbbbbb')
 
-    s = p.add_sub_node(xpath, 'pppppppp', text='ahsdhahah', aa='aa')
+    # s = p.add_get_param(xpath, aa='aaaaaaaaaaaaa')
     # print(s)
     #
     # p.remove_single_node(xpath)

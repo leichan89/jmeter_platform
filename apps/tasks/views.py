@@ -1,3 +1,5 @@
+from rest_framework.exceptions import UnsupportedMediaType
+
 from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer
 from .models import Tasks, TaskFlow, FlowTaskAggregateReport
 from rest_framework import generics
@@ -23,6 +25,9 @@ class CreateTask(generics.CreateAPIView):
         try:
             self.create(request, *args, **kwargs)
             return APIRsp()
+        except UnsupportedMediaType as e:
+            logger.exception(f'创建失败\n{e}')
+            return APIRsp(code=400, msg='不支持的mediaType', status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.exception(f'创建失败\n{e}')
             return APIRsp(code=400, msg='创建失败', status=status.HTTP_400_BAD_REQUEST)

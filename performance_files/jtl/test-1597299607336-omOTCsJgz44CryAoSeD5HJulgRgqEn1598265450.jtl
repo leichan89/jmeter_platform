@@ -1,2 +1,0 @@
-timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
-1598265470537,56,百度,404,Not Found,线程组 1-1,text,false,,4834,191,1,1,http://127.0.0.1:8000/uploadjmx,56,0,31
