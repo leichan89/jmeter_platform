@@ -71,19 +71,14 @@ class Tools:
             #单个sapmler的配置信息
             sampler_info = {}
 
-            sampler_xpath = f'{sapmler_root_xpath}[{sidx + 1}]'
+            sampler_url_xpath = f"{sapmler_root_xpath}[{sidx + 1}]/stringProp[@name='HTTPSampler.path']"
 
-            sampler_url_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.path']"
+            sampler_method_xpath = f"{sapmler_root_xpath}[{sidx + 1}]/stringProp[@name='HTTPSampler.method']"
 
-            sampler_method_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.method']"
-
-            param_israw_xpath = f"{sampler_xpath}/boolProp[@name='HTTPSampler.postBodyRaw']"
+            param_israw_xpath = f"{sapmler_root_xpath}[{sidx + 1}]/boolProp[@name='HTTPSampler.postBodyRaw']"
 
             # jmx请求参数的节点，get请求的参数可能会有多个elementProp，一个参数一个
             sapmler_param_xpath = f"{sapmler_root_xpath}[{sidx + 1}]/elementProp/collectionProp/elementProp"
-
-            # 取样器xpath
-            sampler_info['xpath'] = sampler_xpath
 
             # 取样器名称
             sampler_name = sampler.attrib['testname']
@@ -117,11 +112,15 @@ class Tools:
                                 # key,value格式的参数
                                 # param.attrib['name']为参数的名称，value.text为参数的值
                                 paramname = param.attrib['name']
+                                paramname_xpath = f'{param_value_xpath}[@name="Argument.name"]'
                             else:
                                 # raw格式的参数，没有Argument.name这个标签
                                 paramname = ""
+                                paramname_xpath = ""
                             paramvalue = value.text
-                            sampler_info['params'].append({"paramname": paramname, "paramvalue": paramvalue})
+                            paramvalue_xpath = f'{param_value_xpath}[@name="Argument.value"]'
+                            sampler_info['params'].append({"paramname": paramname, "paramvalue": paramvalue,
+                                                           "paramnameXpath": paramname_xpath, "paramvalueXpath": paramvalue_xpath})
             sapmlers_info.append(sampler_info)
 
         return setup_thread_name, sapmlers_info
@@ -235,27 +234,6 @@ class ParseJmx():
         try:
             nodes = self.tree.xpath(xpath)
             for node in nodes:
-                node.getparent().remove(node)
-            logger.debug(f'删除节点成功')
-        except:
-            logger.exception('未找到该节点')
-
-    def remove_node_and_next(self, xpath, next_name):
-        """
-        删除节点以及临近的节点，一般删除取样器等信息
-        :param xpath:
-        :return:
-        """
-        try:
-            nodes = self.tree.xpath(xpath)
-            for node in nodes:
-                if next_name:
-                    try:
-                        next = node.getnext()
-                        if next.tag == next_name:
-                            node.getparent().remove(next)
-                    except:
-                        pass
                 node.getparent().remove(node)
             logger.debug(f'删除节点成功')
         except:
@@ -392,7 +370,8 @@ class ModifyJMX(ParseJmx):
             raise
 
         self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
-        sub_elementProp = self.add_sub_node(collectionProp, new_tag_name='elementProp', name="", elementType='HTTPArgument')
+        sub_elementProp = collectionProp + '/elementProp'
+        self.add_sub_node(collectionProp, new_tag_name='elementProp', name="", elementType='HTTPArgument')
         self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
         self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=raw, name='Argument.value')
         self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
@@ -411,12 +390,13 @@ class ModifyJMX(ParseJmx):
 
         BackendListener = accord_tag + '/BackendListener'
 
-        self.remove_node_and_next(BackendListener, 'hashTree')
+        self.remove_node(BackendListener)
 
-        self.add_sub_node(accord_tag, new_tag_name='BackendListener', tag_idx=0, guiclass="BackendListenerGui",
+        bl = self.add_sub_node(accord_tag, new_tag_name='BackendListener', tag_idx=0, guiclass="BackendListenerGui",
                           testclass="BackendListener", testname="后端监听器", enabled="true")
 
-        self.add_sub_node(accord_tag, new_tag_name='hashTree', tag_idx=1)
+        if bl.getnext().tag != 'hashTree':
+            self.add_sub_node(accord_tag, new_tag_name='hashTree', tag_idx=1)
 
         elementProp = self.add_sub_node(BackendListener, new_tag_name='elementProp', name="arguments", elementType="Arguments",
                           guiclass="ArgumentsPanel", testclass="Arguments", enabled="true")
@@ -485,31 +465,26 @@ class ModifyJMX(ParseJmx):
 
 if __name__ == "__main__":
 
-    # j = '/Users/chenlei/jmeter5/jmx_folder/django.jmx'
-    #
-    # print(Tools.analysis_jmx(j))
-
     p = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
-    p.add_backendListener('aaaaa', 'bbbbb')
-    # xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[1]'
-    # # p.add_form_data(xpath, {'aa': 'bb', 'cc': 'dd'})
-    # p.add_backendListener(influxdb_url='cccccccc', application_name='fffffffff', measurement_name='xxx')
-    # # p.change_node_text(xpath, 'aaaa')
-    # # m = p.remove_single_node(xpath)
-    # # p.save_change()
-    # # xx = p.add_sub_node(xpath, new_tag_name='aaaa')
-    # # print(type(xx))
-    # # xx.text = 'aaaa'
-    # # xx.attrib['aa'] = 'nbb'
-    # # p.save_change()
-    # # print(type([]))
-    # # p.add_backendListener('aaaa','bbbbbb')
-    # # p.add_get_param(xpath, aa='bbbbb', bb='bbbbbbb')
+    xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[1]'
+    # p.add_form_data(xpath, {'aa': 'bb', 'cc': 'dd'})
+    p.add_backendListener(influxdb_url='cccccccc', application_name='fffffffff', measurement_name='xxx')
+    # p.change_node_text(xpath, 'aaaa')
+    # m = p.remove_single_node(xpath)
+    # p.save_change()
+    # xx = p.add_sub_node(xpath, new_tag_name='aaaa')
+    # print(type(xx))
+    # xx.text = 'aaaa'
+    # xx.attrib['aa'] = 'nbb'
+    # p.save_change()
+    # print(type([]))
+    # p.add_backendListener('aaaa','bbbbbb')
+    # p.add_get_param(xpath, aa='bbbbb', bb='bbbbbbb')
+
+    # s = p.add_get_param(xpath, aa='aaaaaaaaaaaaa')
+    # print(s)
     #
-    # # s = p.add_get_param(xpath, aa='aaaaaaaaaaaaa')
-    # # print(s)
-    # #
-    # # p.remove_single_node(xpath)
-    # # p.single_node_text(xpath)
+    # p.remove_single_node(xpath)
+    # p.single_node_text(xpath)
 
 

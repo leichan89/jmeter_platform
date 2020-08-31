@@ -45,6 +45,7 @@ class JmxUpload(APIView):
             if samplers_info:
                 if len(samplers_info) == 1:
                     data['jmx_setup_thread_name'] = jmxinfo[0]
+                    data['sampler_xpath'] = samplers_info[0]['xpath']
                     data['sampler_name'] = samplers_info[0]['name']
                     data['sampler_url'] = samplers_info[0]['url']
                     data['is_mulit_samplers'] = False
