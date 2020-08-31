@@ -30,38 +30,38 @@ def run_task(taskid, task_flow_str, jmxs):
     from tasks.models import TaskFlow, FlowTaskAggregateReport
 
     try:
-        jmx_ids = []
-        cmds = []
-        stnames = []
+        cmds = {}
         temp_dir = settings.TEMP_URL + task_flow_str
-        temp_jtl = temp_dir + os.sep + 'temp.jtl'
-        summary_jtl = settings.JTL_URL + task_flow_str + '.jtl'
         logger.debug(f'创建临时目录{temp_dir}')
         os.makedirs(temp_dir)
         logger.debug('将jmx复制到临时目录下')
         for sjmx in jmxs:
             jmx = sjmx['jmx']
-            jmx_ids.append(sjmx['id'])
             jmx_name = Tools.filename(jmx)
             shutil.copy(jmx, temp_dir)
-            # 在这里查找替换变量{{}}
+            # 在这里查找替换变量${}
             temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
+            temp_jtl = temp_dir + os.sep + jmx_name + '.jtl'
             cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {temp_jtl}"
-            cmds.append(cmd)
+            cmds[temp_jtl] = [sjmx['id'], cmd]
 
         logger.debug('开始执行jmx')
-        for cmd in cmds:
-            os.system(cmd)
+        for jtl, jmxcmd in cmds.items():
+            code = os.system(jmxcmd[1])
+            if os.path.exists(jtl) and code == 0:
+                logger.debug(f'生成jtl:{jtl}')
 
+        # 聚合jtl文件
         logger.debug('获取临时jmx的setup线程组名称')
-
-        for jmx_id in jmx_ids:
+        jtls_stnames = []
+        for jtl, jmxcmd in cmds.items():
+            jmx_id = jmxcmd[0]
             stname = Jmxs.objects.values('jmx_setup_thread_name').get(id=jmx_id)['jmx_setup_thread_name']
-            stnames.append(stname)
+            jtls_stnames.append([jtl, stname])
 
-        logger.debug(f'删除jtl中的setup线程组信息:{summary_jtl}')
-        Tools.summary_jtl(temp_jtl, summary_jtl, stnames)
-
+        summary_jtl = settings.JTL_URL + task_flow_str + '.jtl'
+        logger.debug(f'开始聚合jtl:{summary_jtl}')
+        Tools.summary_jtls(summary_jtl, jtls_stnames)
         try:
             flow_id = TaskFlow.objects.values('id').get(randomstr=task_flow_str)['id']
             js = JtlsSummary(task_id=taskid, flow_id=flow_id, jtl_url=summary_jtl)

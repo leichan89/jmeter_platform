@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'tasks',
     'jtls',
     'reports',
+    'params'
 ]
 
 MIDDLEWARE = [

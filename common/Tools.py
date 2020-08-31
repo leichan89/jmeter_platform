@@ -141,19 +141,37 @@ class Tools:
         name = os.path.splitext(file)[0]
         return name
 
+    # @staticmethod
+    # def summary_jtls(summary_jtl, jtls_stnames):
+    #     with open(summary_jtl, 'w') as w:
+    #         for idx, jtl_stname in enumerate(jtls_stnames):
+    #             if idx == 0:
+    #                 with open(jtl_stname[0], 'r') as first:
+    #                     line = first.readline()
+    #                     w.write(line)
+    #             with open(jtl_stname[0], 'r') as f:
+    #                 lines = f.readlines()
+    #                 for idx2, line in enumerate(lines):
+    #                     if line.find(jtl_stname[1]) == -1 and idx2 != 0:
+    #                         w.write(line)
+
     @staticmethod
-    def summary_jtls(summary_jtl, jtls_stnames):
-        with open(summary_jtl, 'w') as w:
-            for idx, jtl_stname in enumerate(jtls_stnames):
-                if idx == 0:
-                    with open(jtl_stname[0], 'r') as first:
-                        line = first.readline()
+    def summary_jtl(temp_jtl, summary_jtl, stnames):
+        with open(temp_jtl, 'r') as r:
+            lines = r.readlines()
+            if not lines:
+                return
+            with open(summary_jtl, 'w') as w:
+                for line in lines:
+                    write_tag = True
+                    if stnames:
+                        for st in stnames:
+                            if line.find(st) != -1:
+                                write_tag = False
+                                continue
+                    if write_tag:
                         w.write(line)
-                with open(jtl_stname[0], 'r') as f:
-                    lines = f.readlines()
-                    for idx2, line in enumerate(lines):
-                        if line.find(jtl_stname[1]) == -1 and idx2 != 0:
-                            w.write(line)
+
 
     @staticmethod
     def read_csv_info(filepath):
@@ -284,7 +302,7 @@ class ModifyJMX(ParseJmx):
         super().__init__(jmx)
 
 
-    def add_form_data(self, xpath, **kwargs):
+    def add_form_data(self, xpath, params):
         count = 1
         # xpath为sampler的路径
         # elementProp为collectionProp的父路径
@@ -297,7 +315,14 @@ class ModifyJMX(ParseJmx):
         # 在elementProp节点下添加collectionProp节点
         self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
 
-        for key, value in kwargs.items():
+        if not isinstance(params, dict):
+            logger.exception('参数必须是一个字典')
+            raise
+        for key, value in params.items():
+            try:
+                value = str(value)
+            except:
+                pass
             sub_elementProp = collectionProp + f'/elementProp[{count}]'
             self.add_sub_node(collectionProp, new_tag_name='elementProp', name=value, elementType='HTTPArgument')
             self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
@@ -343,8 +368,8 @@ if __name__ == "__main__":
     # p.change_node_text(xpath, 'aaaa')
     # m = p.remove_single_node(xpath)
     # p.save_change()
-    a = {"task_name": "vvvvv", "add_user": 1}
-    p.add_json_data(xpath, a)
+    a = {'customerId': 25001001}
+    p.add_form_data(xpath, a)
     # p.add_get_param(xpath, aa='bbbbb', bb='bbbbbbb')
 
     # s = p.add_get_param(xpath, aa='aaaaaaaaaaaaa')

@@ -30,7 +30,7 @@ def generate_report(taskid, flowid, jtl_url):
     if os.path.exists(report_output):
         shutil.rmtree(report_output)
     cmd = f"{settings.JMETER} -g {jtl_url} -e -o {report_output}"
-    logger.info(cmd)
+    logger.info(f'开始生成报告:{cmd}')
     os.system(cmd)
     if os.path.exists(report_output):
         report = Reports(task_id=taskid, flow_id=flowid, report_url=report_output)
