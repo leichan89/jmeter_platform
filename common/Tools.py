@@ -34,6 +34,7 @@ class Tools:
         :return: (
             setup线程组名称，
             [
+            "xpath": sampler的xpath路径
             "name": sampler名称
             "url": sampler的url
             "method": sampler请求方法
@@ -41,8 +42,6 @@ class Tools:
             "params": [
                 "paramname": 参数名称
                 "paramvalue": 参数值
-                "paramnameXpath": 参数名称xpath
-                "paramvalueXpath": 参数值xpath
             ]
         ]
         )
@@ -209,7 +208,7 @@ class ParseJmx():
         try:
             return self.tree.xpath(xpath)[0].text
         except:
-            logger.exception('未找到该节点')
+            logger.exception('未找到该节点，或者节点无数据')
             raise
 
     def change_single_tag_text(self, xpath, text):
@@ -326,6 +325,8 @@ class ParseJmx():
 class ModifyJMX(ParseJmx):
 
     def __init__(self, jmx):
+        # 在jmx的第一个ThreadGroup目录下操作
+        self.accord_tag = '//ThreadGroup[1]/following-sibling::hashTree[1]'
         super().__init__(jmx)
 
 
@@ -342,8 +343,10 @@ class ModifyJMX(ParseJmx):
         elementProp = xpath + '/elementProp'
         collectionProp = elementProp + '/collectionProp'
 
-        # 先删除collectionProp节点，再添加所有节点
-        self.remove_node(collectionProp)
+        self.remove_node(elementProp)
+
+        # 重新添加xpath/elementProp
+        self.add_sub_node(xpath, 'elementProp', name="HTTPsampler.Arguments", elementType="Arguments")
 
         # 在elementProp节点下添加collectionProp节点
         self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
@@ -373,16 +376,20 @@ class ModifyJMX(ParseJmx):
         :param raw:
         :return:
         """
+
+        elementProp = xpath + '/elementProp'
+        collectionProp = elementProp + '/collectionProp'
+
         # 先删除boolProp节点，xpath为sampler的路径
         self.remove_node(xpath + '/boolProp[@name="HTTPSampler.postBodyRaw"]')
 
         # 重新添加boolProp节点
         self.add_sub_node(xpath, new_tag_name='boolProp', tag_idx=0, text='true', name='HTTPSampler.postBodyRaw')
-        elementProp = xpath + '/elementProp'
-        collectionProp = elementProp + '/collectionProp'
+        # 删除elementProp
+        self.remove_node(elementProp)
 
-        # 删除collectionProp节点，重新添加参数数据
-        self.remove_node(collectionProp)
+        # 重新添加xpath/elementProp
+        self.add_sub_node(xpath, 'elementProp', name="HTTPsampler.Arguments", elementType="Arguments")
 
         try:
             # 将raw格式转换为字符串
@@ -398,6 +405,40 @@ class ModifyJMX(ParseJmx):
         self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
         self.save_change()
 
+    def add_sampler(self, name, url, method, param_type, param):
+        """
+        添加sampler
+        :param name: sampler名称
+        :param url: 接口地址
+        :param method: 接口方法
+        :param param_type: 参数类型，1是form，2是raw
+        :param param: 参数
+        :return:
+        """
+
+        name = name + '-' + str(Tools.datetime2timestamp(to11=True))
+
+        HTTPSamplerProxy = self.accord_tag + f'/HTTPSamplerProxy[@testname="{name}"]'
+
+        # 在最后的位置插入sampler
+        sp = self.add_sub_node(self.accord_tag, new_tag_name='HTTPSamplerProxy', guiclass="HttpTestSampleGui",
+                          testclass="HTTPSamplerProxy", testname=name, enabled="true")
+
+        # 添加hashTree
+        self.add_sub_node(self.accord_tag, new_tag_name='hashTree')
+
+        #
+        # 1是form表单，2是raw
+        if param_type == 1 and isinstance(param, dict):
+            self.add_form_data(HTTPSamplerProxy, param)
+        if param_type == 2:
+            self.add_json_data(HTTPSamplerProxy, param)
+
+        self._add_sampler_base(sp, url, method)
+
+        self.save_change()
+
+
     def add_backendListener(self, influxdb_url, application_name, measurement_name='jmeter'):
 
         """
@@ -407,16 +448,14 @@ class ModifyJMX(ParseJmx):
         :return:
         """
 
-        accord_tag = '//ThreadGroup[1]/following-sibling::hashTree[1]'
-
-        BackendListener = accord_tag + '/BackendListener'
+        BackendListener = self.accord_tag + '/BackendListener'
 
         self.remove_node_and_next(BackendListener, 'hashTree')
 
-        self.add_sub_node(accord_tag, new_tag_name='BackendListener', tag_idx=0, guiclass="BackendListenerGui",
+        self.add_sub_node(self.accord_tag, new_tag_name='BackendListener', tag_idx=0, guiclass="BackendListenerGui",
                           testclass="BackendListener", testname="后端监听器", enabled="true")
 
-        self.add_sub_node(accord_tag, new_tag_name='hashTree', tag_idx=1)
+        self.add_sub_node(self.accord_tag, new_tag_name='hashTree', tag_idx=1)
 
         elementProp = self.add_sub_node(BackendListener, new_tag_name='elementProp', name="arguments", elementType="Arguments",
                           guiclass="ArgumentsPanel", testclass="Arguments", enabled="true")
@@ -476,9 +515,40 @@ class ModifyJMX(ParseJmx):
         self.save_change()
 
     def _add_param(self, parent_node, param_name, param_value):
+        """
+        常规参数
+        :param parent_node:
+        :param param_name:
+        :param param_value:
+        :return:
+        """
         self.add_sub_node(parent_node, new_tag_name='stringProp', text=param_name, name="Argument.name")
         self.add_sub_node(parent_node, new_tag_name='stringProp', text=param_value, name="Argument.value")
         self.add_sub_node(parent_node, new_tag_name='stringProp', text='=', name="Argument.metadata")
+
+    def _add_sampler_base(self, parent_node, url, method):
+        """
+        sapmpler基础参数
+        :param parent_node:
+        :param url:
+        :param method:
+        :return:
+        """
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.domain")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.port")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.protocol")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.contentEncoding")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', text=url, name="HTTPSampler.path")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', text=method, name="HTTPSampler.method")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', text='true', name="HTTPSampler.follow_redirects")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', text='false', name="HTTPSampler.auto_redirects")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', text='true', name="HTTPSampler.use_keepalive")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', text='false', name="HTTPSampler.DO_MULTIPART_POST")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.embedded_url_re")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.connect_timeout")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.response_timeout")
+
+
 
 
 
@@ -490,26 +560,33 @@ if __name__ == "__main__":
     # print(Tools.analysis_jmx(j))
 
     p = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
-    p.add_backendListener('aaaaa', 'bbbbb')
-    # xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[1]'
-    # # p.add_form_data(xpath, {'aa': 'bb', 'cc': 'dd'})
-    # p.add_backendListener(influxdb_url='cccccccc', application_name='fffffffff', measurement_name='xxx')
-    # # p.change_node_text(xpath, 'aaaa')
-    # # m = p.remove_single_node(xpath)
-    # # p.save_change()
-    # # xx = p.add_sub_node(xpath, new_tag_name='aaaa')
-    # # print(type(xx))
-    # # xx.text = 'aaaa'
-    # # xx.attrib['aa'] = 'nbb'
-    # # p.save_change()
-    # # print(type([]))
-    # # p.add_backendListener('aaaa','bbbbbb')
-    # # p.add_get_param(xpath, aa='bbbbb', bb='bbbbbbb')
-    #
-    # # s = p.add_get_param(xpath, aa='aaaaaaaaaaaaa')
-    # # print(s)
+    # s = p.single_tag_text('//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[last()]')
+    # print(s)
+    # accord_tag = '//ThreadGroup[1]/following-sibling::hashTree[1]'
+    # s = p.single_tag_text(accord_tag + f'/HTTPSamplerProxy[@testname="我是一个测试sampler"][-1]')
+    # print(s)
+    # p.add_sampler(name="我是一个测试sampler", url='http://www.baidu.com', method="GET", param_type=1, param={'aa':'vbbb'})
+
+    p.add_backendListener('aaaaa', 'nnnnn')
+
+    # # # p.add_form_data(xpath, {'aa': 'bb', 'cc': 'dd'})
+    # # p.add_backendListener(influxdb_url='cccccccc', application_name='fffffffff', measurement_name='xxx')
+    # # # p.change_node_text(xpath, 'aaaa')
+    # # # m = p.remove_single_node(xpath)
+    # # # p.save_change()
+    # # # xx = p.add_sub_node(xpath, new_tag_name='aaaa')
+    # # # print(type(xx))
+    # # # xx.text = 'aaaa'
+    # # # xx.attrib['aa'] = 'nbb'
+    # # # p.save_change()
+    # # # print(type([]))
+    # # # p.add_backendListener('aaaa','bbbbbb')
+    # # # p.add_get_param(xpath, aa='bbbbb', bb='bbbbbbb')
     # #
-    # # p.remove_single_node(xpath)
-    # # p.single_node_text(xpath)
+    # # # s = p.add_get_param(xpath, aa='aaaaaaaaaaaaa')
+    # # # print(s)
+    # # #
+    # # # p.remove_single_node(xpath)
+    # # # p.single_node_text(xpath)
 
 
