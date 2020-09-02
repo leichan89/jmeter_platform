@@ -12,11 +12,8 @@ class Jmxs(models.Model):
     """
 
     jmx = models.CharField("jmx存放路径", max_length=200)
+    jmx_alias = models.CharField('jmx中文别名',max_length=200)
     jmx_setup_thread_name = models.CharField("setup线程组名称", default="", max_length=200, null=True, blank=True)
-    is_mulit_samplers = models.BooleanField("判断是否是多个sampler的jmx", default=True)
-    sampler_name = models.CharField("单sampler的名称", default="", max_length=1000, null=True, blank=True)
-    sampler_url = models.CharField("单sample请求的url地址", default="", max_length=1000, null=True, blank=True)
-    samplers_info = models.TextField("线程组下sampler请求和参数信息")
     add_user = models.ForeignKey(Users, on_delete=models.DO_NOTHING, verbose_name="用户")
     add_time = models.DateTimeField("添加时间", auto_now_add=True)
 
@@ -26,3 +23,23 @@ class Jmxs(models.Model):
 
     def __str__(self):
         return f"{self.jmx}"
+
+class JmxThreadGroupChildren(models.Model):
+    """
+    线程组子类的信息
+    """
+    CHILD_TYPE = (
+        ('sampler', 'http请求'),
+        ('csv',  'CSV数据文件设置')
+    )
+    CHILD_THREAD = (
+        ('thread', '普通线程组'),
+        ('setup', 'setup线程组')
+    )
+    jmx = models.ForeignKey(Jmxs, on_delete=models.CASCADE)
+    child_name = models.CharField("线程组子类的名称", max_length=100)
+    child_type = models.CharField("子类的类型", choices=CHILD_TYPE, default="sampler", max_length=10)
+    child_info = models.TextField("线程组子类的信息")
+    child_thread = models.CharField("所在线程组类型", choices=CHILD_THREAD, default="thread", max_length=10)
+    add_time = models.DateTimeField("添加时间", auto_now_add=True)
+

@@ -67,10 +67,10 @@
 # #
 # # sys.path.insert(0, BASE_DIR)
 # # sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
-#
-# import django
-# django.setup()
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
+import django
+django.setup()
 #
 # from jtls.models import JtlsDetails
 #
@@ -91,13 +91,26 @@
 #
 #
 # #
-# # from tasks.models import TasksDetails
-# # from jmxs.models import Jmxs
-# # from tasks.models import Tasks, TaskFlow
-# #
-# # # m = TasksDetails.objects.values('jmx').filter(task_id=1)
-# #
-# # # j = Jmxs.objects.values('id').get(id=2)
+from tasks.models import Tasks
+from tasks.serializer import TaskSerializer
+
+from jmxs.models import JmxThreadGroupChildren
+
+s = JmxThreadGroupChildren.objects.values().filter(jmx_id=23)
+
+for i in s:
+    print(i)
+
+# data = {"task_name": 'xxx', 'add_user': 1}
+# m = TaskSerializer(data=data)
+# if m.is_valid():
+#     m.save()
+#     print(m.data)
+
+
+# m = TasksDetails.objects.values('jmx').filter(task_id=1)
+
+# j = Jmxs.objects.values('id').get(id=2)
 # #
 # # m = TaskFlow.objects.values('id').get(randomstr='uXSwdxgHZ63dSMAS3V')['id']
 # #
@@ -111,6 +124,4 @@
 # # print(s)
 # #
 #
-import shutil
 
-shutil.rmtree('/Users/chenlei/python-project/jmeter_platform/performance_files/temp/aaa')

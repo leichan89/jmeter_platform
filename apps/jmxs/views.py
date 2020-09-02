@@ -1,7 +1,8 @@
 from common.APIResponse import APIRsp
+from common.Operate import ReadJmx
 from common.Tools import Tools
 from rest_framework.views import APIView
-from rest_framework.response import Response
+from .models import JmxThreadGroupChildren
 from jmeter_platform import settings
 from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, JmxsRunSerializer
 from .models import Jmxs
@@ -9,6 +10,9 @@ from rest_framework import status
 from rest_framework import generics
 import json
 import os
+import logging
+
+logger = logging.getLogger(__file__)
 
 class JmxUpload(APIView):
     """
@@ -20,12 +24,13 @@ class JmxUpload(APIView):
 
     def post(self, request):
         """
-        :param request: {'jmx': , 'user': 1}
+        :param request: {'jmx': 'name': , 'user': 1}
         :return:
         """
         data = {}
-        user = request.POST.get('user')
         jmx = request.FILES.get('jmx')
+        jmx_alias = request.POST.get('name')
+        user = request.POST.get('user')
         if jmx and user:
             jmx_name_ext = os.path.splitext(jmx.name)
             jmx_name = jmx_name_ext[0]
@@ -39,29 +44,45 @@ class JmxUpload(APIView):
                 for i in jmx.chunks():
                     f.write(i)
 
-            jmxinfo = Tools.analysis_jmx(jmxpath)
+            jmxinfo = ReadJmx(jmxpath).analysis_jmx()
+            if not jmxinfo:
+                return APIRsp(code=400, msg='添加失败，jmx文件错误', status=status.HTTP_400_BAD_REQUEST)
 
             samplers_info = jmxinfo[1]
-            if samplers_info:
-                if len(samplers_info) == 1:
-                    data['jmx_setup_thread_name'] = jmxinfo[0]
-                    data['sampler_xpath'] = samplers_info[0]['xpath']
-                    data['sampler_name'] = samplers_info[0]['name']
-                    data['sampler_url'] = samplers_info[0]['url']
-                    data['is_mulit_samplers'] = False
-            else:
-                return APIRsp(code=400, msg='jmx文件未解析出任何信息', status=status.HTTP_400_BAD_REQUEST)
+            csvs_info = jmxinfo[2]
 
+            # setup线程组名称
+            data['jmx_setup_thread_name'] = jmxinfo[0]
+
+            # jmx路径
             data['jmx'] = jmxpath
-            # 将list转为str
-            data['samplers_info'] = json.dumps(samplers_info)
+
+            # jmx名称
+            if jmx_alias:
+                data['jmx_alias'] = jmx_alias
+            else:
+                data['jmx_alias'] = jmx_name
+
             # user的id不存在时，会校验失败
             data['add_user'] = user
 
             obj = JmxsSerializer(data=data)
 
+            # 校验数据格式
             if obj.is_valid():
                 obj.save()
+                jmx_id = obj.data['id']
+                for sampler in samplers_info:
+                    # 保存sampler信息
+                    s = JmxThreadGroupChildren(jmx_id=jmx_id, child_name=sampler['name'],
+                                                  child_info=json.dumps(sampler), child_thread=sampler['thread_type'])
+                    s.save()
+                if csvs_info:
+                    for csv in csvs_info:
+                        # 保存csv信息
+                        c = JmxThreadGroupChildren(jmx_id=jmx_id, child_name=csv['name'], child_type='csv',
+                                                   child_info=json.dumps(csv), child_thread=csv['thread_type'])
+                        c.save()
                 return APIRsp()
 
             return APIRsp(code=400, msg='添加失败，参数校验未通过', status=status.HTTP_400_BAD_REQUEST)
@@ -94,8 +115,12 @@ class JmxView(generics.RetrieveAPIView):
         if rsp.status_code == 200:
             if rsp.data:
                 id = rsp.data['id']
-                samplers_info = json.loads(rsp.data['samplers_info'])
-                rsp.data = {'id': id, 'samplers_info': samplers_info}
+                children = []
+                qs = JmxThreadGroupChildren.objects.values('id', 'child_name', 'child_type', 'child_info').filter(jmx_id=id)
+                for q in qs:
+                    q['child_info'] = json.loads(q['child_info'])
+                    children.append(q)
+                rsp.data = {'id': id, 'children': children}
                 return APIRsp(data=rsp.data)
             return APIRsp(code='400', msg='无数据', status=rsp.status_code, data=rsp.data)
         else:
