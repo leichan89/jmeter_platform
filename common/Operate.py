@@ -36,6 +36,7 @@ class ReadJmx():
         """
         try:
             tree = etree.parse(self.jmxPath)
+            # xpath路径错误的话，是不会报异常的，返回一个空[]
             ThreadGroup = tree.xpath('//ThreadGroup')
             if not ThreadGroup:
                 logger.error('jmx文件没有线程组')
@@ -106,12 +107,15 @@ class ReadJmx():
             # jmx请求参数的节点，get请求的参数可能会有多个elementProp，一个参数一个
             sapmler_param_xpath = f"{sapmler_root_xpath}[{sidx + 1}]/elementProp/collectionProp/elementProp"
 
-            # 取样器xpath
-            sampler_info['xpath'] = sampler_xpath
-
             # 取样器名称
-            sampler_name = sampler.attrib['testname']
-            sampler_info['name'] = sampler_name
+            old_name = sampler.attrib['testname']
+            sampler_name = old_name + Tools.random_str(19)
+            sampler.attrib['testname'] = sampler_name
+            tree.write(self.jmxPath, encoding='utf-8')
+            sampler_info['name'] = old_name
+
+            # 取样器xpath
+            sampler_info['xpath'] = f'{sapmler_root_xpath}[@testname="{sampler_name}"]'
 
             # 取样器url
             sampler_url = tree.xpath(sampler_url_xpath)[0].text
@@ -172,10 +176,14 @@ class ReadJmx():
                 csv_info['thread_type'] = thread_type
 
                 csv_xpath = f"{csv_root_xpath}[{cinx + 1}]"
-                csv_info['xpath'] = csv_xpath
 
-                csv_name = csv.attrib['testname']
-                csv_info['name'] = csv_name
+                old_name = csv.attrib['testname']
+                csv_name = old_name + Tools.random_str(19)
+                csv.attrib['testname'] = csv_name
+                csv_info['name'] = old_name
+                tree.write(self.jmxPath, encoding='utf-8')
+
+                csv_info['xpath'] = f'{csv_root_xpath}/[@testname="{csv_name}"]'
 
                 delimiter_xpath = csv_xpath + '/stringProp[@name="delimiter"]'
                 delimiter = tree.xpath(delimiter_xpath)[0].text
@@ -445,7 +453,7 @@ class ModifyJMX(OperateJmx):
 
         self.remove_node_and_next(xpath)
 
-        name = name + '-' + str(Tools.datetime2timestamp(to11=True))
+        name = name + Tools.random_str(19)
 
         HTTPSamplerProxy = self.accord_tag + f'/HTTPSamplerProxy[@testname="{name}"]'
 
