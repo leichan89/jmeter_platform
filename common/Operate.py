@@ -8,7 +8,7 @@ import logging
 import json
 from common.Tools import Tools
 
-logger = logging.getLogger('collect')
+logger = logging.getLogger(__file__)
 
 class ReadJmx():
 
@@ -26,7 +26,7 @@ class ReadJmx():
             "name": sampler名称
             "url": sampler的url
             "method": sampler请求方法
-            "israw": 判断请求参数是否是raw格式
+            "param_type": 判断请求参数是否是raw格式
             "params": [
                 "paramname": 参数名称
                 "paramvalue": 参数值
@@ -102,7 +102,7 @@ class ReadJmx():
 
             sampler_method_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.method']"
 
-            param_israw_xpath = f"{sampler_xpath}/boolProp[@name='HTTPSampler.postBodyRaw']"
+            param_type_xpath = f"{sampler_xpath}/boolProp[@name='HTTPSampler.postBodyRaw']"
 
             # jmx请求参数的节点，get请求的参数可能会有多个elementProp，一个参数一个
             sapmler_param_xpath = f"{sapmler_root_xpath}[{sidx + 1}]/elementProp/collectionProp/elementProp"
@@ -125,11 +125,11 @@ class ReadJmx():
             sampler_method = tree.xpath(sampler_method_xpath)[0].text
             sampler_info['method'] = sampler_method
 
-            # 判断是否是raw格式的请求，0表示不是raw，1是raw
-            param_israw = tree.xpath(param_israw_xpath)
-            sampler_info['israw'] = 0
-            if param_israw:
-                sampler_info['israw'] = 1
+            # 判断是否是raw格式的请求
+            raw_param = tree.xpath(param_type_xpath)
+            sampler_info['param_type'] = 'form'
+            if raw_param:
+                sampler_info['param_type'] = 'raw'
 
             sampler_info['params'] = []
 
@@ -141,7 +141,7 @@ class ReadJmx():
                     param_value = tree.xpath(param_value_xpath)
                     for value in param_value:
                         if value.attrib['name'] == 'Argument.value':
-                            if not param_israw:
+                            if sampler_info['param_type'] == 'form':
                                 # key,value格式的参数
                                 # param.attrib['name']为参数的名称，value.text为参数的值
                                 paramname = param.attrib['name']
@@ -185,14 +185,6 @@ class ReadJmx():
 
                 csv_info['xpath'] = f'{csv_root_xpath}/[@testname="{csv_name}"]'
 
-                delimiter_xpath = csv_xpath + '/stringProp[@name="delimiter"]'
-                delimiter = tree.xpath(delimiter_xpath)[0].text
-                csv_info['delimiter'] = delimiter
-
-                fileEncoding_xpath = csv_xpath + '/stringProp[@name="fileEncoding"]'
-                fileEncoding = tree.xpath(fileEncoding_xpath)[0].text
-                csv_info['fileEncoding'] = fileEncoding
-
                 filename_xpath = csv_xpath + '/stringProp[@name="filename"][1]'
                 filename = tree.xpath(filename_xpath)[0].text
                 csv_info['filename'] = filename
@@ -201,17 +193,9 @@ class ReadJmx():
                 ignoreFirstLine = tree.xpath(ignoreFirstLine_xpath)[0].text
                 csv_info['ignoreFirstLine'] = ignoreFirstLine
 
-                quotedData_xpath = csv_xpath + '/boolProp[@name="quotedData"]'
-                quotedData = tree.xpath(quotedData_xpath)[0].text
-                csv_info['quotedData'] = quotedData
-
                 recycle_xpath = csv_xpath + '/boolProp[@name="recycle"]'
                 recycle = tree.xpath(recycle_xpath)[0].text
                 csv_info['recycle'] = recycle
-
-                shareMode_xpath = csv_xpath + '/stringProp[@name="shareMode"]'
-                shareMode = tree.xpath(shareMode_xpath)[0].text
-                csv_info['shareMode'] = shareMode
 
                 stopThread_xpath = csv_xpath + '/boolProp[@name="stopThread"]'
                 stopThread = tree.xpath(stopThread_xpath)[0].text
@@ -233,6 +217,14 @@ class OperateJmx():
         parser = etree.XMLParser(encoding="utf-8", strip_cdata=False, remove_blank_text=True)
         self.tree = etree.parse(jmx, parser=parser)
         self.jmx = jmx
+
+    def node_exists(self, xpath):
+        rst = self.tree.xpath(xpath)
+        if rst:
+            return True
+        else:
+            logger.debug(f"节点不存在：{xpath}")
+            return False
 
     def single_tag_text(self, xpath):
         """
@@ -280,6 +272,8 @@ class OperateJmx():
         :param xpath:
         :return:
         """
+        if not xpath:
+            return
         try:
             nodes = self.tree.xpath(xpath)
             for node in nodes:
@@ -356,125 +350,157 @@ class OperateJmx():
             logger.exception('保存jmx失败')
             raise
 
-
 class ModifyJMX(OperateJmx):
 
     def __init__(self, jmx):
         # 在jmx的第一个ThreadGroup目录下操作
-        self.accord_tag = '//ThreadGroup[1]/following-sibling::hashTree[1]'
+        self.thread_accord_tag = '//ThreadGroup[1]/following-sibling::hashTree[1]'
+        self.setup_accord_tag = '//SetupThreadGroup[1]/following-sibling::hashTree[1]'
         super().__init__(jmx)
 
-
-    def add_form_data(self, xpath, params):
+    def add_setup_thread(self):
         """
-        添加form表单数据，传入一个字典
-        :param xpath: sampler的路径
-        :param params:
+        添加setup线程组
         :return:
         """
-        count = 1
-        # xpath为sampler的路径
-        # elementProp为collectionProp的父路径
-        elementProp = xpath + '/elementProp'
-        collectionProp = elementProp + '/collectionProp'
+        root_xpath = "//jmeterTestPlan/hashTree/hashTree"
+        SetupThreadGroup = root_xpath + '/SetupThreadGroup'
+        rst = self.node_exists(SetupThreadGroup)
+        if not rst:
+            setup = self.add_sub_node(root_xpath, new_tag_name='SetupThreadGroup', guiclass="SetupThreadGroupGui",
+                              testclass="SetupThreadGroup", testname="setUp线程组", enabled="true")
+            self.add_sub_node(setup, new_tag_name='stringProp', text='continue', name="ThreadGroup.on_sample_error")
+            elementProp = self.add_sub_node(setup, new_tag_name='elementProp', name="ThreadGroup.main_controller",
+                              elementType="LoopController", guiclass="LoopControlPanel", testclass="LoopController",
+                              testname="循环控制器", enabled="true")
+            self.add_sub_node(elementProp, new_tag_name='boolProp', text='false', name="LoopController.continue_forever")
+            self.add_sub_node(elementProp, new_tag_name='stringProp', text='1', name="LoopController.loops")
+            self.add_sub_node(setup, new_tag_name='stringProp', text='1', name="ThreadGroup.num_threads")
+            self.add_sub_node(setup, new_tag_name='stringProp', text='1', name="ThreadGroup.ramp_time")
+            self.add_sub_node(setup, new_tag_name='boolProp', text='false', name="ThreadGroup.scheduler")
+            self.add_sub_node(setup, new_tag_name='stringProp', name="ThreadGroup.duration")
+            self.add_sub_node(setup, new_tag_name='stringProp', name="ThreadGroup.delay")
 
-        self.remove_node(elementProp)
+            # 添加hashTree
+            self.add_sub_node(root_xpath, new_tag_name='hashTree')
 
-        # 重新添加xpath/elementProp
-        self.add_sub_node(xpath, 'elementProp', name="HTTPsampler.Arguments", elementType="Arguments")
+            self.save_change()
 
-        # 在elementProp节点下添加collectionProp节点
-        self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
-
-        if not isinstance(params, dict):
-            logger.exception('参数必须是一个字典')
-            raise
-        for key, value in params.items():
-            try:
-                value = str(value)
-            except:
-                pass
-            sub_elementProp = collectionProp + f'/elementProp[{count}]'
-            self.add_sub_node(collectionProp, new_tag_name='elementProp', name=value, elementType='HTTPArgument')
-            self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
-            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=value, name='Argument.value')
-            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
-            self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='true', name='HTTPArgument.use_equals')
-            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=key, name='Argument.name')
-            count += 1
-        self.save_change()
-
-    def add_json_data(self, xpath, raw):
+    def add_sampler(self, name, url, method, accord='thread', param_type='form', params=None, xpath=None):
         """
-        添加raw格式的json
-        :param xpath: sampler的路径
-        :param raw:
-        :return:
-        """
-
-        elementProp = xpath + '/elementProp'
-        collectionProp = elementProp + '/collectionProp'
-
-        # 先删除boolProp节点，xpath为sampler的路径
-        self.remove_node(xpath + '/boolProp[@name="HTTPSampler.postBodyRaw"]')
-
-        # 重新添加boolProp节点
-        self.add_sub_node(xpath, new_tag_name='boolProp', tag_idx=0, text='true', name='HTTPSampler.postBodyRaw')
-        # 删除elementProp
-        self.remove_node(elementProp)
-
-        # 重新添加xpath/elementProp
-        self.add_sub_node(xpath, 'elementProp', name="HTTPsampler.Arguments", elementType="Arguments")
-
-        try:
-            # 将raw格式转换为字符串
-            raw = json.dumps(raw)
-        except:
-            logger.exception('无效的json格式')
-            raise
-
-        self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
-        sub_elementProp = self.add_sub_node(collectionProp, new_tag_name='elementProp', name="", elementType='HTTPArgument')
-        self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
-        self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=raw, name='Argument.value')
-        self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
-        self.save_change()
-
-    def add_sampler(self, xpath, name, url, method, param_type, param):
-        """
-        添加sampler，添加前可以先删除之前的，再添加
-        :param name: sampler名称
-        :param url: 接口地址
-        :param method: 接口方法
-        :param param_type: 参数类型，1是form，2是raw
+        添加取样器，可以在thread或者setup中添加
+        :param name: 取样器名称
+        :param url: url
+        :param method: 方法
+        :param accord: 在thread或者setup中添加
+        :param param_type: 参数类型
         :param param: 参数
+        :param xpath: 取样器地址，可以先删除之前的取样器，再重新添加
         :return:
         """
+
+        if accord == 'thread':
+            accord_tag = self.thread_accord_tag
+        elif accord == 'setup':
+            accord_tag = self.setup_accord_tag
+        else:
+            logger.error('accord参数错误')
+            raise
 
         self.remove_node_and_next(xpath)
 
         name = name + Tools.random_str(19)
 
-        HTTPSamplerProxy = self.accord_tag + f'/HTTPSamplerProxy[@testname="{name}"]'
+        HTTPSamplerProxy = accord_tag + f'/HTTPSamplerProxy[@testname="{name}"]'
 
         # 在最后的位置插入sampler
-        sp = self.add_sub_node(self.accord_tag, new_tag_name='HTTPSamplerProxy', guiclass="HttpTestSampleGui",
+        sp = self.add_sub_node(accord_tag, new_tag_name='HTTPSamplerProxy', guiclass="HttpTestSampleGui",
                           testclass="HTTPSamplerProxy", testname=name, enabled="true")
 
         # 添加hashTree
-        self.add_sub_node(self.accord_tag, new_tag_name='hashTree')
+        self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
-        #
-        # 1是form表单，2是raw
-        if param_type == 1 and isinstance(param, dict):
-            self.add_form_data(HTTPSamplerProxy, param)
-        if param_type == 2:
-            self.add_json_data(HTTPSamplerProxy, param)
+        if params:
+            if param_type == 'form' and isinstance(params, dict):
+                self._add_form_data(HTTPSamplerProxy, params)
+            elif param_type == 'raw':
+                self._add_raw_data(HTTPSamplerProxy, params)
+            else:
+                logger.error("param_type或者param参数错误")
+                raise
 
         self._add_sampler_base(sp, url, method)
 
         self.save_change()
 
+        sampler_info = {}
+        sampler_info['xpath'] = HTTPSamplerProxy
+        sampler_info['name'] = name
+        sampler_info['url'] = url
+        sampler_info['method'] = method
+        sampler_info['param_type'] = param_type
+        sampler_info['params'] = params
+
+        return sampler_info
+
+    def add_csv(self, name, filename, variableNames, ignoreFirstLine='false', recycle='false', stopThread='false', accord='thread', xpath=None):
+        """
+        添加csv数据文件设置
+        :param name: 名称
+        :param filename: 文件路径
+        :param paramname: 参数名称，以逗号隔开
+        :param ignoreFirstLine: 是否忽略首行数据，首行数据可能包含表头
+        :param recycle: 遇到文件结束符是否再次循环
+        :param stopThread: 遇到文件结束符是否结束线程
+        :param accord: 父路径
+        :param xpath: 已存在的csv路径，修改时候，先删除，再添加
+        :return:
+        """
+
+        if accord == 'thread':
+            accord_tag = self.thread_accord_tag
+        elif accord == 'setup':
+            accord_tag = self.setup_accord_tag
+        else:
+            logger.error('accord参数错误')
+            raise
+
+        self.remove_node_and_next(xpath)
+
+        name = name + Tools.random_str(19)
+
+        CSVDataSet = accord_tag + f'/CSVDataSet[@testname="{name}"]'
+
+        # 在最后的位置插入sampler
+        csv = self.add_sub_node(accord_tag, new_tag_name='CSVDataSet', guiclass="TestBeanGUI",
+                               testclass="CSVDataSet", testname=name, enabled="true")
+
+        # 添加hashTree
+        self.add_sub_node(accord_tag, new_tag_name='hashTree')
+
+        self.add_sub_node(csv, new_tag_name='stringProp', text=',', name="delimiter")
+        self.add_sub_node(csv, new_tag_name='stringProp', name="fileEncoding")
+        self.add_sub_node(csv, new_tag_name='stringProp', text=filename, name="filename")
+        self.add_sub_node(csv, new_tag_name='boolProp', text=ignoreFirstLine, name="ignoreFirstLine")
+        self.add_sub_node(csv, new_tag_name='boolProp', text='false', name="c")
+        self.add_sub_node(csv, new_tag_name='boolProp', text=recycle, name="recycle")
+        self.add_sub_node(csv, new_tag_name='stringProp', text='shareMode.all', name="shareMode")
+        self.add_sub_node(csv, new_tag_name='boolProp', text=stopThread, name="stopThread")
+        self.add_sub_node(csv, new_tag_name='stringProp', text=variableNames, name="variableNames")
+
+        self.save_change()
+
+        csv_info = {}
+
+        csv_info['xpath'] = CSVDataSet
+        csv_info['name'] = name
+        csv_info['filename'] = filename
+        csv_info['ignoreFirstLine'] = ignoreFirstLine
+        csv_info['recycle'] = recycle
+        csv_info['stopThread'] = stopThread
+        csv_info['variableNames'] = variableNames
+
+        return csv_info
 
     def add_backendListener(self, influxdb_url, application_name, measurement_name='jmeter'):
 
@@ -485,14 +511,14 @@ class ModifyJMX(OperateJmx):
         :return:
         """
 
-        BackendListener = self.accord_tag + '/BackendListener'
+        BackendListener = self.thread_accord_tag + '/BackendListener'
 
         self.remove_node_and_next(BackendListener)
 
-        self.add_sub_node(self.accord_tag, new_tag_name='BackendListener', tag_idx=0, guiclass="BackendListenerGui",
+        self.add_sub_node(self.thread_accord_tag, new_tag_name='BackendListener', tag_idx=0, guiclass="BackendListenerGui",
                           testclass="BackendListener", testname="后端监听器", enabled="true")
 
-        self.add_sub_node(self.accord_tag, new_tag_name='hashTree', tag_idx=1)
+        self.add_sub_node(self.thread_accord_tag, new_tag_name='hashTree', tag_idx=1)
 
         elementProp = self.add_sub_node(BackendListener, new_tag_name='elementProp', name="arguments", elementType="Arguments",
                           guiclass="ArgumentsPanel", testclass="Arguments", enabled="true")
@@ -585,10 +611,86 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.connect_timeout")
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.response_timeout")
 
+    def _add_form_data(self, xpath, params):
+        """
+        添加form表单数据，传入一个字典
+        :param xpath: sampler的路径
+        :param params:
+        :return:
+        """
+        count = 1
+        # xpath为sampler的路径
+        # elementProp为collectionProp的父路径
+        elementProp = xpath + '/elementProp'
+        collectionProp = elementProp + '/collectionProp'
+
+        self.remove_node(elementProp)
+
+        # 重新添加xpath/elementProp
+        self.add_sub_node(xpath, 'elementProp', name="HTTPsampler.Arguments", elementType="Arguments")
+
+        # 在elementProp节点下添加collectionProp节点
+        self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
+
+        if not isinstance(params, dict):
+            logger.exception('参数必须是一个字典')
+            raise
+        for key, value in params.items():
+            try:
+                value = str(value)
+            except:
+                pass
+            sub_elementProp = collectionProp + f'/elementProp[{count}]'
+            self.add_sub_node(collectionProp, new_tag_name='elementProp', name=value, elementType='HTTPArgument')
+            self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
+            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=value, name='Argument.value')
+            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
+            self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='true', name='HTTPArgument.use_equals')
+            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=key, name='Argument.name')
+            count += 1
+        self.save_change()
+
+    def _add_raw_data(self, xpath, raw):
+        """
+        添加raw格式的json
+        :param xpath: sampler的路径
+        :param raw:
+        :return:
+        """
+
+        elementProp = xpath + '/elementProp'
+        collectionProp = elementProp + '/collectionProp'
+
+        # 先删除boolProp节点，xpath为sampler的路径
+        self.remove_node(xpath + '/boolProp[@name="HTTPSampler.postBodyRaw"]')
+
+        # 重新添加boolProp节点
+        self.add_sub_node(xpath, new_tag_name='boolProp', tag_idx=0, text='true', name='HTTPSampler.postBodyRaw')
+        # 删除elementProp
+        self.remove_node(elementProp)
+
+        # 重新添加xpath/elementProp
+        self.add_sub_node(xpath, 'elementProp', name="HTTPsampler.Arguments", elementType="Arguments")
+
+        try:
+            # 将raw格式转换为字符串
+            raw = json.dumps(raw)
+        except:
+            logger.exception('无效的json格式')
+            raise
+
+        self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
+        sub_elementProp = self.add_sub_node(collectionProp, new_tag_name='elementProp', name="", elementType='HTTPArgument')
+        self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
+        self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=raw, name='Argument.value')
+        self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
+        self.save_change()
+
 if __name__ == '__main__':
-    r = ReadJmx('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
-    s = r.analysis_jmx()
-    print(json.dumps(s))
+    r = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
+    s = r.add_sampler(name='sampler', url='http://www.baidu.com', method="GET")
+    print(s)
+
 
 
 
