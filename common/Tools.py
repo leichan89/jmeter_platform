@@ -35,26 +35,29 @@ class Tools:
 
     @staticmethod
     def filename(filepath):
-        file = os.path.basename(filepath)
-        name = os.path.splitext(file)[0]
-        return name
+        try:
+            file = os.path.basename(filepath)
+            name = os.path.splitext(file)[0]
+            return name
+        except:
+            return filepath
 
-    @staticmethod
-    def summary_jtl(temp_jtl, summary_jtl, stnames):
-        with open(temp_jtl, 'r') as r:
-            lines = r.readlines()
-            if not lines:
-                return
-            with open(summary_jtl, 'w') as w:
-                for line in lines:
-                    write_tag = True
-                    if stnames:
-                        for st in stnames:
-                            if line.find(st) != -1:
-                                write_tag = False
-                                continue
-                    if write_tag:
-                        w.write(line)
+    # @staticmethod
+    # def summary_jtl(temp_jtl, summary_jtl, stnames):
+    #     with open(temp_jtl, 'r') as r:
+    #         lines = r.readlines()
+    #         if not lines:
+    #             return
+    #         with open(summary_jtl, 'w') as w:
+    #             for line in lines:
+    #                 write_tag = True
+    #                 if stnames:
+    #                     for st in stnames:
+    #                         if line.find(st) != -1:
+    #                             write_tag = False
+    #                             continue
+    #                 if write_tag:
+    #                     w.write(line)
 
     @staticmethod
     def read_csv_info(filepath):

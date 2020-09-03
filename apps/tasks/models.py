@@ -71,6 +71,7 @@ class FlowTaskAggregateReport(models.Model):
     error_rate = models.CharField("异常比例", max_length=100)
     tps = models.CharField("吞吐量", max_length=100)
     recieved_per = models.CharField("每秒从服务器端接收到的数据量", max_length=100)
+    add_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "jtl转换为csv聚合报告"

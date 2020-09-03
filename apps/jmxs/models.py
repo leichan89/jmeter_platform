@@ -13,7 +13,6 @@ class Jmxs(models.Model):
 
     jmx = models.CharField("jmx存放路径", max_length=200)
     jmx_alias = models.CharField('jmx中文别名',max_length=200)
-    jmx_setup_thread_name = models.CharField("setup线程组名称", default="", max_length=200, null=True, blank=True)
     add_user = models.ForeignKey(Users, on_delete=models.DO_NOTHING, verbose_name="用户")
     add_time = models.DateTimeField("添加时间", auto_now_add=True)
 

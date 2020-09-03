@@ -45,8 +45,6 @@ class ReadJmx():
             logger.error('解析jmx错误')
             return None
 
-        setup_thread_xpath = '//SetupThreadGroup'
-
         # thread线程组root节点
         thread_sapmler_root_xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy'
         thread_csv_root_xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/CSVDataSet'
@@ -55,11 +53,9 @@ class ReadJmx():
         setup_sapmler_root_xpath = '//SetupThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy'
         setup_csv_root_xpath = '//SetupThreadGroup[1]/following-sibling::hashTree[1]/CSVDataSet'
 
-        # 获取setup线程组的名称
-        setup_thread_name = ""
-        setup_thread = tree.xpath(setup_thread_xpath)
-        if setup_thread:
-            setup_thread_name = setup_thread[0].attrib['testname']
+        # teardown线程组root节点
+        teardown_sapmler_root_xpath = '//PostThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy'
+        teardown_csv_root_xpath = '//PostThreadGroup[1]/following-sibling::hashTree[1]/CSVDataSet'
 
         thread_sapmlers_info = self._read_sampler(tree, thread_sapmler_root_xpath)
 
@@ -69,11 +65,15 @@ class ReadJmx():
 
         setup_csvs_info = self._read_csv(tree, setup_csv_root_xpath, thread_type='setup')
 
-        sapmlers_info = thread_sapmlers_info + setup_sapmlers_info
-        csvs_info = thread_csvs_info + setup_csvs_info
+        teardown_sapmlers_info = self._read_sampler(tree, teardown_sapmler_root_xpath, thread_type='teardown')
+
+        teardown_csvs_info = self._read_csv(tree, teardown_csv_root_xpath, thread_type='teardown')
+
+        sapmlers_info = thread_sapmlers_info + setup_sapmlers_info + teardown_sapmlers_info
+        csvs_info = thread_csvs_info + setup_csvs_info + teardown_csvs_info
 
 
-        return setup_thread_name, sapmlers_info, csvs_info
+        return sapmlers_info, csvs_info
 
     def _read_sampler(self, tree, sapmler_root_xpath, thread_type='thread'):
         """
@@ -109,7 +109,7 @@ class ReadJmx():
 
             # 取样器名称
             old_name = sampler.attrib['testname']
-            sampler_name = old_name + Tools.random_str(19)
+            sampler_name = old_name + '.' + Tools.random_str(19)
             sampler.attrib['testname'] = sampler_name
             tree.write(self.jmxPath, encoding='utf-8')
             sampler_info['name'] = old_name
@@ -178,7 +178,7 @@ class ReadJmx():
                 csv_xpath = f"{csv_root_xpath}[{cinx + 1}]"
 
                 old_name = csv.attrib['testname']
-                csv_name = old_name + Tools.random_str(19)
+                csv_name = old_name + '.' + Tools.random_str(19)
                 csv.attrib['testname'] = csv_name
                 csv_info['name'] = old_name
                 tree.write(self.jmxPath, encoding='utf-8')
@@ -356,6 +356,7 @@ class ModifyJMX(OperateJmx):
         # 在jmx的第一个ThreadGroup目录下操作
         self.thread_accord_tag = '//ThreadGroup[1]/following-sibling::hashTree[1]'
         self.setup_accord_tag = '//SetupThreadGroup[1]/following-sibling::hashTree[1]'
+        self.teardown_accord_tag = '//PostThreadGroup[1]/following-sibling::hashTree[1]'
         super().__init__(jmx)
 
     def add_setup_thread(self):
@@ -369,6 +370,34 @@ class ModifyJMX(OperateJmx):
         if not rst:
             setup = self.add_sub_node(root_xpath, new_tag_name='SetupThreadGroup', guiclass="SetupThreadGroupGui",
                               testclass="SetupThreadGroup", testname="setUp线程组", enabled="true")
+            self.add_sub_node(setup, new_tag_name='stringProp', text='continue', name="ThreadGroup.on_sample_error")
+            elementProp = self.add_sub_node(setup, new_tag_name='elementProp', name="ThreadGroup.main_controller",
+                              elementType="LoopController", guiclass="LoopControlPanel", testclass="LoopController",
+                              testname="循环控制器", enabled="true")
+            self.add_sub_node(elementProp, new_tag_name='boolProp', text='false', name="LoopController.continue_forever")
+            self.add_sub_node(elementProp, new_tag_name='stringProp', text='1', name="LoopController.loops")
+            self.add_sub_node(setup, new_tag_name='stringProp', text='1', name="ThreadGroup.num_threads")
+            self.add_sub_node(setup, new_tag_name='stringProp', text='1', name="ThreadGroup.ramp_time")
+            self.add_sub_node(setup, new_tag_name='boolProp', text='false', name="ThreadGroup.scheduler")
+            self.add_sub_node(setup, new_tag_name='stringProp', name="ThreadGroup.duration")
+            self.add_sub_node(setup, new_tag_name='stringProp', name="ThreadGroup.delay")
+
+            # 添加hashTree
+            self.add_sub_node(root_xpath, new_tag_name='hashTree')
+
+            self.save_change()
+
+    def add_teardown_thread(self):
+        """
+        添加setup线程组
+        :return:
+        """
+        root_xpath = "//jmeterTestPlan/hashTree/hashTree"
+        PostThreadGroup = root_xpath + '/PostThreadGroup'
+        rst = self.node_exists(PostThreadGroup)
+        if not rst:
+            setup = self.add_sub_node(root_xpath, new_tag_name='PostThreadGroup', guiclass="PostThreadGroupGui",
+                              testclass="PostThreadGroup", testname="tearDown线程组", enabled="true")
             self.add_sub_node(setup, new_tag_name='stringProp', text='continue', name="ThreadGroup.on_sample_error")
             elementProp = self.add_sub_node(setup, new_tag_name='elementProp', name="ThreadGroup.main_controller",
                               elementType="LoopController", guiclass="LoopControlPanel", testclass="LoopController",
@@ -403,6 +432,8 @@ class ModifyJMX(OperateJmx):
             accord_tag = self.thread_accord_tag
         elif accord == 'setup':
             accord_tag = self.setup_accord_tag
+        elif accord == 'teardown':
+            accord_tag = self.teardown_accord_tag
         else:
             logger.error('accord参数错误')
             raise
@@ -411,7 +442,7 @@ class ModifyJMX(OperateJmx):
 
         name = name + Tools.random_str(19)
 
-        HTTPSamplerProxy = accord_tag + f'/HTTPSamplerProxy[@testname="{name}"]'
+        HTTPSamplerProxy = accord_tag + f"/HTTPSamplerProxy[@testname='{name}']"
 
         # 在最后的位置插入sampler
         sp = self.add_sub_node(accord_tag, new_tag_name='HTTPSamplerProxy', guiclass="HttpTestSampleGui",
@@ -461,6 +492,8 @@ class ModifyJMX(OperateJmx):
             accord_tag = self.thread_accord_tag
         elif accord == 'setup':
             accord_tag = self.setup_accord_tag
+        elif accord == 'teardown':
+            accord_tag = self.teardown_accord_tag
         else:
             logger.error('accord参数错误')
             raise
@@ -469,7 +502,7 @@ class ModifyJMX(OperateJmx):
 
         name = name + Tools.random_str(19)
 
-        CSVDataSet = accord_tag + f'/CSVDataSet[@testname="{name}"]'
+        CSVDataSet = accord_tag + f"/CSVDataSet[@testname='{name}']"
 
         # 在最后的位置插入sampler
         csv = self.add_sub_node(accord_tag, new_tag_name='CSVDataSet', guiclass="TestBeanGUI",

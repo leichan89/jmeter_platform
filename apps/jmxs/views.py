@@ -48,11 +48,8 @@ class JmxUpload(APIView):
             if not jmxinfo:
                 return APIRsp(code=400, msg='添加失败，jmx文件错误', status=status.HTTP_400_BAD_REQUEST)
 
-            samplers_info = jmxinfo[1]
-            csvs_info = jmxinfo[2]
-
-            # setup线程组名称
-            data['jmx_setup_thread_name'] = jmxinfo[0]
+            samplers_info = jmxinfo[0]
+            csvs_info = jmxinfo[1]
 
             # jmx路径
             data['jmx'] = jmxpath

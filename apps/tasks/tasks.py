@@ -26,16 +26,13 @@ def run_task(taskid, task_flow_str, jmxs):
     django.setup()
 
     from jtls.models import JtlsSummary
-    from jmxs.models import Jmxs
     from tasks.models import TaskFlow, FlowTaskAggregateReport
 
     try:
         jmx_ids = []
         cmds = []
-        stnames = []
         temp_dir = settings.TEMP_URL + task_flow_str
-        temp_jtl = temp_dir + os.sep + 'temp.jtl'
-        summary_jtl = settings.JTL_URL + task_flow_str + '.jtl'
+        jtl = settings.JTL_URL + task_flow_str + '.jtl'
         logger.debug(f'创建临时目录{temp_dir}')
         os.makedirs(temp_dir)
         logger.debug('将jmx复制到临时目录下')
@@ -46,29 +43,21 @@ def run_task(taskid, task_flow_str, jmxs):
             shutil.copy(jmx, temp_dir)
             # 在这里查找替换变量{{}}
             temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
-            cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {temp_jtl}"
+            cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {jtl}"
             cmds.append(cmd)
 
         logger.debug('开始执行jmx')
         for cmd in cmds:
             os.system(cmd)
 
-        logger.debug('获取临时jmx的setup线程组名称')
-
-        for jmx_id in jmx_ids:
-            stname = Jmxs.objects.values('jmx_setup_thread_name').get(id=jmx_id)['jmx_setup_thread_name']
-            stnames.append(stname)
-
-        logger.debug(f'删除jtl中的setup线程组信息:{summary_jtl}')
-        Tools.summary_jtl(temp_jtl, summary_jtl, stnames)
-
         try:
             flow_id = TaskFlow.objects.values('id').get(randomstr=task_flow_str)['id']
-            js = JtlsSummary(task_id=taskid, flow_id=flow_id, jtl_url=summary_jtl)
+            js = JtlsSummary(task_id=taskid, flow_id=flow_id, jtl_url=jtl)
             js.save()
-            logger.debug('聚合jtl入库成功')
+            logger.debug('jtl信息入库成功')
         except:
-            logger.error('聚合jtl入库失败')
+            logger.error('jtl信息入库失败')
+            os.remove(jtl)
             raise
 
         # 更新流水任务的状态为3，完成状态
@@ -77,8 +66,9 @@ def run_task(taskid, task_flow_str, jmxs):
 
         logger.debug('将jtl文件转换为csv文件')
         summary_csv = settings.TEMP_URL + task_flow_str + os.sep + 'temp.csv'
-        cmd = f'{settings.JMETER_PLUGINS_CMD} --generate-csv {summary_csv} --input-jtl {summary_jtl} --plugin-type AggregateReport'
-        os.system(cmd)
+        to_csv_cmd = f'{settings.JMETER_PLUGINS_CMD} --generate-csv {summary_csv} --input-jtl {jtl} --plugin-type AggregateReport'
+        os.system(to_csv_cmd)
+
         if os.path.exists(summary_csv):
             logger.info('jtl转为csv成功')
             csv_info = Tools.read_csv_info(summary_csv)
@@ -86,10 +76,11 @@ def run_task(taskid, task_flow_str, jmxs):
                 if idx == 0:
                     continue
                 try:
-                    csv_to_db = FlowTaskAggregateReport(task_id=taskid, flow_id=flow_id, label=info[0], samplers=info[1], average_req=info[2],
-                                      median_req=info[3], line90_req=info[4], line95_req=info[5], line99_req=info[6],
-                                      min_req=info[7], max_req=info[8], error_rate=info[9],
-                                      tps=str(float(info[10])), recieved_per=str(float(info[11])))
+                    csv_to_db = FlowTaskAggregateReport(task_id=taskid, flow_id=flow_id, label=Tools.filename(info[0]),
+                                                        samplers=info[1], average_req=info[2],median_req=info[3],
+                                                        line90_req=info[4], line95_req=info[5], line99_req=info[6],
+                                                        min_req=info[7], max_req=info[8], error_rate=info[9],
+                                                        tps=str(float(info[10])), recieved_per=str(float(info[11])))
                     csv_to_db.save()
                 except:
                     logger.error('保存聚合报告数据失败')
