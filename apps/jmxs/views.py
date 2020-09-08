@@ -24,13 +24,13 @@ class JmxUpload(APIView):
 
     def post(self, request):
         """
-        :param request: {'jmx': 'name': , 'user': 1}
+        :param request: {'jmx': 'name': , 'add_user': 1}
         :return:
         """
         data = {}
         jmx = request.FILES.get('jmx')
         jmx_alias = request.POST.get('name')
-        user = request.POST.get('user')
+        user = request.POST.get('add_user')
         if jmx and user:
             jmx_name_ext = os.path.splitext(jmx.name)
             jmx_name = jmx_name_ext[0]

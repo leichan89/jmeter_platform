@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import sys
+import datetime
 
 # celery配置redis作为broker。redis有16个数据库，编号0~15，这里使用第1个。
 BROKER_URL = 'redis://127.0.0.1:6379/0'
@@ -65,10 +66,12 @@ INSTALLED_APPS = [
     'tasks',
     'jtls',
     'reports',
-    'params'
+    'params',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -273,3 +276,33 @@ JMETER_PLUGINS_CMD = os.path.join(BASE_DIR, "jmeter5/bin/JMeterPluginsCMD.sh")
 
 JMX_ALLOWED_FILE_TYPE = ['.jmx']
 CSV_ALLOWED_FILE_TYPE = ['.csv']
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    #  处理没有被捕获的异常
+    'EXCEPTION_HANDLER': 'users.exception.exception_handler',
+}
+
+JWT_AUTH = {
+    # 过期时间
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    # header的token字符串前缀
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    # 自定义认证结果：见下方序列化user和自定义response
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.views.jwt_response_payload_handler',
+}
+
+# 解决跨域问题
+CORS_ORIGIN_ALLOW_ALL = True
+
+AUTHENTICATION_BACKENDS =(
+    'users.views.CustomBackend',
+)
+
