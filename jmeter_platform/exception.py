@@ -29,10 +29,16 @@ def exception_handler(exc, context):
         # logging记录异常信息
         return Response({'code': 500, 'msg': '服务内部异常！'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    response.data = {
-        'code': response.status_code,
-        'msg': response.data['detail']
-    }
+    try:
+        response.data = {
+            'code': response.status_code,
+            'msg': response.data['detail']
+        }
+    except:
+        response.data = {
+            'code': response.status_code,
+            'msg': response.data
+        }
     return response
 
 

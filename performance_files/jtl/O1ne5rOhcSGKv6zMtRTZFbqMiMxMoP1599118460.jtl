@@ -1,0 +1,4 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1599118474042,493,百度2o4dIheLNnFeue5k0SRg1599117468,200,OK,setUp线程组 1-1,text,true,,2559,117,1,1,https://www.baidu.com,493,0,430
+1599118474619,158,百度1VLsvLrrtmWKkyaJXCMw1599117468,200,OK,线程组 1-1,text,true,,2559,117,1,1,https://www.baidu.com,158,0,119
+1599118474781,171,百度3JPHmzjOSmBFLSpRXvYX1599117468,200,OK,tearDown线程组 1-1,text,true,,2559,117,1,1,https://www.baidu.com,170,0,129

@@ -23,7 +23,7 @@ urlpatterns = [
     path('', include('csvs.urls')),
     path('', include('tasks.urls')),
     path('', include('tasks.urls')),
-    # path('', include('jtls.urls')),
     path('', include('reports.urls')),
-    path('login', obtain_jwt_token)
+    path('login', obtain_jwt_token),
+    path('', include('users.urls'))
 ]

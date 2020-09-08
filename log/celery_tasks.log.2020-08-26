@@ -1,0 +1,31 @@
+[INFO][2020-08-27 09:51:48,043][autoreload.py:598]Watching for file changes with StatReloader
+[DEBUG][2020-08-27 09:51:53,545][selector_events.py:53]Using selector: KqueueSelector
+[INFO][2020-08-27 09:52:30,860][autoreload.py:222]/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py changed, reloading.
+[DEBUG][2020-08-27 09:52:30,862][selector_events.py:53]Using selector: KqueueSelector
+[INFO][2020-08-27 09:52:32,532][autoreload.py:598]Watching for file changes with StatReloader
+[DEBUG][2020-08-27 09:52:35,408][selector_events.py:53]Using selector: KqueueSelector
+[INFO][2020-08-27 09:53:00,069][views.py:81]创建临时目录performance_files/temp/47Zfod0cOoJ5eGn3pQaTOo332jqYoQ1598493180
+[WARNING][2020-08-27 09:53:01,099][log.py:235]{'id': 8, 'jmx': 'performance_files/jmx/test-1597299359022.jmx'}
+[WARNING][2020-08-27 09:53:01,106][log.py:235]{'id': 9, 'jmx': 'performance_files/jmx/test-1597299607336.jmx'}
+[WARNING][2020-08-27 09:53:38,906][log.py:228]Not Found: /uploadjmx
+[WARNING][2020-08-27 09:53:54,155][log.py:235][DEBUG][2020-08-27 09:53:54,155][Tools.py:159]读取文件：performance_files/temp/47Zfod0cOoJ5eGn3pQaTOo332jqYoQ1598493180/temp.csv
+[DEBUG][2020-08-27 09:53:54,155][Tools.py:159]读取文件：performance_files/temp/47Zfod0cOoJ5eGn3pQaTOo332jqYoQ1598493180/temp.csv
+[WARNING][2020-08-27 09:53:54,171][log.py:235][INFO][2020-08-27 09:53:54,170][trace.py:125]Task tasks.tasks.run_task[6431a5e3-12de-461f-9d64-a1e922bf1fd8] succeeded in 53.151212855999994s: None
+[INFO][2020-08-27 09:53:54,170][trace.py:125]Task tasks.tasks.run_task[6431a5e3-12de-461f-9d64-a1e922bf1fd8] succeeded in 53.151212855999994s: None
+[DEBUG][2020-08-27 09:54:17,505][selector_events.py:53]Using selector: KqueueSelector
+[INFO][2020-08-27 09:54:23,919][views.py:81]创建临时目录performance_files/temp/1rV4GBUmWd9jxwVE1jUCYzoX5wRua41598493263
+[WARNING][2020-08-27 09:54:24,070][log.py:235]{'id': 8, 'jmx': 'performance_files/jmx/test-1597299359022.jmx'}
+[WARNING][2020-08-27 09:54:24,071][log.py:235]{'id': 9, 'jmx': 'performance_files/jmx/test-1597299607336.jmx'}
+[WARNING][2020-08-27 09:55:01,110][log.py:228]Not Found: /uploadjmx
+[INFO][2020-08-27 09:55:24,244][autoreload.py:222]/Users/chenlei/python-project/jmeter_platform/apps/tasks/views.py changed, reloading.
+[DEBUG][2020-08-27 09:55:24,246][selector_events.py:53]Using selector: KqueueSelector
+[INFO][2020-08-27 09:55:26,031][autoreload.py:598]Watching for file changes with StatReloader
+[DEBUG][2020-08-27 09:55:30,435][selector_events.py:53]Using selector: KqueueSelector
+[INFO][2020-08-27 09:55:45,079][views.py:83]创建临时目录performance_files/temp/xcDokPX5G7B2r6CCnrulb2bvLxX4ay1598493345
+[WARNING][2020-08-27 09:55:46,276][log.py:235]{'id': 8, 'jmx': 'performance_files/jmx/test-1597299359022.jmx'}
+[WARNING][2020-08-27 09:55:46,281][log.py:235]{'id': 9, 'jmx': 'performance_files/jmx/test-1597299607336.jmx'}
+[DEBUG][2020-08-27 09:56:22,645][selector_events.py:53]Using selector: KqueueSelector
+[WARNING][2020-08-27 09:56:40,707][log.py:235][DEBUG][2020-08-27 09:56:40,707][Tools.py:159]读取文件：performance_files/temp/xcDokPX5G7B2r6CCnrulb2bvLxX4ay1598493345/temp.csv
+[DEBUG][2020-08-27 09:56:40,707][Tools.py:159]读取文件：performance_files/temp/xcDokPX5G7B2r6CCnrulb2bvLxX4ay1598493345/temp.csv
+[WARNING][2020-08-27 09:56:40,724][log.py:235][INFO][2020-08-27 09:56:40,722][trace.py:125]Task tasks.tasks.run_task[f393f95c-51d9-45e3-b18f-8dc8dc8f9cff] succeeded in 54.513431151999995s: None
+[INFO][2020-08-27 09:56:40,722][trace.py:125]Task tasks.tasks.run_task[f393f95c-51d9-45e3-b18f-8dc8dc8f9cff] succeeded in 54.513431151999995s: None

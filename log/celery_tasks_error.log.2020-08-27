@@ -1,0 +1,49 @@
+[2020-08-27 12:40:30,887][MainThread:4721282496][task_id:celery_task][tasks.py:104][ERROR][执行流水任务异常]
+Traceback (most recent call last):
+  File "/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py", line 48, in run_task
+    raise Exception('执行jmx的命令信息为空')
+Exception: 执行jmx的命令信息为空
+[2020-08-27 13:41:27,697][MainThread:4515515840][task_id:celery_task][tasks.py:109][ERROR][执行流水任务异常]
+Traceback (most recent call last):
+  File "/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py", line 52, in run_task
+    a / 0
+ZeroDivisionError: division by zero
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py", line 54, in run_task
+    raise Exception(e)
+Exception: division by zero
+[2020-08-27 13:44:08,794][MainThread:4646436288][task_id:celery_task][tasks.py:54][ERROR][division by zero]
+[2020-08-27 13:44:08,797][MainThread:4646436288][task_id:celery_task][tasks.py:110][ERROR][执行流水任务异常]
+Traceback (most recent call last):
+  File "/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py", line 52, in run_task
+    a / 0
+ZeroDivisionError: division by zero
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py", line 55, in run_task
+    raise Exception(e)
+Exception: division by zero
+[2020-08-27 13:44:50,515][MainThread:4646436288][task_id:celery_task][tasks.py:54][ERROR][division by zero]
+[2020-08-27 13:44:50,524][MainThread:4646436288][task_id:celery_task][tasks.py:110][ERROR][执行流水任务异常]
+Traceback (most recent call last):
+  File "/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py", line 52, in run_task
+    a / 0
+ZeroDivisionError: division by zero
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py", line 55, in run_task
+    raise Exception(e)
+Exception: division by zero
+[2020-08-27 13:49:38,342][MainThread:4613987776][task_id:celery_task][tasks.py:54][ERROR][不能为0]
+[2020-08-27 13:49:38,352][MainThread:4613987776][task_id:celery_task][tasks.py:110][ERROR][执行流水任务异常]
+Traceback (most recent call last):
+  File "/Users/chenlei/python-project/jmeter_platform/apps/tasks/tasks.py", line 52, in run_task
+    a / 0
+ZeroDivisionError: division by zero

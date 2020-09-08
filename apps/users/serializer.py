@@ -13,6 +13,19 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username', 'id']
 
 
+class CreateUserSerializer(serializers.ModelSerializer):
+
+    # #密码加密保存
+    def create(self, validated_data):
+        user = super(CreateUserSerializer, self).create(validated_data=validated_data)
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
+
+    class Meta:
+        model = UserProfile
+        fields = ['name', 'username', 'password']
+
 
 
 

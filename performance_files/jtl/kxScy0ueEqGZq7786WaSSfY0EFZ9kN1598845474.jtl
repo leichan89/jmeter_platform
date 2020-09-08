@@ -1,0 +1,12 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1598845491406,187,我是百度1号,200,OK,线程组 1-1,text,true,,2559,149,2,2,https://www.baidu.com,187,0,145
+1598845492409,185,我是百度1号,200,OK,线程组 1-2,text,true,,2559,149,2,2,https://www.baidu.com,185,0,141
+1598845493411,166,我是百度1号,200,OK,线程组 1-3,text,true,,2559,149,2,2,https://www.baidu.com,166,0,126
+1598845494410,169,我是百度1号,200,OK,线程组 1-4,text,true,,2559,149,2,2,https://www.baidu.com,169,0,128
+1598845495405,164,我是百度1号,200,OK,线程组 1-5,text,true,,2559,149,2,2,https://www.baidu.com,164,0,124
+1598845496408,197,我是百度1号,200,OK,线程组 1-6,text,true,,2559,149,2,2,https://www.baidu.com,197,0,147
+1598845497409,178,我是百度1号,200,OK,线程组 1-7,text,true,,2559,149,2,2,https://www.baidu.com,178,0,136
+1598845498407,180,我是百度1号,200,OK,线程组 1-8,text,true,,2559,149,2,2,https://www.baidu.com,180,0,139
+1598845499402,190,我是百度1号,200,OK,线程组 1-9,text,true,,2559,149,2,2,https://www.baidu.com,190,0,132
+1598845500405,169,我是百度1号,200,OK,线程组 1-10,text,true,,2559,149,1,1,https://www.baidu.com,169,0,130
+1598845512850,52,我是百度2号,404,Not Found,线程组 1-1,text,false,,5401,191,1,1,http://127.0.0.1:8000/uploadjmx,51,0,28

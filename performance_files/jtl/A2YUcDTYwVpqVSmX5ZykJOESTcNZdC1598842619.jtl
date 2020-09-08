@@ -1,0 +1,24 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1598842635691,218,百度,200,OK,线程组 1-1,text,true,,2559,149,2,2,https://www.baidu.com,218,0,163
+1598842635691,218,百度,200,OK,线程组 1-1,text,true,,2559,149,2,2,https://www.baidu.com,218,0,163
+1598842636690,250,百度,200,OK,线程组 1-2,text,true,,2559,149,2,2,https://www.baidu.com,250,0,200
+1598842636690,250,百度,200,OK,线程组 1-2,text,true,,2559,149,2,2,https://www.baidu.com,250,0,200
+1598842637694,735,百度,200,OK,线程组 1-3,text,true,,2559,149,2,2,https://www.baidu.com,735,0,663
+1598842637694,735,百度,200,OK,线程组 1-3,text,true,,2559,149,2,2,https://www.baidu.com,735,0,663
+1598842638694,241,百度,200,OK,线程组 1-4,text,true,,2559,149,2,2,https://www.baidu.com,241,0,184
+1598842638694,241,百度,200,OK,线程组 1-4,text,true,,2559,149,2,2,https://www.baidu.com,241,0,184
+1598842639691,249,百度,200,OK,线程组 1-5,text,true,,2559,149,2,2,https://www.baidu.com,248,0,194
+1598842639691,249,百度,200,OK,线程组 1-5,text,true,,2559,149,2,2,https://www.baidu.com,248,0,194
+1598842640689,207,百度,200,OK,线程组 1-6,text,true,,2559,149,2,2,https://www.baidu.com,207,0,141
+1598842640689,207,百度,200,OK,线程组 1-6,text,true,,2559,149,2,2,https://www.baidu.com,207,0,141
+1598842641688,214,百度,200,OK,线程组 1-7,text,true,,2559,149,2,2,https://www.baidu.com,214,0,159
+1598842641688,214,百度,200,OK,线程组 1-7,text,true,,2559,149,2,2,https://www.baidu.com,214,0,159
+1598842643689,239,百度,200,OK,线程组 1-9,text,true,,2559,149,3,3,https://www.baidu.com,239,0,178
+1598842643689,239,百度,200,OK,线程组 1-9,text,true,,2559,149,3,3,https://www.baidu.com,239,0,178
+1598842642689,1402,百度,200,OK,线程组 1-8,text,true,,2559,149,2,2,https://www.baidu.com,1402,0,1350
+1598842642689,1402,百度,200,OK,线程组 1-8,text,true,,2559,149,2,2,https://www.baidu.com,1402,0,1350
+1598842644690,332,百度,200,OK,线程组 1-10,text,true,,2559,149,1,1,https://www.baidu.com,332,0,283
+1598842644690,332,百度,200,OK,线程组 1-10,text,true,,2559,149,1,1,https://www.baidu.com,332,0,283
+1598842658771,88,百度,404,Not Found,线程组 1-1,text,false,,5401,191,1,1,http://127.0.0.1:8000/uploadjmx,88,0,50
+1598842658771,88,百度,404,Not Found,线程组 1-1,text,false,,5401,191,1,1,http://127.0.0.1:8000/uploadjmx,88,0,50

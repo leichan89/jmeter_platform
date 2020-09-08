@@ -287,13 +287,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ),
     #  处理没有被捕获的异常
-    'EXCEPTION_HANDLER': 'users.exception.exception_handler',
+    'EXCEPTION_HANDLER': 'jmeter_platform.exception.exception_handler',
 }
 
 JWT_AUTH = {
     # 过期时间
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
-    # header的token字符串前缀
+    # header的token字符串前缀，默认貌似就是JWT
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
     # 自定义认证结果：见下方序列化user和自定义response
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.views.jwt_response_payload_handler',
