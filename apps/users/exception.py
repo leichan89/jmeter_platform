@@ -30,7 +30,7 @@ def exception_handler(exc, context):
         return Response({'code': 500, 'msg': '服务内部异常！'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     response.data = {
-        'code': 400,
+        'code': response.status_code,
         'msg': response.data['detail']
     }
     return response
