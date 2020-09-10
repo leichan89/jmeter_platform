@@ -8,11 +8,21 @@ from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, Jm
 from .models import Jmxs
 from rest_framework import status
 from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
 import json
 import os
 import logging
 
 logger = logging.getLogger(__file__)
+
+class JmxsPagination(PageNumberPagination):
+    """
+    自定义分页
+    """
+    # 每页数量
+    page_size_query_param = 'size'
+    # 第几页
+    page_query_param = 'num'
 
 class JmxUpload(APIView):
     """
@@ -90,6 +100,7 @@ class JmxListView(generics.ListAPIView):
     """
     查询jmx文件
     """
+    pagination_class = JmxsPagination
     queryset = Jmxs.objects.all()
     serializer_class = JmxListSerializer
 

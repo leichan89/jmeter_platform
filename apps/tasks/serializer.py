@@ -5,6 +5,7 @@
 
 from rest_framework import serializers
 from .models import Tasks, TasksDetails, FlowTaskAggregateReport
+from users.serializer import UserSerializer
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -25,6 +26,15 @@ class FlowTaskAggregateReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = FlowTaskAggregateReport
         exclude = ['id', 'task', 'flow']
+
+
+class TasksListSerializer(serializers.ModelSerializer):
+
+    add_user = UserSerializer()
+
+    class Meta:
+        model = Tasks
+        fields = "__all__"
 
 
 

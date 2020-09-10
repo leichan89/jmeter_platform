@@ -1,6 +1,6 @@
 from rest_framework.exceptions import UnsupportedMediaType
 
-from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer
+from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer, TasksListSerializer
 from .models import Tasks, TaskFlow, FlowTaskAggregateReport
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -10,9 +10,27 @@ from common.Tools import Tools
 from .tasks import run_task, kill_task
 from rest_framework import status
 from common.APIResponse import APIRsp
+from rest_framework.pagination import PageNumberPagination
 import logging
 
 logger = logging.getLogger(__file__)
+
+class TasksPagition(PageNumberPagination):
+    page_size_query_param = 'size'
+    page_query_param = 'num'
+
+class TasksList(generics.ListAPIView):
+    queryset = Tasks.objects.all()
+    serializer_class = TasksListSerializer
+    pagination_class = TasksPagition
+
+    def get(self, request, *args, **kwargs):
+        rsp_data = self.list(request, *args, **kwargs)
+        if rsp_data.status_code == 200:
+            return APIRsp(data=rsp_data.data)
+        else:
+            return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)
+
 
 class CreateTask(generics.CreateAPIView):
     """

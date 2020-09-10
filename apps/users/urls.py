@@ -8,6 +8,7 @@ from django.urls import path
 
 urlpatterns = [
     path('users/create', views.CreateUser.as_view()),
+    path('menus', views.MenuList.as_view()),
 ]
 
 

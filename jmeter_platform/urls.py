@@ -20,8 +20,6 @@ from rest_framework_jwt.views import obtain_jwt_token
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('jmxs.urls')),
-    path('', include('csvs.urls')),
-    path('', include('tasks.urls')),
     path('', include('tasks.urls')),
     path('', include('reports.urls')),
     path('login', obtain_jwt_token),

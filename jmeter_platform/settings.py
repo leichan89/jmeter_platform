@@ -286,8 +286,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
-    #  处理没有被捕获的异常
+    #  处理drf没有被捕获的异常
     'EXCEPTION_HANDLER': 'jmeter_platform.exception.exception_handler',
+    # 分页
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 每页显示的个数
+    'PAGE_SIZE': '10',
 }
 
 JWT_AUTH = {
