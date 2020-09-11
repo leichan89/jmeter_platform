@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="baa3b33b-cc4d-4cd8-acab-067d87818d58" name="Default Changelist" comment="">
+    <list default="true" id="baa3b33b-cc4d-4cd8-acab-067d87818d58" name="Default Changelist" comment="新增增删改sampler">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/jmxs/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/jmxs/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/tasks/serializer.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/tasks/serializer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/tasks/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/tasks/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/tasks/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/tasks/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/users/serializer.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/users/serializer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/users/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/users/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/users/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jmeter_platform/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/jmeter_platform/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jmeter_platform/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/jmeter_platform/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Operate.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/Operate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/performance_files/jmx/sss-1599807227098.jmx" beforeDir="false" afterPath="$PROJECT_DIR$/performance_files/jmx/sss-1599807227098.jmx" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,105 +19,74 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/jmxs/serializer.py">
+        <entry file="file://$PROJECT_DIR$/apps/jmxs/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="22" column="31" lean-forward="true" selection-start-line="22" selection-start-column="31" selection-end-line="22" selection-end-column="31" />
+            <state relative-caret-position="194">
+              <caret line="133" column="23" selection-start-line="133" selection-start-column="23" selection-end-line="133" selection-end-column="23" />
+              <folding>
+                <element signature="e#0#37#0" expanded="true" />
+                <element signature="e#737#3276#0" />
+                <element signature="e#737#825#1" />
+                <element signature="e#6231#8402#0" />
+                <element signature="e#8309#8699#0" />
+                <element signature="e#3323#3757#0" />
+                <element signature="e#3804#4682#0" />
+                <element signature="e#4732#5070#0" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/jmxs/urls.py">
+        <entry file="file://$PROJECT_DIR$/common/APIResponse.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="165">
-              <caret line="12" column="28" selection-start-line="12" selection-start-column="28" selection-end-line="12" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/tasks/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" column="118" selection-start-line="2" selection-start-column="118" selection-end-line="2" selection-end-column="118" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/tasks/serializer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="540">
-              <caret line="36" column="25" selection-start-line="36" selection-start-column="25" selection-end-line="36" selection-end-column="25" />
+              <caret line="11" column="8" selection-start-line="11" selection-start-column="8" selection-end-line="11" selection-end-column="8" />
               <folding>
-                <element signature="e#103#141#0" expanded="true" />
+                <element signature="e#104#148#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/jmeter_platform/urls.py">
+        <entry file="file://$PROJECT_DIR$/common/Tools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="21" column="35" selection-start-line="21" selection-start-column="35" selection-end-line="21" selection-end-column="35" />
+            <state relative-caret-position="727">
+              <caret line="63" column="41" selection-start-line="63" selection-start-column="41" selection-end-line="63" selection-end-column="41" />
               <folding>
-                <element signature="e#639#671#0" expanded="true" />
+                <element signature="e#98#109#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/tasks/tasks.py">
+        <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/rest_framework/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1077">
-              <caret line="82" column="56" selection-start-line="82" selection-start-column="56" selection-end-line="82" selection-end-column="56" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/tasks/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-137">
-              <caret line="11" column="12" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="12" />
-              <folding>
-                <element signature="e#0#28#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="751">
+              <caret line="501" selection-start-line="501" selection-end-line="501" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/test.py">
+        <entry file="file://$PROJECT_DIR$/common/Operate.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="297">
-              <caret line="2135" column="70" selection-start-line="2135" selection-start-column="70" selection-end-line="2135" selection-end-column="70" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/tasks/urls.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="29" lean-forward="true" selection-start-line="9" selection-start-column="29" selection-end-line="9" selection-end-column="29" />
+            <state relative-caret-position="315">
+              <caret line="176" column="92" selection-start-line="176" selection-start-column="92" selection-end-line="176" selection-end-column="92" />
               <folding>
-                <element signature="e#97#120#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/reports/urls.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="51" selection-start-line="9" selection-start-column="51" selection-end-line="9" selection-end-column="51" />
-              <folding>
-                <element signature="e#97#125#0" expanded="true" />
+                <element signature="e#100#122#0" expanded="true" />
+                <element signature="e#6227#8161#0" />
+                <element signature="e#8232#9688#0" />
+                <element signature="e#14093#15811#0" />
+                <element signature="e#15856#17571#0" />
+                <element signature="e#19805#22144#0" />
+                <element signature="e#22249#26083#0" />
+                <element signature="e#26632#27074#0" />
+                <element signature="e#27143#28624#0" />
+                <element signature="e#28204#29860#0" />
+                <element signature="e#29911#31307#0" />
               </folding>
             </state>
           </provider>
@@ -141,9 +103,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>tag</find>
-      <find>//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[4]/elementProp/collectionProp/elementProp[1]/stringProp</find>
-      <find>samplers_params</find>
       <find>sampler_info</find>
       <find>Text</find>
       <find>未找到</find>
@@ -171,6 +130,9 @@
       <find>UserProfile</find>
       <find>DoesNotExist</find>
       <find>UserSerializer</find>
+      <find>JmxThreadGroupChildren</find>
+      <find>jmx</find>
+      <find>add_sampler</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -179,7 +141,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/apps/tasks_details/serializer.py" />
         <option value="$PROJECT_DIR$/apps/tasks_details/views.py" />
         <option value="$PROJECT_DIR$/apps/jmxs/tasks.py" />
         <option value="$PROJECT_DIR$/apps/csvs/urls.py" />
@@ -192,16 +153,13 @@
         <option value="$PROJECT_DIR$/apps/csvs/models.py" />
         <option value="$PROJECT_DIR$/apps/reports/models.py" />
         <option value="$PROJECT_DIR$/apps/reports/urls.py" />
-        <option value="$PROJECT_DIR$/common/APIResponse.py" />
         <option value="$PROJECT_DIR$/apps/reports/views.py" />
         <option value="$PROJECT_DIR$/apps/csvs/views.py" />
         <option value="$PROJECT_DIR$/apps/jtls/urls.py" />
         <option value="$PROJECT_DIR$/apps/jtls/views.py" />
-        <option value="$PROJECT_DIR$/apps/jmxs/urls.py" />
         <option value="$PROJECT_DIR$/log/jmeter_platform_collect.log" />
         <option value="$PROJECT_DIR$/apps/jtls/models.py" />
         <option value="$PROJECT_DIR$/apps/jtls/serializer.py" />
-        <option value="$PROJECT_DIR$/log/jmeter_platform_err.log" />
         <option value="$PROJECT_DIR$/log/celery_tasks_error.log" />
         <option value="$PROJECT_DIR$/log/celery_tasks.log" />
         <option value="$PROJECT_DIR$/TODO" />
@@ -209,32 +167,36 @@
         <option value="$PROJECT_DIR$/apps/reports/tasks.py" />
         <option value="$PROJECT_DIR$/apps/params/models.py" />
         <option value="$PROJECT_DIR$/common/operate.py" />
-        <option value="$PROJECT_DIR$/apps/jmxs/models.py" />
-        <option value="$PROJECT_DIR$/apps/jmxs/serializer.py" />
         <option value="$PROJECT_DIR$/apps/tasks/models.py" />
-        <option value="$PROJECT_DIR$/common/Operate.py" />
         <option value="$PROJECT_DIR$/common/Tools.py" />
         <option value="$PROJECT_DIR$/apps/tasks/tasks.py" />
         <option value="$PROJECT_DIR$/apps/users/middleware.py" />
         <option value="$PROJECT_DIR$/apps/users/utils.py" />
         <option value="$PROJECT_DIR$/apps/users/exception.py" />
         <option value="$PROJECT_DIR$/apps/users/models.py" />
-        <option value="$PROJECT_DIR$/jmeter_platform/exception.py" />
         <option value="$PROJECT_DIR$/apps/users/urls.py" />
         <option value="$PROJECT_DIR$/jmeter_platform/settings.py" />
-        <option value="$PROJECT_DIR$/apps/jmxs/views.py" />
-        <option value="$PROJECT_DIR$/apps/users/views.py" />
         <option value="$PROJECT_DIR$/apps/users/serializer.py" />
-        <option value="$PROJECT_DIR$/apps/tasks/urls.py" />
+        <option value="$PROJECT_DIR$/jmeter_platform/urls.py" />
         <option value="$PROJECT_DIR$/apps/tasks/views.py" />
         <option value="$PROJECT_DIR$/apps/tasks/serializer.py" />
-        <option value="$PROJECT_DIR$/jmeter_platform/urls.py" />
+        <option value="$PROJECT_DIR$/jmeter_platform/exception.py" />
+        <option value="$PROJECT_DIR$/apps/users/views.py" />
+        <option value="$PROJECT_DIR$/apps/jmxs/models.py" />
+        <option value="$PROJECT_DIR$/apps/tasks/urls.py" />
+        <option value="$PROJECT_DIR$/log/jmeter_platform_err.log" />
+        <option value="$PROJECT_DIR$/common/APIResponse.py" />
+        <option value="$PROJECT_DIR$/apps/jmxs/serializer.py" />
+        <option value="$PROJECT_DIR$/common/CommonAPIView.py" />
+        <option value="$PROJECT_DIR$/apps/jmxs/urls.py" />
         <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/apps/jmxs/views.py" />
+        <option value="$PROJECT_DIR$/common/Operate.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-35" />
+    <option name="x" value="413" />
     <option name="y" value="23" />
     <option name="width" value="1404" />
     <option name="height" value="877" />
@@ -261,36 +223,23 @@
             <path>
               <item name="jmeter_platform" type="b2602c69:ProjectViewProjectNode" />
               <item name="jmeter_platform" type="462c0819:PsiDirectoryNode" />
-              <item name="apps" type="462c0819:PsiDirectoryNode" />
-              <item name="jmxs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="jmeter_platform" type="b2602c69:ProjectViewProjectNode" />
-              <item name="jmeter_platform" type="462c0819:PsiDirectoryNode" />
-              <item name="apps" type="462c0819:PsiDirectoryNode" />
-              <item name="jtls" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="jmeter_platform" type="b2602c69:ProjectViewProjectNode" />
-              <item name="jmeter_platform" type="462c0819:PsiDirectoryNode" />
-              <item name="apps" type="462c0819:PsiDirectoryNode" />
-              <item name="reports" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="jmeter_platform" type="b2602c69:ProjectViewProjectNode" />
-              <item name="jmeter_platform" type="462c0819:PsiDirectoryNode" />
-              <item name="apps" type="462c0819:PsiDirectoryNode" />
-              <item name="tasks" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="jmeter_platform" type="b2602c69:ProjectViewProjectNode" />
-              <item name="jmeter_platform" type="462c0819:PsiDirectoryNode" />
               <item name="common" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="jmeter_platform" type="b2602c69:ProjectViewProjectNode" />
               <item name="jmeter_platform" type="462c0819:PsiDirectoryNode" />
+              <item name="log" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="jmeter_platform" type="b2602c69:ProjectViewProjectNode" />
               <item name="jmeter_platform" type="462c0819:PsiDirectoryNode" />
+              <item name="performance_files" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="jmeter_platform" type="b2602c69:ProjectViewProjectNode" />
+              <item name="jmeter_platform" type="462c0819:PsiDirectoryNode" />
+              <item name="performance_files" type="462c0819:PsiDirectoryNode" />
+              <item name="jmx" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -334,7 +283,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.test">
+  <component name="RunManager" selected="Python.Operate">
     <configuration name="Operate" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="jmeter_platform" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -502,8 +451,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.test" />
         <item itemvalue="Python.Operate" />
+        <item itemvalue="Python.test" />
         <item itemvalue="Python.Tools" />
         <item itemvalue="Python.tasks" />
         <item itemvalue="Python.test (1)" />
@@ -587,7 +536,7 @@
       <workItem from="1599558173184" duration="4421000" />
       <workItem from="1599616578357" duration="2607000" />
       <workItem from="1599630929577" duration="167000" />
-      <workItem from="1599637079974" duration="8031000" />
+      <workItem from="1599637079974" duration="30022000" />
     </task>
     <task id="LOCAL-00001" summary="屏蔽idea">
       <created>1596445623895</created>
@@ -862,11 +811,25 @@
       <option name="project" value="LOCAL" />
       <updated>1599562824233</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="新增分页">
+      <created>1599705475024</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1599705475025</updated>
+    </task>
+    <task id="LOCAL-00041" summary="新增增删改sampler">
+      <created>1599818435731</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1599818435733</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="377545000" />
+    <option name="totallyTimeSpent" value="399536000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -879,14 +842,15 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1404" height="877" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21218796" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23641704" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49742836" visible="true" weight="0.27133757" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.52866244" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49742836" weight="0.39745224" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.40127388" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49963263" weight="0.46751592" />
@@ -894,7 +858,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.3299363" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50257164" side_tool="true" weight="0.5210191" />
-      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4981631" weight="0.733758" />
+      <window_info anchor="bottom" id="Terminal" order="11" sideWeight="0.4981631" weight="0.39490446" />
       <window_info anchor="bottom" id="Python Console" order="12" sideWeight="0.49963263" weight="0.3299363" />
       <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" weight="0.3299363" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -935,8 +899,6 @@
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.log" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="完善接口" />
-    <MESSAGE value="添加单个jmx的查询接口" />
     <MESSAGE value="优化单接口查询" />
     <MESSAGE value="添加执行jmx文件接口" />
     <MESSAGE value="配置celery和flower" />
@@ -960,7 +922,9 @@
     <MESSAGE value="优化任务逻辑" />
     <MESSAGE value="处理获取token的异常" />
     <MESSAGE value="加密新用户密码" />
-    <option name="LAST_COMMIT_MESSAGE" value="加密新用户密码" />
+    <MESSAGE value="新增分页" />
+    <MESSAGE value="新增增删改sampler" />
+    <option name="LAST_COMMIT_MESSAGE" value="新增增删改sampler" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>
@@ -970,163 +934,16 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/jmeter_platform$Operate.coverage" NAME="Operate Coverage Results" MODIFIED="1599114524191" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/common" />
+    <SUITE FILE_PATH="coverage/jmeter_platform$Operate.coverage" NAME="Operate Coverage Results" MODIFIED="1599821249912" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/common" />
     <SUITE FILE_PATH="coverage/jmeter_platform$tasks.coverage" NAME="tasks Coverage Results" MODIFIED="1597918547607" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/tasks" />
-    <SUITE FILE_PATH="coverage/jmeter_platform$test.coverage" NAME="test Coverage Results" MODIFIED="1599651456992" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/jmeter_platform$test.coverage" NAME="test Coverage Results" MODIFIED="1599817485682" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/jmeter_platform$views.coverage" NAME="views Coverage Results" MODIFIED="1597391794966" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/jmxs" />
     <SUITE FILE_PATH="coverage/jmeter_platform$Tools.coverage" NAME="Tools Coverage Results" MODIFIED="1599016232857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/common" />
     <SUITE FILE_PATH="coverage/jmeter_platform$test__1_.coverage" NAME="test (1) Coverage Results" MODIFIED="1597825873345" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/mytest" />
     <SUITE FILE_PATH="coverage/jmeter_platform$0001_initial.coverage" NAME="0001_initial Coverage Results" MODIFIED="1596443972606" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps/jcsvs/migrations" />
-    <SUITE FILE_PATH="coverage/jmeter_platform$runserver.coverage" NAME="runserver Coverage Results" MODIFIED="1599637737179" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/jmeter_platform$runserver.coverage" NAME="runserver Coverage Results" MODIFIED="1599818056938" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2019.1/python_stubs/-748947588/lxml/etree/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="553" column="4" selection-start-line="553" selection-start-column="4" selection-end-line="553" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/log/jmeter_platform_err.log">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-682" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/TODO">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="30" selection-start-line="4" selection-start-column="30" selection-end-line="4" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/reports/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/tasks/tasks.py.bak">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1500">
-          <caret line="107" column="26" selection-start-line="107" selection-start-column="26" selection-end-line="107" selection-end-column="26" />
-          <folding>
-            <element signature="e#97#106#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/reports/tasks.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="645">
-          <caret line="43" selection-start-line="43" selection-end-line="43" />
-          <folding>
-            <element signature="e#97#106#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/Tools.py.bak">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/params/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="20" column="46" selection-start-line="20" selection-start-column="46" selection-end-line="20" selection-end-column="46" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/rest_framework/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="168" column="8" selection-start-line="168" selection-start-column="8" selection-end-line="168" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/json/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="298" column="4" selection-start-line="298" selection-start-column="4" selection-end-line="298" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2019.1/python_stubs/-748947588/lxml/etree/_Element.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
-          <caret line="379" column="8" selection-start-line="379" selection-start-column="8" selection-end-line="379" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2019.1/python_stubs/-748947588/lxml/etree/_ElementTree.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="265" column="8" selection-start-line="265" selection-start-column="8" selection-end-line="265" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/nntplib.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="129">
-          <caret line="852" column="8" selection-start-line="852" selection-start-column="8" selection-end-line="852" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/jtls/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="6" selection-start-line="5" selection-start-column="6" selection-end-line="5" selection-end-column="6" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/Operate.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-845">
-          <caret line="180" column="42" selection-start-line="180" selection-start-column="42" selection-end-line="180" selection-end-column="42" />
-          <folding>
-            <element signature="e#100#122#0" expanded="true" />
-            <element signature="e#8323#8504#0" />
-            <element signature="e#8548#8655#0" />
-            <element signature="e#8552#8778#0" />
-            <element signature="e#8839#9126#0" />
-            <element signature="e#9170#9461#0" />
-            <element signature="e#9536#10152#0" />
-            <element signature="e#10243#10910#0" />
-            <element signature="e#11001#11722#0" />
-            <element signature="e#11759#12027#0" />
-            <element signature="e#16505#20318#0" />
-            <element signature="e#20392#20834#0" />
-            <element signature="e#20903#22384#0" />
-            <element signature="e#19503#21159#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/Tools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="63" column="41" selection-start-line="63" selection-start-column="41" selection-end-line="63" selection-end-column="41" />
-          <folding>
-            <element signature="e#98#109#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" selection-start-line="7" selection-end-line="7" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/users/middleware.py" />
     <entry file="file://$PROJECT_DIR$/apps/users/utils.py" />
     <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/rest_framework_jwt/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -1207,60 +1024,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/jmeter_platform/exception.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="371">
-          <caret line="36" column="11" lean-forward="true" selection-start-line="36" selection-start-column="11" selection-end-line="36" selection-end-column="11" />
-          <folding>
-            <element signature="e#103#147#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/APIResponse.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="8" selection-start-line="11" selection-start-column="8" selection-end-line="11" selection-end-column="8" />
-          <folding>
-            <element signature="e#104#148#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/users/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="3" column="6" selection-start-line="3" selection-start-column="6" selection-end-line="3" selection-end-column="6" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/users/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="58" column="44" selection-start-line="58" selection-start-column="44" selection-end-line="58" selection-end-column="44" />
-          <folding>
-            <element signature="e#0#53#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/users/serializer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="12" column="23" selection-start-line="12" selection-start-column="23" selection-end-line="12" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/jmxs/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="12" column="28" selection-start-line="12" selection-start-column="28" selection-end-line="12" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/apps/users/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
@@ -1271,74 +1034,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/jmeter_platform/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="288" column="12" selection-start-line="288" selection-start-column="12" selection-end-line="288" selection-end-column="12" />
-          <folding>
-            <element signature="e#316#325#0" expanded="true" />
-            <element signature="e#3965#7429#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/jmxs/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="21" column="10" lean-forward="true" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-            <element signature="e#522#3061#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/jmxs/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/tasks/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="118" selection-start-line="2" selection-start-column="118" selection-end-line="2" selection-end-column="118" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/jmxs/serializer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="22" column="31" lean-forward="true" selection-start-line="22" selection-start-column="31" selection-end-line="22" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/tasks/serializer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="36" column="25" selection-start-line="36" selection-start-column="25" selection-end-line="36" selection-end-column="25" />
-          <folding>
-            <element signature="e#103#141#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/apps/jtls/views.py">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/tasks/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="29" lean-forward="true" selection-start-line="9" selection-start-column="29" selection-end-line="9" selection-end-column="29" />
-          <folding>
-            <element signature="e#97#120#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/apps/reports/views.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -1370,27 +1067,282 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/apps/tasks/tasks.py">
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/django/views/generic/base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1077">
-          <caret line="82" column="56" selection-start-line="82" selection-start-column="56" selection-end-line="82" selection-end-column="56" />
+        <state relative-caret-position="149">
+          <caret line="70" selection-start-line="70" selection-end-line="70" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/apps/tasks/models.py">
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/django/views/decorators/csrf.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-137">
-          <caret line="11" column="12" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="12" />
+        <state relative-caret-position="312">
+          <caret line="53" selection-start-line="53" selection-end-line="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/django/core/handlers/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="149">
+          <caret line="112" selection-start-line="112" selection-end-line="112" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/django/utils/deprecation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="297">
+          <caret line="93" selection-start-line="93" selection-end-line="93" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/users/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="6" selection-start-line="3" selection-start-column="6" selection-end-line="3" selection-end-column="6" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/log/celery_tasks.log">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/django/core/handlers/exception.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="33" selection-start-line="33" selection-end-line="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/users/serializer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="8" column="6" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/jmeter_platform/exception.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="33" column="38" selection-start-line="33" selection-start-column="38" selection-end-line="33" selection-end-column="38" />
+          <folding>
+            <element signature="e#103#147#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/tasks/serializer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="727">
+          <caret line="51" column="30" selection-start-line="51" selection-start-column="30" selection-end-line="51" selection-end-column="30" />
+          <folding>
+            <element signature="e#103#141#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/tasks/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="110">
+          <caret line="22" column="6" selection-start-line="22" selection-start-column="6" selection-end-line="22" selection-end-column="6" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/users/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="212">
+          <caret line="84" column="46" lean-forward="true" selection-start-line="84" selection-start-column="46" selection-end-line="84" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/log/jmeter_platform_collect.log">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/tasks/tests.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/shutil.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="245">
+          <caret line="95" column="4" selection-start-line="95" selection-start-column="4" selection-end-line="95" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/tasks/tasks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="403">
+          <caret line="42" column="20" lean-forward="true" selection-start-line="42" selection-start-column="20" selection-end-line="42" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/tasks/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="16" column="50" selection-start-line="16" selection-start-column="50" selection-end-line="16" selection-end-column="50" />
+          <folding>
+            <element signature="e#97#120#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/rest_framework/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="853" column="6" selection-start-line="853" selection-start-column="6" selection-end-line="853" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/jmeter_platform/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="270" selection-start-line="270" selection-end-line="270" />
+          <folding>
+            <element signature="e#316#325#0" expanded="true" />
+            <element signature="e#3965#7429#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/CommonAPIView.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
+          <folding>
+            <element signature="e#107#142#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/jmxs/serializer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="601">
+          <caret line="49" column="25" selection-start-line="49" selection-start-column="25" selection-end-line="49" selection-end-column="25" />
+          <folding>
+            <element signature="e#103#141#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/json/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="298" column="4" selection-start-line="298" selection-start-column="4" selection-end-line="298" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/log/jmeter_platform_info.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8836" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/log/jmeter_platform_err.log">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/jmxs/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="230">
+          <caret line="25" column="20" selection-start-line="25" selection-start-column="6" selection-end-line="25" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/log/celery_tasks_error.log">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/jmxs/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="19" column="57" lean-forward="true" selection-start-line="19" selection-start-column="57" selection-end-line="19" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/tasks/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="439">
+          <caret line="129" column="32" selection-start-line="129" selection-start-column="25" selection-end-line="129" selection-end-column="32" />
+          <folding>
+            <element signature="e#0#58#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="2135" column="70" selection-start-line="2135" selection-start-column="70" selection-end-line="2135" selection-end-column="70" />
+        <state relative-caret-position="190">
+          <caret line="82" column="63" selection-start-line="82" selection-start-column="63" selection-end-line="82" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/lib/python3.7/site-packages/rest_framework/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="751">
+          <caret line="501" selection-start-line="501" selection-end-line="501" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/APIResponse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="8" selection-start-line="11" selection-start-column="8" selection-end-line="11" selection-end-column="8" />
+          <folding>
+            <element signature="e#104#148#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/Tools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="727">
+          <caret line="63" column="41" selection-start-line="63" selection-start-column="41" selection-end-line="63" selection-end-column="41" />
+          <folding>
+            <element signature="e#98#109#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/jmxs/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="194">
+          <caret line="133" column="23" selection-start-line="133" selection-start-column="23" selection-end-line="133" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#37#0" expanded="true" />
+            <element signature="e#737#3276#0" />
+            <element signature="e#737#825#1" />
+            <element signature="e#6231#8402#0" />
+            <element signature="e#8309#8699#0" />
+            <element signature="e#3323#3757#0" />
+            <element signature="e#3804#4682#0" />
+            <element signature="e#4732#5070#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/Operate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="176" column="92" selection-start-line="176" selection-start-column="92" selection-end-line="176" selection-end-column="92" />
+          <folding>
+            <element signature="e#100#122#0" expanded="true" />
+            <element signature="e#6227#8161#0" />
+            <element signature="e#8232#9688#0" />
+            <element signature="e#14093#15811#0" />
+            <element signature="e#15856#17571#0" />
+            <element signature="e#19805#22144#0" />
+            <element signature="e#22249#26083#0" />
+            <element signature="e#26632#27074#0" />
+            <element signature="e#27143#28624#0" />
+            <element signature="e#28204#29860#0" />
+            <element signature="e#29911#31307#0" />
+          </folding>
         </state>
       </provider>
     </entry>

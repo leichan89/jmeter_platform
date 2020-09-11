@@ -110,6 +110,7 @@ class JmxCreate(APIView):
         data = {}
         jmx_name = request.POST.get('jmx_name')
         sampler_name = request.POST.get('sapmpler_name')
+        sampler_headers = request.POST.get('sampler_headers')
         method = request.POST.get('method')
         url = request.POST.get('url')
         param_type = request.POST.get('param_type')
@@ -125,7 +126,7 @@ class JmxCreate(APIView):
 
         shutil.copyfile(template_path, new_jmxpath)
         try:
-            ModifyJMX(new_jmxpath).add_sampler(sampler_name, url, method, param_type=param_type, params=params)
+            ModifyJMX(new_jmxpath).add_sampler(sampler_name, url, method, param_type=param_type, headers=sampler_headers, params=params)
         except:
             os.remove(new_jmxpath)
             return APIRsp(code=400, msg='创建jmx失败，参数错误！', status=status.HTTP_400_BAD_REQUEST)

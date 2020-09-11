@@ -110,6 +110,8 @@ class ReadJmx():
 
             sampler_xpath = f'{sapmler_root_xpath}[{sidx + 1}]'
 
+            headers_xpath = sampler_xpath + '/following-sibling::hashTree[1]/HeaderManager/collectionProp/elementProp'
+
             sampler_url_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.path']"
 
             sampler_method_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.method']"
@@ -163,6 +165,16 @@ class ReadJmx():
                             paramvalue = value.text
                             sampler_info['params'].append({"paramname": paramname, "paramvalue": paramvalue})
             sapmlers_info.append(sampler_info)
+
+            headers_params = tree.xpath(headers_xpath)
+            sampler_info['headers'] = []
+            if headers_params:
+                for hidx, param in enumerate(headers_params):
+                    header_param_name_xpath = f'{headers_xpath}[{hidx + 1}]/stringProp[1]'
+                    header_param_value_xpath = f'{headers_xpath}[{hidx + 1}]/stringProp[2]'
+                    header_param_name = tree.xpath(header_param_name_xpath)[0].text
+                    header_param_value = tree.xpath(header_param_value_xpath)[0].text
+                    sampler_info['headers'].append({'headername': header_param_name, 'headervalue': header_param_value})
 
         return sapmlers_info
 
@@ -471,7 +483,7 @@ class ModifyJMX(OperateJmx):
 
             self.save_change()
 
-    def add_sampler(self, name, url, method, accord='thread', param_type='form', params=None, xpath=None):
+    def add_sampler(self, name, url, method, accord='thread', param_type='form', headers=None, params=None, xpath=None):
         """
         添加取样器，可以在thread或者setup中添加
         :param name: 取样器名称
@@ -511,7 +523,7 @@ class ModifyJMX(OperateJmx):
                           testclass="HTTPSamplerProxy", testname=name, enabled="true")
 
         # 添加hashTree
-        self.add_sub_node(accord_tag, new_tag_name='hashTree')
+        hashTree = self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
         if params:
             if param_type == 'form':
@@ -523,6 +535,8 @@ class ModifyJMX(OperateJmx):
                 raise
 
         self._add_sampler_base(sp, url, method)
+
+        self.add_header(hashTree, headers)
 
         self.save_change()
 
@@ -674,6 +688,20 @@ class ModifyJMX(OperateJmx):
 
         self.save_change()
 
+    def add_header(self, parent_node, headers):
+        """
+        添加请求头信息
+        :param parent_node:
+        :param headers:
+        :return:
+        """
+        header = self.add_sub_node(parent_node, new_tag_name='HeaderManager', guiclass="HeaderPanel", testclass="HeaderManager",
+                          testname="HTTP信息头管理器", enabled="true")
+        collectionProp = self.add_sub_node(header, new_tag_name='collectionProp', name="HeaderManager.headers")
+        if headers and isinstance(headers, dict):
+            for key, value in headers.items():
+                self._add_headers_param(collectionProp, key, value)
+
     def _add_param(self, parent_node, param_name, param_value):
         """
         常规参数
@@ -707,6 +735,18 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.embedded_url_re")
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.connect_timeout")
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.response_timeout")
+
+    def _add_headers_param(self, parent_node, param_name, param_value):
+        """
+        添加headers参数
+        :param parent_node:
+        :param param_name:
+        :param param_value:
+        :return:
+        """
+        elementProp = self.add_sub_node(parent_node, new_tag_name='elementProp', name="", elementType="Header")
+        self.add_sub_node(elementProp, new_tag_name='stringProp', text=param_name, name="Header.name")
+        self.add_sub_node(elementProp, new_tag_name='stringProp', text=param_value, name="Header.value")
 
     def _add_form_data(self, xpath, params):
         """
@@ -790,7 +830,7 @@ if __name__ == '__main__':
     jmx = '/Users/chenlei/jmeter5/jmx_folder/django.jmx'
     r = ReadJmx(jmx)
     s = r.analysis_jmx()
-    print(s)
+    print(json.dumps(s))
 
 
 
