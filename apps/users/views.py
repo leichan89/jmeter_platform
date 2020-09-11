@@ -82,7 +82,7 @@ class MenuList(APIView):
                             {
                                 "id":112,
                                 "authName":"任务流水",
-                                "path":"flows",
+                                "path":"tasks/flows",
                                 "children":[
 
                                 ],

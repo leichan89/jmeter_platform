@@ -9,6 +9,9 @@ from rest_framework.views import exception_handler as drf_exception_handler  # d
 from rest_framework import status
 from rest_framework_jwt.views import ObtainJSONWebToken
 from users.models import UserProfile
+import logging
+
+logger = logging.getLogger('collect')
 
 #自定义的异常处理方法，处理没有处理的异常
 def exception_handler(exc, context):
@@ -27,6 +30,8 @@ def exception_handler(exc, context):
     if response is None:
         # 重点：有些异常信息需要记录日志文件
         # logging记录异常信息
+        if exc:
+            logger.error(f"服务内部错误：{exc}")
         return Response({'code': 500, 'msg': '服务内部异常！'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     try:

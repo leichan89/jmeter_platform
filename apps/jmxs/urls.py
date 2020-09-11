@@ -14,7 +14,10 @@ urlpatterns = [
     # 查询单个jmx信息
     path('jmxs/<int:pk>', views.JmxView.as_view()),
     # 删除接口
-    path('jmxs/delete/<int:pk>', views.JmxDestory.as_view())
+    path('jmxs/delete/<int:pk>', views.JmxDestory.as_view()),
+    path('jmxs/create', views.JmxCreate.as_view()),
+    path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
+    path('samplers/delete/<int:child_id>', views.JmxDeleteChild.as_view()),
 ]
 
 

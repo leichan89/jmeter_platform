@@ -4,7 +4,7 @@
 # @File    : serializer.py
 
 from rest_framework import serializers
-from .models import Jmxs
+from .models import Jmxs, JmxThreadGroup
 from users.serializer import UserSerializer
 
 class JmxsSerializer(serializers.ModelSerializer):
@@ -42,3 +42,9 @@ class JmxsRunSerializer(serializers.ModelSerializer):
     class Meta:
         model = Jmxs
         fields = ['id']
+
+class JmxThreadGroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = JmxThreadGroup
+        fields = "__all__"

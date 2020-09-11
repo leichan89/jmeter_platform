@@ -23,17 +23,19 @@ class Jmxs(models.Model):
     def __str__(self):
         return f"{self.jmx}"
 
-class JmxThreadGroupChildren(models.Model):
+class JmxThreadGroup(models.Model):
     """
     线程组子类的信息
     """
     CHILD_TYPE = (
         ('sampler', 'http请求'),
-        ('csv',  'CSV数据文件设置')
+        ('csv',  'CSV数据文件设置'),
+        ('thread', '普通线程组信息'),
     )
     CHILD_THREAD = (
         ('thread', '普通线程组'),
-        ('setup', 'setup线程组')
+        ('setup', 'setup线程组'),
+        ('teardown', 'setup线程组'),
     )
     jmx = models.ForeignKey(Jmxs, on_delete=models.CASCADE)
     child_name = models.CharField("线程组子类的名称", max_length=100)

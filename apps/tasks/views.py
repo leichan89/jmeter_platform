@@ -1,6 +1,6 @@
 from rest_framework.exceptions import UnsupportedMediaType
 
-from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer, TasksListSerializer
+from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer, TasksListSerializer, TaskFlowSerializer
 from .models import Tasks, TaskFlow, FlowTaskAggregateReport
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -131,6 +131,21 @@ class DestoryTask(generics.DestroyAPIView):
             return APIRsp()
         except:
             return APIRsp(code=404, msg='资源未找到', status=status.HTTP_404_NOT_FOUND)
+
+class FlowsList(generics.ListAPIView):
+    """
+    查询任务流水信息
+    """
+    queryset = TaskFlow.objects.all()
+    serializer_class = TaskFlowSerializer
+    pagination_class = TasksPagition
+
+    def get(self, request, *args, **kwargs):
+        rsp_data = self.list(request, *args, **kwargs)
+        if rsp_data.status_code == 200:
+            return APIRsp(data=rsp_data.data)
+        else:
+            return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)
 
 
 

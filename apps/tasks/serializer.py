@@ -4,32 +4,57 @@
 # @File    : serializer.py
 
 from rest_framework import serializers
-from .models import Tasks, TasksDetails, FlowTaskAggregateReport
+from .models import Tasks, TasksDetails, FlowTaskAggregateReport, TaskFlow
 from users.serializer import UserSerializer
 
 
 class TaskSerializer(serializers.ModelSerializer):
-
+    """
+    获取任务全部信息
+    """
     class Meta:
         model = Tasks
         fields = "__all__"
 
-
+class TaskNameSerializer(serializers.ModelSerializer):
+    """
+    只获取任务的id和名称
+    """
+    class Meta:
+        model = Tasks
+        fields = ['id', 'task_name']
 
 class TasksDetailsSerializer(serializers.ModelSerializer):
+    """
+    获取任务绑定的jmx信息
+    """
     class Meta:
         model = TasksDetails
         fields = "__all__"
 
 
 class FlowTaskAggregateReportSerializer(serializers.ModelSerializer):
+    """
+    获取流水任务报告信息
+    """
     class Meta:
         model = FlowTaskAggregateReport
         exclude = ['id', 'task', 'flow']
 
+class TaskFlowSerializer(serializers.ModelSerializer):
+    """
+    获取流水任务信息
+    """
+    # task是TaskFLow模型中的字段
+    task = TaskNameSerializer()
+    class Meta:
+        model = TaskFlow
+        exclude = ['randomstr']
+
 
 class TasksListSerializer(serializers.ModelSerializer):
 
+    # add_user是Tasks模型中的字段
     add_user = UserSerializer()
 
     class Meta:

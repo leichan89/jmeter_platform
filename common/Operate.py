@@ -35,6 +35,15 @@ class ReadJmx():
         )
         """
         try:
+            add = ModifyJMX(self.jmxPath)
+            # 添加setup线程组
+            add.add_setup_thread()
+            # 添加teardown线程组
+            add.add_teardown_thread()
+        except:
+            logger.warning('为线程组添加setup和teardown线程组失败!')
+
+        try:
             tree = etree.parse(self.jmxPath)
             # xpath路径错误的话，是不会报异常的，返回一个空[]
             ThreadGroup = tree.xpath('//ThreadGroup')
@@ -57,23 +66,26 @@ class ReadJmx():
         teardown_sapmler_root_xpath = '//PostThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy'
         teardown_csv_root_xpath = '//PostThreadGroup[1]/following-sibling::hashTree[1]/CSVDataSet'
 
+        # 获取thread线程组的sampler和csv
         thread_sapmlers_info = self._read_sampler(tree, thread_sapmler_root_xpath)
-
         thread_csvs_info = self._read_csv(tree, thread_csv_root_xpath)
 
+        # 获取setup线程组的sampler和csv
         setup_sapmlers_info = self._read_sampler(tree, setup_sapmler_root_xpath, thread_type='setup')
-
         setup_csvs_info = self._read_csv(tree, setup_csv_root_xpath, thread_type='setup')
 
+        # 获取teardown线程组的sampler和csv
         teardown_sapmlers_info = self._read_sampler(tree, teardown_sapmler_root_xpath, thread_type='teardown')
-
         teardown_csvs_info = self._read_csv(tree, teardown_csv_root_xpath, thread_type='teardown')
+
+        # 获取线程组的信息
+        thread_info = self._read_thread_info(tree)
 
         sapmlers_info = thread_sapmlers_info + setup_sapmlers_info + teardown_sapmlers_info
         csvs_info = thread_csvs_info + setup_csvs_info + teardown_csvs_info
 
 
-        return sapmlers_info, csvs_info
+        return sapmlers_info, csvs_info, thread_info
 
     def _read_sampler(self, tree, sapmler_root_xpath, thread_type='thread'):
         """
@@ -209,14 +221,58 @@ class ReadJmx():
 
         return csvs_info
 
+    def _read_thread_info(self, tree, thread_type='thread'):
+        """
+        获取第一个线程组的信息
+        :param tree:
+        :return:
+        """
+
+        thread_info = {}
+
+        thread_info['thread_type'] = thread_type
+
+        thread_xpath = '//ThreadGroup[1]'
+
+        num_threads_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.num_threads']"
+        num_threads = tree.xpath(num_threads_xpath)[0].text
+        thread_info['num_threads'] = num_threads
+
+        # 线程数
+        num_threads_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.num_threads']"
+        num_threads = tree.xpath(num_threads_xpath)[0].text
+        thread_info['num_threads'] = num_threads
+
+        # Ramp-UP时间
+        ramp_time_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.ramp_time']"
+        ramp_time = tree.xpath(ramp_time_xpath)[0].text
+        thread_info['ramp_time'] = ramp_time
+
+        # 循环次数，-1表示永远
+        loops_xpath = thread_xpath + "/elementProp/stringProp[@name='LoopController.loops']"
+        loops = tree.xpath(loops_xpath)[0].text
+        thread_info['loops'] = loops
+
+        # 调度器配置，true or false
+        scheduler_xpath = thread_xpath + "/boolProp[@name='ThreadGroup.scheduler']"
+        scheduler = tree.xpath(scheduler_xpath)[0].text
+        thread_info['scheduler'] = scheduler
+
+        # 持续时间
+        duration_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.duration']"
+        duration = tree.xpath(duration_xpath)[0].text
+        thread_info['duration'] = duration
+
+        return thread_info
+
 
 class OperateJmx():
 
-    def __init__(self, jmx):
+    def __init__(self, jmxPath):
         # 让添加的节点自动换行
         parser = etree.XMLParser(encoding="utf-8", strip_cdata=False, remove_blank_text=True)
-        self.tree = etree.parse(jmx, parser=parser)
-        self.jmx = jmx
+        self.tree = etree.parse(jmxPath, parser=parser)
+        self.jmx = jmxPath
 
     def node_exists(self, xpath):
         rst = self.tree.xpath(xpath)
@@ -352,12 +408,12 @@ class OperateJmx():
 
 class ModifyJMX(OperateJmx):
 
-    def __init__(self, jmx):
+    def __init__(self, jmxPath):
         # 在jmx的第一个ThreadGroup目录下操作
         self.thread_accord_tag = '//ThreadGroup[1]/following-sibling::hashTree[1]'
         self.setup_accord_tag = '//SetupThreadGroup[1]/following-sibling::hashTree[1]'
         self.teardown_accord_tag = '//PostThreadGroup[1]/following-sibling::hashTree[1]'
-        super().__init__(jmx)
+        super().__init__(jmxPath)
 
     def add_setup_thread(self):
         """
@@ -427,6 +483,12 @@ class ModifyJMX(OperateJmx):
         :param xpath: 取样器地址，可以先删除之前的取样器，再重新添加
         :return:
         """
+        try:
+            if params:
+                params = json.loads(params)
+        except:
+            logger.error('参数格式错误！')
+            raise
 
         if accord == 'thread':
             accord_tag = self.thread_accord_tag
@@ -452,7 +514,7 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
         if params:
-            if param_type == 'form' and isinstance(params, dict):
+            if param_type == 'form':
                 self._add_form_data(HTTPSamplerProxy, params)
             elif param_type == 'raw':
                 self._add_raw_data(HTTPSamplerProxy, params)
@@ -465,8 +527,9 @@ class ModifyJMX(OperateJmx):
         self.save_change()
 
         sampler_info = {}
-        sampler_info['xpath'] = HTTPSamplerProxy
+        sampler_info['thread_type'] = accord
         sampler_info['name'] = name
+        sampler_info['xpath'] = HTTPSamplerProxy
         sampler_info['url'] = url
         sampler_info['method'] = method
         sampler_info['param_type'] = param_type
@@ -525,8 +588,9 @@ class ModifyJMX(OperateJmx):
 
         csv_info = {}
 
-        csv_info['xpath'] = CSVDataSet
+        csv_info['thread_type'] = accord
         csv_info['name'] = name
+        csv_info['xpath'] = CSVDataSet
         csv_info['filename'] = filename
         csv_info['ignoreFirstLine'] = ignoreFirstLine
         csv_info['recycle'] = recycle
@@ -720,8 +784,12 @@ class ModifyJMX(OperateJmx):
         self.save_change()
 
 if __name__ == '__main__':
-    r = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
-    s = r.add_sampler(name='sampler', url='http://www.baidu.com', method="GET")
+    # r = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
+    # s = r.add_sampler(name='sampler', url='http://www.baidu.com', method="GET")
+    # print(s)
+    jmx = '/Users/chenlei/jmeter5/jmx_folder/django.jmx'
+    r = ReadJmx(jmx)
+    s = r.analysis_jmx()
     print(s)
 
 
