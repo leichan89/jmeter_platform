@@ -68,10 +68,14 @@ class JmxBindTask(generics.CreateAPIView):
 
 class RunTask(APIView):
     """
-    运行任务，生成一个流水任务
+    运行任务，生成一个流水任务，一个任务只能有一个运行中的流水任务
     """
     def post(self, request, taskid):
-
+        # 判断任务是否存在或者是否绑定了jmx
+        task = TasksDetails.objects.filter(task_id=taskid)
+        if not task:
+            return APIRsp(code=400, msg='该任务不存在或未绑定jmx！', status=status.HTTP_200_OK)
+        # 判断是否存在运行中的流水任务
         running = TaskFlow.objects.filter(task_id=taskid, task_status=0)
         if running:
             return APIRsp(code=400, msg='存在运行中的流水任务，请稍后重试！', status=status.HTTP_200_OK)
