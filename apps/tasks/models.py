@@ -44,6 +44,7 @@ class TaskFlow(models.Model):
     celery_task_id = models.CharField("celery任务的id", max_length=40)
     # 0:进行中，1:已停止，2:执行异常，3:已结束
     task_status = models.IntegerField('任务流水状态', default=0)
+    task_flow_url = models.CharField("流水任务的url", max_length=300)
     add_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -51,7 +52,7 @@ class TaskFlow(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return f"{self.randomstr}"
+        return f"{self.task_flow_url}"
 
 class FlowTaskAggregateReport(models.Model):
     """

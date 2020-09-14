@@ -10,6 +10,7 @@ import shutil
 from common.Tools import Tools
 from celery import shared_task
 from jmeter_platform import settings
+from common.Operate import ModifyJMX
 from celery.utils.log import get_task_logger
 
 logger = get_task_logger('celery_task')
@@ -43,6 +44,7 @@ def run_task(taskid, task_flow_str, jmxs):
             shutil.copy(jmx, temp_dir)
             # 在这里查找替换变量{{}}
             temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
+            ModifyJMX(temp_jmx).add_backendListener(influxdb_url=settings.INFLUXDB_URL, application_name=task_flow_str)
             cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {jtl}"
             cmds.append(cmd)
 

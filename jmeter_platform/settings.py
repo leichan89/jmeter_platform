@@ -273,6 +273,11 @@ JMX_CSV_DIR = os.path.join(BASE_DIR, "performance_files")
 JMETER = os.path.join(BASE_DIR, "jmeter5/bin/jmeter.sh")
 JMETER_PLUGINS_CMD = os.path.join(BASE_DIR, "jmeter5/bin/JMeterPluginsCMD.sh")
 
+# influxdb、grafana地址
+INFLUXDB_URL = "http://192.168.62.131:8086/write?db=jmeter"
+GRAFANA_ENNDPOINT = "http://192.168.62.131:3000/d/wuMeCkDMk/influxdbbackendlistenerclient?orgId=1&var-data_source=jmeter&var-transaction=&var-measurement_name=jmeter&var-send_interval=5&refresh=5s"
+
+
 
 JMX_ALLOWED_FILE_TYPE = ['.jmx']
 CSV_ALLOWED_FILE_TYPE = ['.csv']

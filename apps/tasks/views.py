@@ -1,5 +1,5 @@
 from rest_framework.exceptions import UnsupportedMediaType
-
+from jmeter_platform import settings
 from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer, TasksListSerializer, TaskFlowSerializer
 from .models import Tasks, TaskFlow, FlowTaskAggregateReport
 from rest_framework import generics
@@ -83,7 +83,8 @@ class RunTask(APIView):
 
         task_flow_str = Tools.random_str()
         celery_task_id = run_task.delay(taskid, task_flow_str, jmxs)
-        flow = TaskFlow(task_id=taskid, celery_task_id=celery_task_id, randomstr=task_flow_str)
+        url = settings.GRAFANA_ENNDPOINT + f'&var-application={task_flow_str}'
+        flow = TaskFlow(task_id=taskid, celery_task_id=celery_task_id, randomstr=task_flow_str, task_flow_url=url)
         flow.save()
         return APIRsp()
 
