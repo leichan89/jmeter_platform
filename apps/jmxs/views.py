@@ -85,9 +85,8 @@ class JmxUpload(APIView):
                 for sampler in samplers_info:
                     # 保存sampler信息
                     sampler_children = sampler['children']
-
-                    print(sampler_children)
                     del sampler['children']
+
                     sp = JmxThreadGroup(jmx_id=jmx_id, child_name=sampler['name'],
                                                   child_info=json.dumps(sampler), child_thread=sampler['thread_type'])
 
@@ -166,6 +165,7 @@ class JmxCreate(APIView):
             jmx_id = obj.data['id']
             if sampler_info:
                 # 保存sampler信息
+                del sampler_info['children']
                 s = JmxThreadGroup(jmx_id=jmx_id, child_name=sampler_info['name'],
                                               child_info=json.dumps(sampler_info), child_thread=sampler_info['thread_type'])
                 s.save()
@@ -180,6 +180,7 @@ class JmxCreateUpdateSapmler(APIView):
     def post(self, request):
 
         jmx_id = request.POST.get('jmx_id')
+        # 修改的时候才需要传入childid信息
         child_id = request.POST.get('child_id')
         thread_type = request.POST.get('thread_type')
         sampler_name = request.POST.get('sapmpler_name')
