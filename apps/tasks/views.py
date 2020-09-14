@@ -71,6 +71,10 @@ class RunTask(APIView):
     运行任务，生成一个流水任务
     """
     def post(self, request, taskid):
+
+        running = TaskFlow.objects.filter(task_id=taskid, task_status=0)
+        if running:
+            return APIRsp(code=400, msg='存在运行中的流水任务，请稍后重试！', status=status.HTTP_200_OK)
         try:
             jmxs_id = TasksDetails.objects.values('jmx').filter(task_id=taskid)
             rsp = Jmxs.objects.values('id', 'jmx').filter(id__in=jmxs_id)
