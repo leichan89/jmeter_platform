@@ -110,8 +110,6 @@ class ReadJmx():
 
             sampler_xpath = f'{sapmler_root_xpath}[{sidx + 1}]'
 
-            headers_xpath = sampler_xpath + '/following-sibling::hashTree[1]/HeaderManager/collectionProp/elementProp'
-
             sampler_url_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.path']"
 
             sampler_method_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.method']"
@@ -151,6 +149,7 @@ class ReadJmx():
             if sampler_params:
                 for pidx, param in enumerate(sampler_params):
                     # param_value_xpath为参数具体的xpath路径，elementProp/stringProp
+
                     param_value_xpath = f"{sapmler_param_xpath}[{pidx + 1}]/stringProp"
                     param_value = tree.xpath(param_value_xpath)
                     for value in param_value:
@@ -165,16 +164,8 @@ class ReadJmx():
                             paramvalue = value.text
                             sampler_info['params'].append({"paramname": paramname, "paramvalue": paramvalue})
             sapmlers_info.append(sampler_info)
-
-            headers_params = tree.xpath(headers_xpath)
-            sampler_info['headers'] = []
-            if headers_params:
-                for hidx, param in enumerate(headers_params):
-                    header_param_name_xpath = f'{headers_xpath}[{hidx + 1}]/stringProp[1]'
-                    header_param_value_xpath = f'{headers_xpath}[{hidx + 1}]/stringProp[2]'
-                    header_param_name = tree.xpath(header_param_name_xpath)[0].text
-                    header_param_value = tree.xpath(header_param_value_xpath)[0].text
-                    sampler_info['headers'].append({'headername': header_param_name, 'headervalue': header_param_value})
+            # 获取sampler的子元素信息
+            sampler_info['children'] = self._read_sampler_children_info(tree, sampler_xpath)
 
         return sapmlers_info
 
@@ -242,7 +233,7 @@ class ReadJmx():
 
         thread_info = {}
 
-        thread_info['thread_type'] = thread_type
+        # thread_info['thread_type'] = thread_type
 
         thread_xpath = '//ThreadGroup[1]'
 
@@ -276,6 +267,53 @@ class ReadJmx():
         thread_info['duration'] = duration
 
         return thread_info
+
+    def _read_sampler_children_info(self, tree, sampler_xapth):
+        """
+        读取sampler的子元素信息
+        :param tree:
+        :param sampler_xapth:
+        :return:
+        """
+
+        # 所有子元素信息
+        children = []
+
+        # sampler子元素的hashTree
+        hashTreeXpath = sampler_xapth + "/following-sibling::hashTree[1]"
+
+        # 计数头信息
+        header_count = 1
+
+        hashTree = tree.xpath(sampler_xapth)[0].getnext()
+
+        if hashTree is not None:
+            for cd in hashTree:
+                child = {}
+                # 获取头信息
+                if cd.tag == "HeaderManager":
+                    child['child_type'] = 'header'
+                    old_header_name = cd.attrib['testname']
+                    new_header_name = old_header_name + Tools.random_str(9)
+                    cd.attrib['testname'] = new_header_name
+                    tree.write(self.jmxPath, encoding='utf-8')
+                    child['child_name'] = new_header_name
+                    header_xpath = hashTreeXpath + f'/HeaderManager[@testname="{new_header_name}"]'
+                    child['xpath'] = header_xpath
+                    header_temp_xpath = hashTreeXpath + f'/HeaderManager[{header_count}]/collectionProp/elementProp'
+                    header_param_info = tree.xpath(header_temp_xpath)
+                    params_list = []
+                    for pidx, param in enumerate(header_param_info):
+                        param_name_xpath = f"{header_temp_xpath}[{pidx + 1}]/stringProp[@name='Header.name']"
+                        param_value_xpath = f"{header_temp_xpath}[{pidx + 1}]/stringProp[@name='Header.value']"
+                        param_name = tree.xpath(param_name_xpath)[0].text
+                        param_value = tree.xpath(param_value_xpath)[0].text
+                        header_param = {"paramname": param_name, "paramvalue": param_value}
+                        params_list.append(header_param)
+                    child['params'] = params_list
+                if child:
+                    children.append(child)
+            return children
 
 
 class OperateJmx():
@@ -336,7 +374,7 @@ class OperateJmx():
 
     def remove_node_and_next(self, xpath, next_name='hashTree'):
         """
-        删除节点以及临近的节点，一般删除取样器等信息
+        先删除hashTree，再删除节点。删除节点以及临近的节点，一般删除取样器等信息
         :param xpath:
         :return:
         """
@@ -483,7 +521,7 @@ class ModifyJMX(OperateJmx):
 
             self.save_change()
 
-    def add_sampler(self, name, url, method, accord='thread', param_type='form', headers=None, params=None, xpath=None):
+    def add_sampler(self, name, url, method, accord='thread', param_type='form', params=None, xpath=None):
         """
         添加取样器，可以在thread或者setup中添加
         :param name: 取样器名称
@@ -523,7 +561,7 @@ class ModifyJMX(OperateJmx):
                           testclass="HTTPSamplerProxy", testname=name, enabled="true")
 
         # 添加hashTree
-        hashTree = self.add_sub_node(accord_tag, new_tag_name='hashTree')
+        self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
         if params:
             if param_type == 'form':
@@ -535,8 +573,6 @@ class ModifyJMX(OperateJmx):
                 raise
 
         self._add_sampler_base(sp, url, method)
-
-        self.add_header(hashTree, headers)
 
         self.save_change()
 
@@ -688,19 +724,44 @@ class ModifyJMX(OperateJmx):
 
         self.save_change()
 
-    def add_header(self, parent_node, headers):
+    def add_header(self, sampler_xpath, header_xpath=None, header_name="HTTP信息头管理器", headers=None):
         """
-        添加请求头信息
-        :param parent_node:
-        :param headers:
+        添加请求头信息，一个sampler只允许添加一个
+        :param sampler_xpath: sampler的xpath路径
+        :param headers: 信息头字典
+        :param header_name: 信息头名称
         :return:
         """
-        header = self.add_sub_node(parent_node, new_tag_name='HeaderManager', guiclass="HeaderPanel", testclass="HeaderManager",
-                          testname="HTTP信息头管理器", enabled="true")
+        try:
+            # 如果是修改，则先删除原来的header，再进行添加
+            if header_xpath:
+                self.remove_node_and_next(header_xpath)
+            hashTree = self.tree.xpath(sampler_xpath)[0].getnext()
+        except:
+            logger.exception("获取sampler信息失败")
+            raise
+
+        try:
+            headers = json.loads(headers)
+        except:
+            logger.exception("请求头参数错误")
+            raise
+
+        header_name = header_name + Tools.random_str(9)
+        header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel", testclass="HeaderManager",
+                          testname=header_name, enabled="true")
+        # 添加hashTree
+        self.add_sub_node(hashTree, new_tag_name="hashTree")
         collectionProp = self.add_sub_node(header, new_tag_name='collectionProp', name="HeaderManager.headers")
         if headers and isinstance(headers, dict):
             for key, value in headers.items():
                 self._add_headers_param(collectionProp, key, value)
+
+        new_header_xpath = sampler_xpath + f'/following-sibling::hashTree[1]/HeaderManager[@testname="{header_name}"]'
+
+        self.save_change()
+
+        return new_header_xpath
 
     def _add_param(self, parent_node, param_name, param_value):
         """
@@ -827,10 +888,14 @@ if __name__ == '__main__':
     # r = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
     # s = r.add_sampler(name='sampler', url='http://www.baidu.com', method="GET")
     # print(s)
-    jmx = '/Users/chenlei/jmeter5/jmx_folder/django.jmx'
+    jmx = '/Users/chenlei/python-project/jmeter_platform/performance_files/jmx/新增jmx-1600051758672.jmx'
+    # o = ModifyJMX(jmx)
+    # xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[@testname="xxx"]'
+    # o.add_header(sampler_xpath=xpath, headers={'aaaa': 'bbaa'}, header_name="aaaaaaa")
     r = ReadJmx(jmx)
     s = r.analysis_jmx()
     print(json.dumps(s))
+
 
 
 
