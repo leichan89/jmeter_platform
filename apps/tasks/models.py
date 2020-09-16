@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from jmxs.models import Jmxs
+import datetime
 
 Users = get_user_model()
 
@@ -46,6 +47,7 @@ class TaskFlow(models.Model):
     task_status = models.IntegerField('任务流水状态', default=0)
     task_flow_url = models.CharField("流水任务的url", max_length=300)
     add_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "任务流水表"
