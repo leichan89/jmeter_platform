@@ -8,6 +8,7 @@ from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, Jm
 from .models import Jmxs
 from rest_framework import status
 from rest_framework import generics
+from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
 import json
 import os
@@ -46,7 +47,7 @@ class JmxUpload(APIView):
             jmx_ext = jmx_name_ext[1]
             if jmx_ext not in settings.JMX_ALLOWED_FILE_TYPE:
                 return APIRsp(code=205, msg='无效的格式，请上传.jmx格式的文件', status=status.HTTP_205_RESET_CONTENT)
-            jmxfile = jmx_name + "-" + str(Tools.datetime2timestamp()) + jmx_ext
+            jmxfile = jmx_name + "-" + Tools.random_str(9) + jmx_ext
             jmxpath = settings.JMX_URL + jmxfile
 
             with open(jmxpath, 'wb') as f:
@@ -129,7 +130,7 @@ class JmxCreate(APIView):
 
         template_path = settings.JMX_URL + 'template.jmx'
 
-        new_jmxpath = settings.JMX_URL + jmx_name + "-" + str(Tools.datetime2timestamp()) + '.jmx'
+        new_jmxpath = settings.JMX_URL + jmx_name + "-" + Tools.random_str(9) + '.jmx'
 
         shutil.copyfile(template_path, new_jmxpath)
         try:
@@ -246,12 +247,19 @@ class JmxListView(generics.ListAPIView):
     查询jmx文件
     """
     pagination_class = JmxsPagination
-    queryset = Jmxs.objects.all()
+    # 按添加时间降序排序，最近的时间排在最上面
+    queryset = Jmxs.objects.all().order_by('-add_time')
     serializer_class = JmxListSerializer
+    filter_backends = [filters.SearchFilter]
+    # 可以搜索的字段
+    search_fields = ['jmx_alias']
 
     def get(self, request, *args, **kwargs):
         rsp_data = self.list(request, *args, **kwargs)
         if rsp_data.status_code == 200:
+            data = rsp_data.data
+            del data['next']
+            del data['previous']
             return APIRsp(data=rsp_data.data)
         else:
             return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)

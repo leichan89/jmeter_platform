@@ -23,7 +23,7 @@ class JmxListSerializer(serializers.ModelSerializer):
     add_user = UserSerializer()
     class Meta:
         model = Jmxs
-        exclude = ['jmx']
+        exclude = ['jmx', 'thread_base_info']
 
 
 class JmxSerializer(serializers.ModelSerializer):

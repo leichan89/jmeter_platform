@@ -10,6 +10,7 @@ from common.Tools import Tools
 from .tasks import run_task, kill_task
 from rest_framework import status
 from common.APIResponse import APIRsp
+from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
 import logging
 
@@ -20,13 +21,19 @@ class TasksPagition(PageNumberPagination):
     page_query_param = 'num'
 
 class TasksList(generics.ListAPIView):
-    queryset = Tasks.objects.all()
+    queryset = Tasks.objects.all().order_by('-add_time')
     serializer_class = TasksListSerializer
     pagination_class = TasksPagition
+    filter_backends = [filters.SearchFilter]
+
+    search_fields = ['task_name']
 
     def get(self, request, *args, **kwargs):
         rsp_data = self.list(request, *args, **kwargs)
         if rsp_data.status_code == 200:
+            data = rsp_data.data
+            del data['next']
+            del data['previous']
             return APIRsp(data=rsp_data.data)
         else:
             return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)
@@ -145,13 +152,20 @@ class FlowsList(generics.ListAPIView):
     """
     查询任务流水信息
     """
-    queryset = TaskFlow.objects.all()
+    queryset = TaskFlow.objects.all().order_by('-add_time')
     serializer_class = TaskFlowSerializer
     pagination_class = TasksPagition
+    # 不设置search_fields的话，则在所有字段中搜索
+    filter_backends = [filters.SearchFilter]
+    # 通过外键对应的名字搜索
+    search_fields = ['task__task_name']
 
     def get(self, request, *args, **kwargs):
         rsp_data = self.list(request, *args, **kwargs)
         if rsp_data.status_code == 200:
+            data = rsp_data.data
+            del data['next']
+            del data['previous']
             return APIRsp(data=rsp_data.data)
         else:
             return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)
