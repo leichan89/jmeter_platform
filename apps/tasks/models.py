@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from jmxs.models import Jmxs
-import datetime
 
 Users = get_user_model()
 
@@ -10,6 +9,8 @@ class Tasks(models.Model):
     任务表，查询任务的时候，调用taskdetails查询任务关联的jmx数量
     """
     task_name = models.CharField("任务名称", max_length=100)
+    # 任务的类型，0是普通的任务，1是单个jmx的任务
+    task_type = models.IntegerField('任务类型', default=0)
     add_user = models.ForeignKey(Users, on_delete=models.DO_NOTHING, verbose_name="用户名")
     add_time = models.DateTimeField(auto_now_add=True)
 

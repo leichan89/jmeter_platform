@@ -10,6 +10,7 @@ urlpatterns = [
     path('tasks', views.TasksList.as_view()),
     path('tasks/create', views.CreateTask.as_view()),
     path('tasks/run/<int:taskid>', views.RunTask.as_view()),
+    path('tasks/runjmx/<int:userid>/<int:jmxid>', views.RunJmx.as_view()),
     path('tasks/bindjmxs', views.JmxBindTask.as_view()),
     path('tasks/kill/<int:flowid>', views.KillTask.as_view()),
     path('tasks/queryAggregateReport/<int:flowid>', views.FlowTaskAggregateReportView.as_view()),

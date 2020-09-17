@@ -12,6 +12,7 @@ from celery import shared_task
 from jmeter_platform import settings
 from common.Operate import ModifyJMX
 from celery.utils.log import get_task_logger
+from datetime import datetime
 
 logger = get_task_logger('celery_task')
 
@@ -64,7 +65,7 @@ def run_task(taskid, task_flow_str, jmxs):
 
         # 更新流水任务的状态为3，完成状态
         logger.debug('更新流水任务状态为完成状态')
-        TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=3)
+        TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=3, end_time=datetime.now())
 
         logger.debug('将jtl文件转换为csv文件')
         summary_csv = settings.TEMP_URL + task_flow_str + os.sep + 'temp.csv'
@@ -93,7 +94,7 @@ def run_task(taskid, task_flow_str, jmxs):
             raise
     except:
         # 更新流水任务的状态为2，运行异常
-        TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=2)
+        TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=2, end_time=datetime.now())
         # 这里会自动打印异常信息
         logger.exception(f'执行流水任务失败')
     finally:
@@ -141,7 +142,7 @@ def kill_task(celery_task_id, task_flow_str):
             break
     # 更新流水任务的状态为1，已停止
     logger.info(f'更新流水任务状态为已停止:{celery_task_id}')
-    TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=1)
+    TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=1, end_time=datetime.now())
 
     try:
         logger.debug('删除任务流水目录')
