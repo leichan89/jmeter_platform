@@ -7,6 +7,14 @@ celery flower --broker='redis://127.0.0.1:6379/0'  -A jmeter_platform --address=
 启动redis
 redis-server
 
+启动influxd
+influxd -config /usr/local/etc/influxdb.conf
+
+
+启动grafana
+brew services start grafana
+admin/jmeter
+
 
 前端页面参考：
 https://testerhome.com/topics/17986

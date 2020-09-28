@@ -67,26 +67,26 @@
 # # # #
 # # # # sys.path.insert(0, BASE_DIR)
 # # # # sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
-import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
-import django
-django.setup()
-
-from tasks.models import TaskFlow
-from datetime import datetime
-
-# TaskFlow.objects.filter(id=118).update(add_time=datetime.now())
-# # #
-from tasks.models import TasksDetails
-
-
-# j = list(TasksDetails.objects.select_related('task').filter(jmx_id=77))
+# import os
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jmeter_platform.settings")
+# import django
+# django.setup()
 #
-# for i in j:
-#     print(i.task.task_type)
-
-s = TasksDetails.objects.get(jmx_id=1000)
-print(s)
+# from tasks.models import TaskFlow
+# from datetime import datetime
+#
+# # TaskFlow.objects.filter(id=118).update(add_time=datetime.now())
+# # # #
+# from tasks.models import TasksDetails
+#
+#
+# # j = list(TasksDetails.objects.select_related('task').filter(jmx_id=77))
+# #
+# # for i in j:
+# #     print(i.task.task_type)
+#
+# s = TasksDetails.objects.get(jmx_id=1000)
+# print(s)
 
 
 # # #
@@ -166,3 +166,57 @@ print(s)
 #
 # print(m)
 # print(s)
+
+#
+# m = s['aa']
+#
+# del s['aa']
+#
+# print(m)
+# print(s)#
+# # m = s['aa']
+# #
+# # del s['aa']
+# #
+# # print(m)
+# # print(s)#
+# # m = s['aa']
+# #
+# # del s['aa']
+# #
+# # print(m)
+# # print(s)#
+# # m = s['aa']
+# #
+# # del s['aa']
+# #
+# # print(m)
+# # print(s)#
+# # m = s['aa']
+# #
+# # del s['aa']
+# #
+# # print(m)
+# # print(s)
+
+import random
+import copy
+
+
+
+for i in range(100):
+    s = f"""
+【试题类型】单项选择题
+2.甲公司2×14年12月20日上市与乙公司签订商品销售合{random.randint(1000000,20000000)}同，合同约定：甲公司应于2×15年5月20日前将合同标的商品运抵乙公司并经验收，在商品运抵乙公司前灭失、毁损、价值变动等风险由甲公司承担。甲公司该项合同中所售商品为库存w商品，2×14年12月30日，甲公司根据合同向乙公司开具了增值税专ss用发票并于当日确认了商品销售收入。W商品于2×15年5月10日发出并于5月15日运抵乙公司验收合格。对于甲公司2×14年W商品销售收入确认的恰当性判断，除考虑与会计准则规定的收入确认条件的符合性以外，还应考虑可能违背的会计基本假设是（ )。
+A.会计主体
+B.会计分期
+C.持续经营
+D.货币计量
+【答案】B
+【解析】在会计分期假设下，企业应当划分会计期间，分期结算账目和编制财务报表。
+【难度】易
+【考点】128257
+【试题类型】单项选择题
+"""
+    print(s)
+
