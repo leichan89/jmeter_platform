@@ -533,9 +533,12 @@ class ModifyJMX(OperateJmx):
         :param xpath: 取样器地址，可以先删除之前的取样器，再重新添加
         :return:
         """
+        params_info = {}
         try:
-            if params:
-                params = json.loads(params)
+            # 如果是form格式，就需要转换为字典
+            if params and isinstance(params, list):
+                for param in params:
+                    params_info[param['key']] = param['value']
         except:
             logger.error('参数格式错误！')
             raise
@@ -563,14 +566,13 @@ class ModifyJMX(OperateJmx):
         # 添加hashTree
         self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
-        if params:
-            if param_type == 'form':
-                self._add_form_data(HTTPSamplerProxy, params)
-            elif param_type == 'raw':
-                self._add_raw_data(HTTPSamplerProxy, params)
-            else:
-                logger.error("param_type或者param参数错误")
-                raise
+        if param_type == 'form' and params_info:
+            self._add_form_data(HTTPSamplerProxy, params_info)
+        elif param_type == 'raw' and params:
+            self._add_raw_data(HTTPSamplerProxy, params)
+        else:
+            logger.error("param_type或者param参数错误")
+            raise
 
         self._add_sampler_base(sp, url, method)
 
@@ -583,7 +585,7 @@ class ModifyJMX(OperateJmx):
         sampler_info['url'] = url
         sampler_info['method'] = method
         sampler_info['param_type'] = param_type
-        sampler_info['params'] = params
+        sampler_info['params'] = params_info
 
         return sampler_info
 
@@ -741,21 +743,19 @@ class ModifyJMX(OperateJmx):
             logger.exception("获取sampler信息失败")
             raise
 
-        try:
-            headers = json.loads(headers)
-        except:
-            logger.exception("请求头参数错误")
-            raise
-
         header_name = header_name + Tools.random_str(9)
         header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel", testclass="HeaderManager",
                           testname=header_name, enabled="true")
         # 添加hashTree
         self.add_sub_node(hashTree, new_tag_name="hashTree")
         collectionProp = self.add_sub_node(header, new_tag_name='collectionProp', name="HeaderManager.headers")
-        if headers and isinstance(headers, dict):
-            for key, value in headers.items():
-                self._add_headers_param(collectionProp, key, value)
+        if headers and isinstance(headers, list):
+            for item in headers:
+                try:
+                    self._add_headers_param(collectionProp, item['key'], item['value'])
+                except:
+                    logger.exception("参数错误，找不到键【key，value】！")
+                    raise
 
         new_header_xpath = sampler_xpath + f'/following-sibling::hashTree[1]/HeaderManager[@testname="{header_name}"]'
 
@@ -869,13 +869,6 @@ class ModifyJMX(OperateJmx):
 
         # 重新添加xpath/elementProp
         self.add_sub_node(xpath, 'elementProp', name="HTTPsampler.Arguments", elementType="Arguments")
-
-        try:
-            # 将raw格式转换为字符串
-            raw = json.dumps(raw)
-        except:
-            logger.exception('无效的json格式')
-            raise
 
         self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
         sub_elementProp = self.add_sub_node(collectionProp, new_tag_name='elementProp', name="", elementType='HTTPArgument')

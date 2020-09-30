@@ -39,8 +39,8 @@ class JmxUpload(APIView):
         """
         data = {}
         jmx = request.FILES.get('jmx')
-        jmx_alias = request.POST.get('jmx_name')
-        user = request.POST.get('add_user')
+        jmx_alias = request.POST.get('jmxName')
+        user = request.POST.get('addUser')
         if jmx and user:
             jmx_name_ext = os.path.splitext(jmx.name)
             jmx_name = jmx_name_ext[0]
@@ -117,13 +117,13 @@ class JmxCreate(APIView):
     def post(self, request):
 
         data = {}
-        jmx_name = request.POST.get('jmx_name')
-        sampler_name = request.POST.get('sapmpler_name')
-        method = request.POST.get('method')
-        url = request.POST.get('url')
-        param_type = request.POST.get('param_type')
-        params = request.POST.get('params')
-        user = request.POST.get('add_user')
+        jmx_name = request.data.get('jmxName')
+        sampler_name = request.data.get('samplerName')
+        method = request.data.get('method')
+        url = request.data.get('url')
+        param_type = request.data.get('paramType')
+        params = request.data.get('params')
+        user = request.data.get('addUser')
 
         if not sampler_name or not method or not url:
             return APIRsp(code=400, msg='创建jmx失败，接口名称、方法、url必传', status=status.HTTP_400_BAD_REQUEST)
@@ -170,9 +170,29 @@ class JmxCreate(APIView):
                 s = JmxThreadGroup(jmx_id=jmx_id, child_name=sampler_info['name'],
                                               child_info=json.dumps(sampler_info), child_thread=sampler_info['thread_type'])
                 s.save()
-            return APIRsp()
+            return APIRsp(data={'sapmlerId': s.id}) # sampler的id
         os.remove(new_jmxpath)
         return APIRsp(code=400, msg='添加失败，参数校验未通过', status=status.HTTP_400_BAD_REQUEST)
+
+class JmxCreateSamplerHeader(APIView):
+    """
+    创建sampler的header
+    """
+    def post(self, request):
+        sapmler_id = request.data.get('sapmlerId')
+        params = request.data.get('params')
+        if sapmler_id:
+            try:
+                # 获取jmx的信息
+                jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmler_id)
+                jmx_path = jmxInfo[0].jmx
+                sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+                ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params)
+                return APIRsp()
+            except:
+                return APIRsp(code=400, msg='创建header失败！')
+        else:
+            return APIRsp(code=400, msg='创建header失败！未传入samplerId')
 
 class JmxCreateUpdateSapmler(APIView):
     """
@@ -180,14 +200,14 @@ class JmxCreateUpdateSapmler(APIView):
     """
     def post(self, request):
 
-        jmx_id = request.POST.get('jmx_id')
+        jmx_id = request.POST.get('jmxId')
         # 修改的时候才需要传入childid信息
-        child_id = request.POST.get('child_id')
-        thread_type = request.POST.get('thread_type')
-        sampler_name = request.POST.get('sapmpler_name')
+        child_id = request.POST.get('childId')
+        thread_type = request.POST.get('threadType')
+        sampler_name = request.POST.get('sapmplerName')
         method = request.POST.get('method')
         url = request.POST.get('url')
-        param_type = request.POST.get('param_type')
+        param_type = request.POST.get('paramType')
         params = request.POST.get('params')
 
         jmx_path = Jmxs.objects.values('jmx').get(id=jmx_id)['jmx']

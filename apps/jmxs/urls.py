@@ -17,6 +17,7 @@ urlpatterns = [
     path('jmxs/delete/<int:pk>', views.JmxDestory.as_view()),
     path('jmxs/create', views.JmxCreate.as_view()),
     path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
+    path('samplers/create_header', views.JmxCreateSamplerHeader.as_view()),
     path('samplers/delete/<int:child_id>', views.JmxDeleteChild.as_view()),
 ]
 
