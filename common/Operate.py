@@ -538,7 +538,9 @@ class ModifyJMX(OperateJmx):
             # 如果是form格式，就需要转换为字典
             if params and isinstance(params, list):
                 for param in params:
-                    params_info[param['key']] = param['value']
+                    # key和value都为空的不添加到表单中
+                    if param['key'] != "" and param['value'] != "":
+                        params_info[param['key']] = param['value']
         except:
             logger.error('参数格式错误！')
             raise
@@ -570,9 +572,6 @@ class ModifyJMX(OperateJmx):
             self._add_form_data(HTTPSamplerProxy, params_info)
         elif param_type == 'raw' and params:
             self._add_raw_data(HTTPSamplerProxy, params)
-        else:
-            logger.error("param_type或者param参数错误")
-            raise
 
         self._add_sampler_base(sp, url, method)
 

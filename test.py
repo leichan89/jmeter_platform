@@ -84,12 +84,12 @@ django.setup()
 #
 # for i in j:
 #     print(i.task.task_type)
-from jmxs.models import JmxThreadGroup
-
-s = JmxThreadGroup.objects.get(jmx_id=76)
-print(s.jmx)
-for i in s:
-    print(i.jmx)
+# from jmxs.models import JmxThreadGroup
+#
+# s = JmxThreadGroup.objects.get(jmx_id=76)
+# print(s.jmx)
+# for i in s:
+#     print(i.jmx)
 
 
 # # #
@@ -238,3 +238,6 @@ for i in s:
 # """
 #     print(s)
 
+s = {"": ""}
+
+print(s)
