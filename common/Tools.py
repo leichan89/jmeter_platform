@@ -76,6 +76,36 @@ class Tools:
         else:
             raise FileNotFoundError
 
+    @staticmethod
+    def assert_type_dict():
+        """
+        生成断言代码
+        :param assert_str: 断言的字符
+        :return:
+        """
+        assert_dict = {}
+        assert_dict['Aef'] = 2
+        assert_dict['Bef'] = 1
+        assert_dict['Cef'] = 8
+        assert_dict['Def'] = 16
+
+        assert_dict['AEf'] = 6
+        assert_dict['BEf'] = 5
+        assert_dict['CEf'] = 12
+        assert_dict['DEf'] = 20
+
+        assert_dict['AEF'] = 38
+        assert_dict['BEF'] = 37
+        assert_dict['CEF'] = 44
+        assert_dict['DEF'] = 52
+
+        assert_dict['AeF'] = 34
+        assert_dict['BeF'] = 33
+        assert_dict['CeF'] = 40
+        assert_dict['DeF'] = 48
+
+        return assert_dict
+
 
 if __name__ == "__main__":
 

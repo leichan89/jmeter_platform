@@ -9,8 +9,8 @@ class Jmxs(models.Model):
     在生成了jtl后需要更新JtlsDetails表中的jtl_url_created字段
     """
 
-    jmx = models.CharField("jmx存放路径", max_length=200)
-    jmx_alias = models.CharField('jmx中文别名',max_length=200)
+    jmx = models.CharField("jmx存放路径", max_length=500)
+    jmx_alias = models.CharField('jmx中文别名',max_length=500)
     thread_base_info = models.TextField("线程组基本信息", default="")
     add_user = models.ForeignKey(Users, on_delete=models.DO_NOTHING, verbose_name="用户")
     add_time = models.DateTimeField("添加时间", auto_now_add=True)
@@ -36,7 +36,7 @@ class JmxThreadGroup(models.Model):
         ('teardown', 'setup线程组'),
     )
     jmx = models.ForeignKey(Jmxs, on_delete=models.CASCADE)
-    child_name = models.CharField("线程组子类的名称", max_length=100)
+    child_name = models.CharField("线程组子类的名称", max_length=500)
     child_type = models.CharField("子类的类型", choices=CHILD_TYPE, default="sampler", max_length=10)
     child_info = models.TextField("线程组子类的信息")
     child_thread = models.CharField("所在线程组类型", choices=CHILD_THREAD, default="thread", max_length=10)
@@ -61,9 +61,9 @@ class SamplersChildren(models.Model):
         ('beanshell_end', 'beanshell后置处理器')
     )
     sampler = models.ForeignKey(JmxThreadGroup, on_delete=models.CASCADE)
-    child_name = models.CharField("子元素名称", max_length=100)
+    child_name = models.CharField("子元素名称", max_length=500)
     child_type = models.CharField("子元素类型", choices=CHILD_TYPE, default="header", max_length=20)
-    child_info = models.TextField("子元素信息", max_length=1000)
+    child_info = models.TextField("子元素信息", max_length=5000)
     add_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:

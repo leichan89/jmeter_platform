@@ -8,7 +8,7 @@ class Tasks(models.Model):
     """
     任务表，查询任务的时候，调用taskdetails查询任务关联的jmx数量
     """
-    task_name = models.CharField("任务名称", max_length=100)
+    task_name = models.CharField("任务名称", max_length=200)
     # 任务的类型，0是普通的任务，1是单个jmx的任务
     task_type = models.IntegerField('任务类型', default=0)
     add_user = models.ForeignKey(Users, on_delete=models.DO_NOTHING, verbose_name="用户名")
@@ -46,7 +46,7 @@ class TaskFlow(models.Model):
     celery_task_id = models.CharField("celery任务的id", max_length=40)
     # 0:进行中，1:已停止，2:执行异常，3:已结束
     task_status = models.IntegerField('任务流水状态', default=0)
-    task_flow_url = models.CharField("流水任务的url", max_length=300)
+    task_flow_url = models.CharField("流水任务的url", max_length=500)
     add_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(auto_now=True)
 
@@ -64,7 +64,7 @@ class FlowTaskAggregateReport(models.Model):
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="任务id")
     flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE)
     label = models.CharField("Label", max_length=1000)
-    samplers = models.CharField("样本名称", max_length=1000)
+    samplers = models.CharField("样本名称", max_length=500)
     average_req = models.CharField("平均值", max_length=100)
     median_req = models.CharField("中位数", max_length=100)
     line90_req = models.CharField("90%百分位", max_length=100)

@@ -18,6 +18,7 @@ urlpatterns = [
     path('jmxs/create', views.JmxCreate.as_view()),
     path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
     path('samplers/create_header', views.JmxCreateSamplerHeader.as_view()),
+    path('samplers/create_rsp_assert', views.JmxCreateSamplerRSPAssert.as_view()),
     path('samplers/delete/<int:child_id>', views.JmxDeleteChild.as_view()),
 ]
 

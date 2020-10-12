@@ -285,9 +285,6 @@ class ReadJmx():
         # 计数头信息
         header_count = 1
 
-        # 响应断言计数器
-        rsp_assert_count =1
-
         hashTree = tree.xpath(sampler_xapth)[0].getnext()
 
         if hashTree is not None:
@@ -314,28 +311,10 @@ class ReadJmx():
                         header_param = {"paramname": param_name, "paramvalue": param_value}
                         params_list.append(header_param)
                     child['params'] = params_list
-                if cd.tag == "ResponseAssertion":
-                    child['child_type'] = 'rsp_assert'
-                    old_rsp_assert_name = cd.attrib['testname']
-                    new_rsp_assert_name = old_rsp_assert_name + Tools.random_str(9)
-                    cd.attrib['testname'] = new_rsp_assert_name
-                    tree.write(self.jmxPath, encoding='utf-8')
-                    child['child_name'] = new_rsp_assert_name
-                    rsp_assert_xpath = hashTreeXpath + f'/ResponseAssertion[@testname="{new_rsp_assert_name}"]'
-                    child['xpath'] = rsp_assert_xpath
-                    # 断言内容
-                    rsp_assert_content_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/collectionProp/stringProp'
-                    # 断言方式
-                    rsp_assert_type_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/intProp'
-                    rsp_assert_content = tree.xpath(rsp_assert_content_xpath)[0].text
-                    rsp_assert_type = tree.xpath(rsp_assert_type_xpath)[0].text
-                    assert_type_dict = Tools.assert_type_dict()
-                    for key, value in assert_type_dict.items():
-                        if str(value) == rsp_assert_type:
-                            child['params'] = {"rsp_assert_content": rsp_assert_content, "rsp_assert_type": key}
                 if child:
                     children.append(child)
             return children
+
 
 class OperateJmx():
 
@@ -746,7 +725,7 @@ class ModifyJMX(OperateJmx):
 
         self.save_change()
 
-    def add_header(self, sampler_xpath, headers, header_xpath=None):
+    def add_header(self, sampler_xpath, header_xpath=None, header_name="HTTP信息头管理器", headers=None):
         """
         添加请求头信息，一个sampler只允许添加一个
         :param sampler_xpath: sampler的xpath路径
@@ -762,55 +741,26 @@ class ModifyJMX(OperateJmx):
         except:
             logger.exception("获取sampler信息失败")
             raise
-        header_name = "HTTP信息头管理器" + Tools.random_str(9)
-        header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel",
-                                   testclass="HeaderManager",
-                                   testname=header_name, enabled="true")
+
+        header_name = header_name + Tools.random_str(9)
+        header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel", testclass="HeaderManager",
+                          testname=header_name, enabled="true")
         # 添加hashTree
         self.add_sub_node(hashTree, new_tag_name="hashTree")
-        collectionProp = self.add_sub_node(header, new_tag_name="collectionProp", name="HeaderManager.headers")
-        for item in headers:
-            try:
-                self._add_headers_param(collectionProp, item['key'], item['value'])
-            except:
-                logger.exception("参数错误，找不到键【key，value】！")
-                raise
+        collectionProp = self.add_sub_node(header, new_tag_name='collectionProp', name="HeaderManager.headers")
+        if headers and isinstance(headers, list):
+            for item in headers:
+                try:
+                    self._add_headers_param(collectionProp, item['key'], item['value'])
+                except:
+                    logger.exception("参数错误，找不到键【key，value】！")
+                    raise
 
         new_header_xpath = sampler_xpath + f'/following-sibling::hashTree[1]/HeaderManager[@testname="{header_name}"]'
+
         self.save_change()
+
         return new_header_xpath
-
-    def add_rsp_assert(self, sampler_xpath, assert_str, assert_content, rsp_assert_xpath=None):
-        """
-        添加响应信息断言
-        :param sampler_xpath: 目标取样器
-        :param rsp_assert_xpath: 断言的xpath路径，方便后续修改，先删除，再修改
-        :param rsp_assert_name: 断言名称
-        :param assert_content: 断言内容
-        :return:
-        """
-        try:
-            if rsp_assert_xpath:
-                self.remove_node_and_next(rsp_assert_xpath)
-            hashTree = self.tree.xpath(sampler_xpath)[0].getnext()
-        except:
-            logger.exception("获取sampler信息失败")
-            raise
-
-        assert_type = self._to_assert_type(assert_str)
-        rsp_assert_name = "响应断言" + Tools.random_str(9)
-        rsp_assert = self.add_sub_node(hashTree, new_tag_name="ResponseAssertion", guiclass="AssertionGui",
-                                       testclass="ResponseAssertion", testname=rsp_assert_name, enabled="true")
-        collectionProp = self.add_sub_node(rsp_assert, new_tag_name="collectionProp", name="Asserion.test_strings")
-        self.add_sub_node(collectionProp, new_tag_name="stringProp", text=assert_content, name="-673543273")
-        self.add_sub_node(rsp_assert, new_tag_name="stringProp", name="Assertion.custom_message")
-        self.add_sub_node(rsp_assert, new_tag_name="stringProp", text="Assertion.response_data", name="Assertion.test_field")
-        self.add_sub_node(rsp_assert, new_tag_name="boolProp", text="false", name="Assertion.assume_success")
-        self.add_sub_node(rsp_assert, new_tag_name="intProp", text=assert_type, name="Assertion.test_type")
-
-        new_rsp_assert_xpath = sampler_xpath + f'/following-sibling::hashTree[1]/ResponseAssertion[@testname="{rsp_assert_name}"]'
-        self.save_change()
-        return new_rsp_assert_xpath
 
     def _add_param(self, parent_node, param_name, param_value):
         """
@@ -925,19 +875,6 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=raw, name='Argument.value')
         self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
         self.save_change()
-
-    def _to_assert_type(self, assert_str):
-        """
-        生成断言代码
-        :param assert_str: 断言的字符
-        :return:
-        """
-        try:
-            assert_type_dict = Tools.assert_type_dict()
-            return str(assert_type_dict[assert_str])
-        except:
-            logger.exception("无效的断言字符参数")
-            raise
 
 if __name__ == '__main__':
     # r = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')

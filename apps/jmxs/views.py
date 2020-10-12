@@ -181,18 +181,39 @@ class JmxCreateSamplerHeader(APIView):
     def post(self, request):
         sapmler_id = request.data.get('sapmlerId')
         params = request.data.get('params')
-        if sapmler_id:
-            try:
-                # 获取jmx的信息
-                jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmler_id)
-                jmx_path = jmxInfo[0].jmx
-                sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
-                ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params)
-                return APIRsp()
-            except:
-                return APIRsp(code=400, msg='创建header失败！')
-        else:
-            return APIRsp(code=400, msg='创建header失败！未传入samplerId')
+        if not params:
+            return APIRsp(msg='头参数为空，不创建头信息')
+        elif not isinstance(params, list):
+            return APIRsp(code=400, msg='参数应该是一个list')
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmler_id)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params)
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建header失败，参数错误！')
+
+class JmxCreateSamplerRSPAssert(APIView):
+    """
+    创建sampler的响应断言
+    """
+    def post(self, request):
+        sapmler_id = request.data.get('sapmlerId')
+        assert_str = request.data.get('assertStr')
+        assert_content = request.data.get('assertContent')
+        if not assert_str and not assert_content:
+            return APIRsp(msg='断言参数为空，不创建响应断言')
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmler_id)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str, assert_content=assert_content)
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建响应断言失败，参数错误！')
 
 class JmxCreateUpdateSapmler(APIView):
     """
