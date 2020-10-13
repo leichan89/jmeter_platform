@@ -201,8 +201,11 @@ class JmxCreateSamplerRSPAssert(APIView):
     """
     def post(self, request):
         sapmler_id = request.data.get('sapmlerId')
-        assert_str = request.data.get('assertStr')
+        radioStr = request.data.get('radioStr')
+        checkedFalseStr = request.data.get('checkedFalseStr')
+        checkedOrStr = request.data.get('checkedOrStr')
         assert_content = request.data.get('assertContent')
+        assert_str = radioStr + checkedFalseStr + checkedOrStr
         if not assert_str and not assert_content:
             return APIRsp(msg='断言参数为空，不创建响应断言')
         try:
