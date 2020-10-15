@@ -26,7 +26,7 @@ class CsvUpload(APIView):
             csv_ext = csv_name_ext[1]
             if csv_ext not in settings.CSV_ALLOWED_FILE_TYPE:
                 return APIRsp(code=205, msg='无效的格式，请上传.csv格式的文件', status=status.HTTP_205_RESET_CONTENT)
-            csvfile = csv_name + "-" + Tools.random_str(9) + csv_ext
+            csvfile = csv_name + "." + Tools.random_str(9) + csv_ext
             path = settings.CSV_URL + csvfile
 
             with open(path, 'wb') as f:

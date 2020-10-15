@@ -47,7 +47,7 @@ class JmxUpload(APIView):
             jmx_ext = jmx_name_ext[1]
             if jmx_ext not in settings.JMX_ALLOWED_FILE_TYPE:
                 return APIRsp(code=205, msg='无效的格式，请上传.jmx格式的文件', status=status.HTTP_205_RESET_CONTENT)
-            jmxfile = jmx_name + "-" + Tools.random_str(9) + jmx_ext
+            jmxfile = jmx_name + "." + Tools.random_str(9) + jmx_ext
             jmxpath = settings.JMX_URL + jmxfile
 
             with open(jmxpath, 'wb') as f:
@@ -130,7 +130,7 @@ class JmxCreate(APIView):
 
         template_path = settings.JMX_URL + 'template.jmx'
 
-        new_jmxpath = settings.JMX_URL + jmx_name + "-" + Tools.random_str(9) + '.jmx'
+        new_jmxpath = settings.JMX_URL + jmx_name + "." + Tools.random_str(9) + '.jmx'
 
         shutil.copyfile(template_path, new_jmxpath)
         try:

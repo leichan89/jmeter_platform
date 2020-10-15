@@ -6,6 +6,7 @@
 from lxml import etree
 import logging
 import json
+import time
 from common.Tools import Tools
 
 logger = logging.getLogger(__file__)
@@ -121,7 +122,7 @@ class ReadJmx():
 
             # 取样器名称
             old_name = sampler.attrib['testname']
-            sampler_name = old_name + '.' + Tools.random_str(19)
+            sampler_name = old_name + '.' + Tools.random_str(9)
             sampler.attrib['testname'] = sampler_name
             tree.write(self.jmxPath, encoding='utf-8')
             sampler_info['name'] = old_name
@@ -193,7 +194,7 @@ class ReadJmx():
                 csv_xpath = f"{csv_root_xpath}[{cinx + 1}]"
 
                 old_name = csv.attrib['testname']
-                csv_name = old_name + '.' + Tools.random_str(19)
+                csv_name = old_name + '.' + Tools.random_str(9)
                 csv.attrib['testname'] = csv_name
                 csv_info['name'] = old_name
                 tree.write(self.jmxPath, encoding='utf-8')
@@ -578,7 +579,7 @@ class ModifyJMX(OperateJmx):
 
         self.remove_node_and_next(xpath)
 
-        name = name + Tools.random_str(19)
+        name = name + "." + Tools.random_str(9)
 
         HTTPSamplerProxy = accord_tag + f"/HTTPSamplerProxy[@testname='{name}']"
 
@@ -635,7 +636,7 @@ class ModifyJMX(OperateJmx):
 
         self.remove_node_and_next(xpath)
 
-        name = name + Tools.random_str(19)
+        name = name + Tools.random_str(9)
 
         CSVDataSet = accord_tag + f"/CSVDataSet[@testname='{name}']"
 
@@ -762,7 +763,7 @@ class ModifyJMX(OperateJmx):
         except:
             logger.exception("获取sampler信息失败")
             raise
-        header_name = "HTTP信息头管理器" + Tools.random_str(9)
+        header_name = "HTTP信息头管理器" + "." + Tools.random_str(9)
         header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel",
                                    testclass="HeaderManager",
                                    testname=header_name, enabled="true")
@@ -798,11 +799,11 @@ class ModifyJMX(OperateJmx):
             raise
 
         assert_type = self._to_assert_type(assert_str)
-        rsp_assert_name = "响应断言" + Tools.random_str(9)
+        rsp_assert_name = "响应断言" + "." + Tools.random_str(9)
         rsp_assert = self.add_sub_node(hashTree, new_tag_name="ResponseAssertion", guiclass="AssertionGui",
                                        testclass="ResponseAssertion", testname=rsp_assert_name, enabled="true")
         collectionProp = self.add_sub_node(rsp_assert, new_tag_name="collectionProp", name="Asserion.test_strings")
-        self.add_sub_node(collectionProp, new_tag_name="stringProp", text=assert_content, name="-673543273")
+        self.add_sub_node(collectionProp, new_tag_name="stringProp", text=assert_content, name=str(time.time()))
         self.add_sub_node(rsp_assert, new_tag_name="stringProp", name="Assertion.custom_message")
         self.add_sub_node(rsp_assert, new_tag_name="stringProp", text="Assertion.response_data", name="Assertion.test_field")
         self.add_sub_node(rsp_assert, new_tag_name="boolProp", text="false", name="Assertion.assume_success")
@@ -835,7 +836,7 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.domain")
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.port")
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.protocol")
-        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.contentEncoding")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.contentEncoding", text="utf-8")
         self.add_sub_node(parent_node, new_tag_name='stringProp', text=url, name="HTTPSampler.path")
         self.add_sub_node(parent_node, new_tag_name='stringProp', text=method, name="HTTPSampler.method")
         self.add_sub_node(parent_node, new_tag_name='stringProp', text='true', name="HTTPSampler.follow_redirects")
