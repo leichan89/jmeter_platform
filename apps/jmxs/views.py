@@ -139,7 +139,7 @@ class JmxCreate(APIView):
             os.remove(new_jmxpath)
             return APIRsp(code=400, msg='创建jmx失败，参数错误！', status=status.HTTP_400_BAD_REQUEST)
 
-        jmxinfo = ReadJmx(new_jmxpath).analysis_jmx()
+        jmxinfo = ReadJmx(new_jmxpath).analysis_jmx(upload=False)
         if not jmxinfo:
             return APIRsp(code=400, msg='添加失败，jmx文件错误！', status=status.HTTP_400_BAD_REQUEST)
 

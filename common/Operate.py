@@ -16,7 +16,7 @@ class ReadJmx():
     def __init__(self, jmxPath):
         self.jmxPath = jmxPath
 
-    def analysis_jmx(self):
+    def analysis_jmx(self, upload=True):
         """
         解析jmx，获取sampler的信息
         :param jmxPath: jmx文件的绝对路径
@@ -68,16 +68,16 @@ class ReadJmx():
         teardown_csv_root_xpath = '//PostThreadGroup[1]/following-sibling::hashTree[1]/CSVDataSet'
 
         # 获取thread线程组的sampler和csv
-        thread_sapmlers_info = self._read_sampler(tree, thread_sapmler_root_xpath)
-        thread_csvs_info = self._read_csv(tree, thread_csv_root_xpath)
+        thread_sapmlers_info = self._read_sampler(tree, thread_sapmler_root_xpath, upload=upload)
+        thread_csvs_info = self._read_csv(tree, thread_csv_root_xpath, upload=upload)
 
         # 获取setup线程组的sampler和csv
-        setup_sapmlers_info = self._read_sampler(tree, setup_sapmler_root_xpath, thread_type='setup')
-        setup_csvs_info = self._read_csv(tree, setup_csv_root_xpath, thread_type='setup')
+        setup_sapmlers_info = self._read_sampler(tree, setup_sapmler_root_xpath, thread_type='setup', upload=upload)
+        setup_csvs_info = self._read_csv(tree, setup_csv_root_xpath, thread_type='setup', upload=upload)
 
         # 获取teardown线程组的sampler和csv
-        teardown_sapmlers_info = self._read_sampler(tree, teardown_sapmler_root_xpath, thread_type='teardown')
-        teardown_csvs_info = self._read_csv(tree, teardown_csv_root_xpath, thread_type='teardown')
+        teardown_sapmlers_info = self._read_sampler(tree, teardown_sapmler_root_xpath, thread_type='teardown', upload=upload)
+        teardown_csvs_info = self._read_csv(tree, teardown_csv_root_xpath, thread_type='teardown', upload=upload)
 
         # 获取线程组的信息
         thread_info = self._read_thread_info(tree)
@@ -88,7 +88,7 @@ class ReadJmx():
 
         return sapmlers_info, csvs_info, thread_info
 
-    def _read_sampler(self, tree, sapmler_root_xpath, thread_type='thread'):
+    def _read_sampler(self, tree, sapmler_root_xpath, thread_type='thread', upload=True):
         """
 
         :param tree:
@@ -122,9 +122,12 @@ class ReadJmx():
 
             # 取样器名称
             old_name = sampler.attrib['testname']
-            sampler_name = old_name + '.' + Tools.random_str(9)
-            sampler.attrib['testname'] = sampler_name
-            tree.write(self.jmxPath, encoding='utf-8')
+            if upload:
+                sampler_name = old_name + '.' + Tools.random_str(9)
+                sampler.attrib['testname'] = sampler_name
+                tree.write(self.jmxPath, encoding='utf-8')
+            else:
+                sampler_name = old_name
             sampler_info['name'] = old_name
 
             # 取样器xpath
@@ -166,11 +169,11 @@ class ReadJmx():
                             sampler_info['params'].append({"paramname": paramname, "paramvalue": paramvalue})
             sapmlers_info.append(sampler_info)
             # 获取sampler的子元素信息
-            sampler_info['children'] = self._read_sampler_children_info(tree, sampler_xpath)
+            sampler_info['children'] = self._read_sampler_children_info(tree, sampler_xpath, upload=upload)
 
         return sapmlers_info
 
-    def _read_csv(self, tree, csv_root_xpath, thread_type='thread'):
+    def _read_csv(self, tree, csv_root_xpath, thread_type='thread', upload=True):
         """
 
         :param tree:
@@ -194,13 +197,14 @@ class ReadJmx():
                 csv_xpath = f"{csv_root_xpath}[{cinx + 1}]"
 
                 old_name = csv.attrib['testname']
-                csv_name = old_name + '.' + Tools.random_str(9)
-                csv.attrib['testname'] = csv_name
+                if upload:
+                    csv_name = old_name + '.' + Tools.random_str(9)
+                    csv.attrib['testname'] = csv_name
+                    tree.write(self.jmxPath, encoding='utf-8')
+                else:
+                    csv_name = old_name
                 csv_info['name'] = old_name
-                tree.write(self.jmxPath, encoding='utf-8')
-
                 csv_info['xpath'] = f'{csv_root_xpath}/[@testname="{csv_name}"]'
-
                 filename_xpath = csv_xpath + '/stringProp[@name="filename"][1]'
                 filename = tree.xpath(filename_xpath)[0].text
                 csv_info['filename'] = filename
@@ -269,7 +273,7 @@ class ReadJmx():
 
         return thread_info
 
-    def _read_sampler_children_info(self, tree, sampler_xapth):
+    def _read_sampler_children_info(self, tree, sampler_xapth, upload=True):
         """
         读取sampler的子元素信息
         :param tree:
@@ -298,9 +302,12 @@ class ReadJmx():
                 if cd.tag == "HeaderManager":
                     child['child_type'] = 'header'
                     old_header_name = cd.attrib['testname']
-                    new_header_name = old_header_name + Tools.random_str(9)
-                    cd.attrib['testname'] = new_header_name
-                    tree.write(self.jmxPath, encoding='utf-8')
+                    if upload:
+                        new_header_name = old_header_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_header_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_header_name = old_header_name
                     child['child_name'] = new_header_name
                     header_xpath = hashTreeXpath + f'/HeaderManager[@testname="{new_header_name}"]'
                     child['xpath'] = header_xpath
@@ -318,9 +325,12 @@ class ReadJmx():
                 if cd.tag == "ResponseAssertion":
                     child['child_type'] = 'rsp_assert'
                     old_rsp_assert_name = cd.attrib['testname']
-                    new_rsp_assert_name = old_rsp_assert_name + Tools.random_str(9)
-                    cd.attrib['testname'] = new_rsp_assert_name
-                    tree.write(self.jmxPath, encoding='utf-8')
+                    if upload:
+                        new_rsp_assert_name = old_rsp_assert_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_rsp_assert_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_rsp_assert_name = old_rsp_assert_name
                     child['child_name'] = new_rsp_assert_name
                     rsp_assert_xpath = hashTreeXpath + f'/ResponseAssertion[@testname="{new_rsp_assert_name}"]'
                     child['xpath'] = rsp_assert_xpath
