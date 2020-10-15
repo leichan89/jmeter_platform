@@ -25,7 +25,7 @@ class Tools:
 
 
     @staticmethod
-    def random_str(slen=30):
+    def random_str(slen=20):
         stime = str(time.time()).split('.')[0]
         seed = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         sa = []
