@@ -338,12 +338,15 @@ class ReadJmx():
                     rsp_assert_content_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/collectionProp/stringProp'
                     # 断言方式
                     rsp_assert_type_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/intProp'
-                    rsp_assert_content = tree.xpath(rsp_assert_content_xpath)[0].text
+                    rsp_assert_content = tree.xpath(rsp_assert_content_xpath)
+                    rsp_assert_content_list = []
+                    for rac in rsp_assert_content:
+                        rsp_assert_content_list.append(rac.text)
                     rsp_assert_type = tree.xpath(rsp_assert_type_xpath)[0].text
                     assert_type_dict = Tools.assert_type_dict()
                     for key, value in assert_type_dict.items():
                         if str(value) == rsp_assert_type:
-                            child['params'] = {"rsp_assert_content": rsp_assert_content, "rsp_assert_type": key}
+                            child['params'] = {"rsp_assert_content": rsp_assert_content_list, "rsp_assert_type": key}
                 if child:
                     children.append(child)
             return children
@@ -813,7 +816,9 @@ class ModifyJMX(OperateJmx):
         rsp_assert = self.add_sub_node(hashTree, new_tag_name="ResponseAssertion", guiclass="AssertionGui",
                                        testclass="ResponseAssertion", testname=rsp_assert_name, enabled="true")
         collectionProp = self.add_sub_node(rsp_assert, new_tag_name="collectionProp", name="Asserion.test_strings")
-        self.add_sub_node(collectionProp, new_tag_name="stringProp", text=assert_content, name=str(time.time()))
+        for ac in assert_content:
+            if ac['key']:
+                self.add_sub_node(collectionProp, new_tag_name="stringProp", text=ac['key'], name=str(time.time()))
         self.add_sub_node(rsp_assert, new_tag_name="stringProp", name="Assertion.custom_message")
         self.add_sub_node(rsp_assert, new_tag_name="stringProp", text="Assertion.response_data", name="Assertion.test_field")
         self.add_sub_node(rsp_assert, new_tag_name="boolProp", text="false", name="Assertion.assume_success")

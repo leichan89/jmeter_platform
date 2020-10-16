@@ -2248,25 +2248,29 @@ s = [
 #     else:
 #         print(count)
 #         count = []
-import random
-def test(mylist):
-    ran = random.randint(1, 5)
-    if ran < len(mylist):
-        s = mylist[:ran]
-        print(param(s))
-        for i in range(ran):
-            mylist.pop(0)
-        if mylist:
-            test(mylist)
-    else:
-        print(param(mylist))
+# import random
+# def test(mylist):
+#     ran = random.randint(1, 5)
+#     if ran < len(mylist):
+#         s = mylist[:ran]
+#         print(param(s))
+#         for i in range(ran):
+#             mylist.pop(0)
+#         if mylist:
+#             test(mylist)
+#     else:
+#         print(param(mylist))
+#
+#
+# def param(mylist):
+#     t = []
+#     for i in mylist:
+#         t.append({"questionId":i})
+#     return t
+#
+#
+# test(s)
+s = []
+for i in s:
+    print('a')
 
-
-def param(mylist):
-    t = []
-    for i in mylist:
-        t.append({"questionId":i})
-    return t
-
-
-test(s)
