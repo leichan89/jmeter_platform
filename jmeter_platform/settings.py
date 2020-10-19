@@ -67,7 +67,8 @@ INSTALLED_APPS = [
     'jtls',
     'reports',
     'params',
-    'corsheaders'
+    'corsheaders',
+    'django_filters'
 ]
 
 MIDDLEWARE = [

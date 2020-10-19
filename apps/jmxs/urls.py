@@ -16,6 +16,7 @@ urlpatterns = [
     # 删除接口
     path('jmxs/delete/<int:pk>', views.JmxDestory.as_view()),
     path('jmxs/create', views.JmxCreate.as_view()),
+    path('jmxs/thread_group_children/<int:jmx_id>', views.JmxChildrenList.as_view()),
     path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
     path('samplers/create_header', views.JmxCreateSamplerHeader.as_view()),
     path('samplers/create_rsp_assert', views.JmxCreateSamplerRSPAssert.as_view()),

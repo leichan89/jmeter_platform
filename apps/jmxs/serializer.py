@@ -4,7 +4,7 @@
 # @File    : serializer.py
 
 from rest_framework import serializers
-from .models import Jmxs, JmxThreadGroup
+from .models import Jmxs, JmxThreadGroup, JmxThreadGroup
 from users.serializer import UserSerializer
 
 class JmxsSerializer(serializers.ModelSerializer):

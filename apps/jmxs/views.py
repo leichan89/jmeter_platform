@@ -9,6 +9,7 @@ from .models import Jmxs
 from rest_framework import status
 from rest_framework import generics
 from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 import json
 import os
@@ -266,6 +267,25 @@ class JmxCreateUpdateSapmler(APIView):
             except:
                 return APIRsp(code=400, msg='新增sapmler失败，sampler参数有误！', status=status.HTTP_400_BAD_REQUEST)
 
+class JmxChildrenList(generics.GenericAPIView):
+    """
+    查询Jmx的子元素，安装第三方过滤库DjangoFilterBackend
+    http://www.mamicode.com/info-detail-3065555.html
+    """
+    queryset = JmxThreadGroup.objects.all().order_by('-add_time')
+    serializer_class = JmxThreadGroupSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['child_thread']
+    def get(self, request, jmx_id):
+        try:
+            qs = self.get_queryset().filter(jmx_id=jmx_id)
+            qs = self.filter_queryset(qs)
+            serializer = self.get_serializer(instance=qs, many=True)
+            return APIRsp(data=serializer.data)
+        except Exception as e:
+            logger.exception(f'生成聚合报告异常\n{e}')
+            return APIRsp(code=500, msg='生成聚合报告异常', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class JmxDeleteChild(APIView):
     """
     删除sampler或者csv
@@ -304,7 +324,7 @@ class JmxListView(generics.ListAPIView):
             data = rsp_data.data
             del data['next']
             del data['previous']
-            return APIRsp(data=rsp_data.data)
+            return APIRsp(data=data)
         else:
             return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)
 
