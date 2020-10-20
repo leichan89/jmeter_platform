@@ -34,7 +34,7 @@ class TasksList(generics.ListAPIView):
             data = rsp_data.data
             del data['next']
             del data['previous']
-            return APIRsp(data=rsp_data.data)
+            return APIRsp(data=data)
         else:
             return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)
 
@@ -206,7 +206,7 @@ class FlowsList(generics.ListAPIView):
             data = rsp_data.data
             del data['next']
             del data['previous']
-            return APIRsp(data=rsp_data.data)
+            return APIRsp(data=data)
         else:
             return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)
 

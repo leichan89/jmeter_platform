@@ -298,6 +298,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 每页显示的个数
     'PAGE_SIZE': '10',
+    # 第三方过滤器
+    'DEFAULT_FILTER_BACKENDS': 'django_filters.rest_framework.backends.DjangoFilterBackend'
 }
 
 JWT_AUTH = {
