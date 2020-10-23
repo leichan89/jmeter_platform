@@ -161,12 +161,10 @@ class ReadJmx():
                             if sampler_info['param_type'] == 'form':
                                 # key,value格式的参数
                                 # param.attrib['name']为参数的名称，value.text为参数的值
-                                paramname = param.attrib['name']
+                                sampler_info['params'].append({"key": param.attrib['name'], "value": value.text})
                             else:
                                 # raw格式的参数，没有Argument.name这个标签
-                                paramname = ""
-                            paramvalue = value.text
-                            sampler_info['params'].append({"paramname": paramname, "paramvalue": paramvalue})
+                                sampler_info['params'] = value.text
             sapmlers_info.append(sampler_info)
             # 获取sampler的子元素信息
             sampler_info['children'] = self._read_sampler_children_info(tree, sampler_xpath, upload=upload)
@@ -568,15 +566,12 @@ class ModifyJMX(OperateJmx):
         :param xpath: 取样器地址，可以先删除之前的取样器，再重新添加
         :return:
         """
-        params_info = {}
+        params_info = []
         sampler_info = {}
         try:
             # 如果是form格式，就需要转换为字典
             if params and isinstance(params, list):
-                for param in params:
-                    # key和value都为空的不添加到表单中
-                    if param['key'] != "" and param['value'] != "":
-                        params_info[param['key']] = param['value']
+                params_info = params
         except:
             logger.error('参数格式错误！')
             raise
@@ -591,18 +586,25 @@ class ModifyJMX(OperateJmx):
             logger.error('accord参数错误')
             raise
 
-        self.remove_node_and_next(xpath)
-
         name = name + "." + Tools.random_str(9)
 
-        HTTPSamplerProxy = accord_tag + f"/HTTPSamplerProxy[@testname='{name}']"
+        if xpath:
+            # 如果是修改，则删除所有子节点，重新添加参数
+            sampler = self.tree.xpath(xpath)[0]
+            sampler_children = sampler.getchildren()
+            for child in sampler_children:
+                child.getparent().remove(child)
+            sampler.attrib['testname'] = name
+            HTTPSamplerProxy = accord_tag + f"/HTTPSamplerProxy[@testname='{name}']"
+        else:
+            HTTPSamplerProxy = accord_tag + f"/HTTPSamplerProxy[@testname='{name}']"
 
-        # 在最后的位置插入sampler
-        sp = self.add_sub_node(accord_tag, new_tag_name='HTTPSamplerProxy', guiclass="HttpTestSampleGui",
-                          testclass="HTTPSamplerProxy", testname=name, enabled="true")
+            # 在最后的位置插入sampler
+            self.add_sub_node(accord_tag, new_tag_name='HTTPSamplerProxy', guiclass="HttpTestSampleGui",
+                              testclass="HTTPSamplerProxy", testname=name, enabled="true")
 
-        # 添加hashTree
-        self.add_sub_node(accord_tag, new_tag_name='hashTree')
+            # 添加hashTree
+            self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
         sampler_info['params'] = ''
         if param_type == 'form' and params_info:
@@ -612,7 +614,7 @@ class ModifyJMX(OperateJmx):
             self._add_raw_data(HTTPSamplerProxy, params)
             sampler_info['params'] = params
 
-        self._add_sampler_base(sp, url, method)
+        self._add_sampler_base(HTTPSamplerProxy, url, method)
         self.save_change()
         sampler_info['thread_type'] = accord
         sampler_info['name'] = name
@@ -620,8 +622,7 @@ class ModifyJMX(OperateJmx):
         sampler_info['url'] = url
         sampler_info['method'] = method
         sampler_info['param_type'] = param_type
-
-
+        print(sampler_info)
         return sampler_info
 
     def add_csv(self, filename, variableNames, delimiter=',', ignoreFirstLine='false', recycle='false', stopThread='false', accord='thread', xpath=None):
@@ -896,21 +897,17 @@ class ModifyJMX(OperateJmx):
         # 在elementProp节点下添加collectionProp节点
         self.add_sub_node(elementProp, new_tag_name='collectionProp', name='Arguments.arguments')
 
-        if not isinstance(params, dict):
-            logger.exception('参数必须是一个字典')
+        if not isinstance(params, list):
+            logger.exception('参数必须是一个列表')
             raise
-        for key, value in params.items():
-            try:
-                value = str(value)
-            except:
-                pass
+        for param in params:
             sub_elementProp = collectionProp + f'/elementProp[{count}]'
-            self.add_sub_node(collectionProp, new_tag_name='elementProp', name=value, elementType='HTTPArgument')
+            self.add_sub_node(collectionProp, new_tag_name='elementProp', name=param['value'], elementType='HTTPArgument')
             self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
-            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=value, name='Argument.value')
+            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=param['value'], name='Argument.value')
             self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
             self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='true', name='HTTPArgument.use_equals')
-            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=key, name='Argument.name')
+            self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=param['key'], name='Argument.name')
             count += 1
         self.save_change()
 
