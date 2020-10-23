@@ -147,13 +147,12 @@ class ReadJmx():
             if raw_param:
                 sampler_info['param_type'] = 'raw'
 
-            sampler_info['params'] = []
+            sampler_info['params'] = ""
 
             sampler_params = tree.xpath(sapmler_param_xpath)
             if sampler_params:
                 for pidx, param in enumerate(sampler_params):
                     # param_value_xpath为参数具体的xpath路径，elementProp/stringProp
-
                     param_value_xpath = f"{sapmler_param_xpath}[{pidx + 1}]/stringProp"
                     param_value = tree.xpath(param_value_xpath)
                     for value in param_value:
@@ -161,6 +160,7 @@ class ReadJmx():
                             if sampler_info['param_type'] == 'form':
                                 # key,value格式的参数
                                 # param.attrib['name']为参数的名称，value.text为参数的值
+                                sampler_info['params'] = []
                                 sampler_info['params'].append({"key": param.attrib['name'], "value": value.text})
                             else:
                                 # raw格式的参数，没有Argument.name这个标签
@@ -307,8 +307,7 @@ class ReadJmx():
                     else:
                         new_header_name = old_header_name
                     child['child_name'] = new_header_name
-                    header_xpath = hashTreeXpath + f'/HeaderManager[@testname="{new_header_name}"]'
-                    child['xpath'] = header_xpath
+                    child['xpath'] = f'//HeaderManager[@testname="{new_header_name}"]'
                     header_temp_xpath = hashTreeXpath + f'/HeaderManager[{header_count}]/collectionProp/elementProp'
                     header_param_info = tree.xpath(header_temp_xpath)
                     params_list = []
@@ -317,7 +316,7 @@ class ReadJmx():
                         param_value_xpath = f"{header_temp_xpath}[{pidx + 1}]/stringProp[@name='Header.value']"
                         param_name = tree.xpath(param_name_xpath)[0].text
                         param_value = tree.xpath(param_value_xpath)[0].text
-                        header_param = {"paramname": param_name, "paramvalue": param_value}
+                        header_param = {"key": param_name, "value": param_value}
                         params_list.append(header_param)
                     child['params'] = params_list
                 if cd.tag == "ResponseAssertion":
@@ -330,7 +329,7 @@ class ReadJmx():
                     else:
                         new_rsp_assert_name = old_rsp_assert_name
                     child['child_name'] = new_rsp_assert_name
-                    rsp_assert_xpath = hashTreeXpath + f'/ResponseAssertion[@testname="{new_rsp_assert_name}"]'
+                    rsp_assert_xpath = f'/ResponseAssertion[@testname="{new_rsp_assert_name}"]'
                     child['xpath'] = rsp_assert_xpath
                     # 断言内容
                     rsp_assert_content_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/collectionProp/stringProp'
@@ -622,7 +621,6 @@ class ModifyJMX(OperateJmx):
         sampler_info['url'] = url
         sampler_info['method'] = method
         sampler_info['param_type'] = param_type
-        print(sampler_info)
         return sampler_info
 
     def add_csv(self, filename, variableNames, delimiter=',', ignoreFirstLine='false', recycle='false', stopThread='false', accord='thread', xpath=None):
@@ -792,9 +790,14 @@ class ModifyJMX(OperateJmx):
                 logger.exception("参数错误，找不到键【key，value】！")
                 raise
 
-        new_header_xpath = sampler_xpath + f'/following-sibling::hashTree[1]/HeaderManager[@testname="{header_name}"]'
+        new_header_xpath = f'//HeaderManager[@testname="{header_name}"]'
         self.save_change()
-        return new_header_xpath
+        child_info = {}
+        child_info['child_type'] = "header"
+        child_info['child_name'] = header_name
+        child_info['xpath'] = new_header_xpath
+        child_info['params'] = headers
+        return child_info
 
     def add_rsp_assert(self, sampler_xpath, assert_str, assert_content, rsp_assert_xpath=None):
         """
@@ -826,9 +829,15 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(rsp_assert, new_tag_name="boolProp", text="false", name="Assertion.assume_success")
         self.add_sub_node(rsp_assert, new_tag_name="intProp", text=assert_type, name="Assertion.test_type")
 
-        new_rsp_assert_xpath = sampler_xpath + f'/following-sibling::hashTree[1]/ResponseAssertion[@testname="{rsp_assert_name}"]'
+        new_rsp_assert_xpath = f'//ResponseAssertion[@testname="{rsp_assert_name}"]'
         self.save_change()
-        return new_rsp_assert_xpath
+
+        child_info = {}
+        child_info['child_type'] = "rsp_assert"
+        child_info['child_name'] = rsp_assert_name
+        child_info['xpath'] = new_rsp_assert_xpath
+        child_info['params'] = assert_content
+        return child_info
 
     def _add_param(self, parent_node, param_name, param_value):
         """

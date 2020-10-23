@@ -19,8 +19,8 @@ urlpatterns = [
     path('jmxs/uploadcsv', views.CsvUpload.as_view()),
     path('jmxs/thread_group_children/<int:jmx_id>', views.JmxChildrenList.as_view()),
     path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
-    path('samplers/create_header', views.JmxCreateSamplerHeader.as_view()),
-    path('samplers/create_rsp_assert', views.JmxCreateSamplerRSPAssert.as_view()),
+    path('samplers/header/create_update', views.SamplerCreateUpdateHeader.as_view()),
+    path('samplers/assert/create_update_rsp', views.SamplerCreateUpdateRSPAssert.as_view()),
     path('samplers/delete/<int:child_id>', views.JmxDeleteChild.as_view()),
     path('samplers/<int:pk>', views.JmxChildrenView.as_view()),
     path('csvs', views.CsvListView.as_view())

@@ -176,12 +176,13 @@ class JmxCreate(APIView):
         os.remove(new_jmxpath)
         return APIRsp(code=400, msg='添加失败，参数校验未通过', status=status.HTTP_400_BAD_REQUEST)
 
-class JmxCreateSamplerHeader(APIView):
+class SamplerCreateUpdateHeader(APIView):
     """
     创建sampler的header
     """
     def post(self, request):
-        sapmler_id = request.data.get('sapmlerId')
+        sapmlerId = request.data.get('sapmlerId')
+        childId = request.data.get('childId')
         params = request.data.get('params')
         if not params:
             return APIRsp(msg='头参数为空，不创建头信息')
@@ -189,33 +190,54 @@ class JmxCreateSamplerHeader(APIView):
             return APIRsp(code=400, msg='参数应该是一个list')
         try:
             # 获取jmx的信息
-            jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmler_id)
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmlerId)
             jmx_path = jmxInfo[0].jmx
             sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
-            ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params)
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params, header_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params)
+                s = SamplersChildren(sampler_id=sapmlerId, child_name=child_info['child_name'], child_type='header',
+                                     child_info=json.dumps(child_info))
+                s.save()
             return APIRsp()
         except:
             return APIRsp(code=400, msg='创建header失败，参数错误！')
 
-class JmxCreateSamplerRSPAssert(APIView):
+class SamplerCreateUpdateRSPAssert(APIView):
     """
     创建sampler的响应断言
     """
     def post(self, request):
-        sapmler_id = request.data.get('sapmlerId')
+        sapmlerId = request.data.get('sapmlerId')
+        childId = request.data.get('childId')
         radioStr = request.data.get('radioStr')
         checkedFalseStr = request.data.get('checkedFalseStr')
         checkedOrStr = request.data.get('checkedOrStr')
         assert_content = request.data.get('assertContent')
         assert_str = radioStr + checkedFalseStr + checkedOrStr
-        if not assert_str and not assert_content:
+        if len(assert_content) == 1 and assert_content[0]['key'] == "":
             return APIRsp(msg='断言参数为空，不创建响应断言')
         try:
             # 获取jmx的信息
-            jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmler_id)
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmlerId)
             jmx_path = jmxInfo[0].jmx
             sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
-            ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str, assert_content=assert_content)
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str,
+                                                        assert_content=assert_content, rsp_assert_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str,
+                                                                     assert_content=assert_content)
+                s = SamplersChildren(sampler_id=sapmlerId, child_name=child_info['child_name'], child_type='rsp_assert',
+                                     child_info=json.dumps(child_info))
+                s.save()
             return APIRsp()
         except:
             return APIRsp(code=400, msg='创建响应断言失败，参数错误！')
