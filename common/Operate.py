@@ -569,6 +569,7 @@ class ModifyJMX(OperateJmx):
         :return:
         """
         params_info = {}
+        sampler_info = {}
         try:
             # 如果是form格式，就需要转换为字典
             if params and isinstance(params, list):
@@ -603,36 +604,35 @@ class ModifyJMX(OperateJmx):
         # 添加hashTree
         self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
+        sampler_info['params'] = ''
         if param_type == 'form' and params_info:
             self._add_form_data(HTTPSamplerProxy, params_info)
+            sampler_info['params'] = params_info
         elif param_type == 'raw' and params:
             self._add_raw_data(HTTPSamplerProxy, params)
+            sampler_info['params'] = params
 
         self._add_sampler_base(sp, url, method)
-
         self.save_change()
-
-        sampler_info = {}
         sampler_info['thread_type'] = accord
         sampler_info['name'] = name
         sampler_info['xpath'] = HTTPSamplerProxy
         sampler_info['url'] = url
         sampler_info['method'] = method
         sampler_info['param_type'] = param_type
-        sampler_info['params'] = params_info
+
 
         return sampler_info
 
-    def add_csv(self, name, filename, variableNames, ignoreFirstLine='false', recycle='false', stopThread='false', accord='thread', xpath=None):
+    def add_csv(self, filename, variableNames, delimiter=',', ignoreFirstLine='false', recycle='false', stopThread='false', accord='thread', xpath=None):
         """
         添加csv数据文件设置
-        :param name: 名称
         :param filename: 文件路径
         :param paramname: 参数名称，以逗号隔开
         :param ignoreFirstLine: 是否忽略首行数据，首行数据可能包含表头
         :param recycle: 遇到文件结束符是否再次循环
         :param stopThread: 遇到文件结束符是否结束线程
-        :param accord: 父路径
+        :param accord: 父路径，决定是setup,thread,teardown中添加
         :param xpath: 已存在的csv路径，修改时候，先删除，再添加
         :return:
         """
@@ -649,7 +649,7 @@ class ModifyJMX(OperateJmx):
 
         self.remove_node_and_next(xpath)
 
-        name = name + Tools.random_str(9)
+        name = 'CSV数据文件设置' + '.' + Tools.random_str(9)
 
         CSVDataSet = accord_tag + f"/CSVDataSet[@testname='{name}']"
 
@@ -660,7 +660,7 @@ class ModifyJMX(OperateJmx):
         # 添加hashTree
         self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
-        self.add_sub_node(csv, new_tag_name='stringProp', text=',', name="delimiter")
+        self.add_sub_node(csv, new_tag_name='stringProp', text=delimiter, name="delimiter")
         self.add_sub_node(csv, new_tag_name='stringProp', name="fileEncoding")
         self.add_sub_node(csv, new_tag_name='stringProp', text=filename, name="filename")
         self.add_sub_node(csv, new_tag_name='boolProp', text=ignoreFirstLine, name="ignoreFirstLine")
@@ -681,6 +681,7 @@ class ModifyJMX(OperateJmx):
         csv_info['ignoreFirstLine'] = ignoreFirstLine
         csv_info['recycle'] = recycle
         csv_info['stopThread'] = stopThread
+        csv_info['delimiter'] = delimiter
         csv_info['variableNames'] = variableNames
 
         return csv_info

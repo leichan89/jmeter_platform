@@ -4,7 +4,7 @@
 # @File    : serializer.py
 
 from rest_framework import serializers
-from .models import Jmxs, JmxThreadGroup, JmxThreadGroup
+from .models import Jmxs, Csvs, JmxThreadGroup, SamplersChildren
 from users.serializer import UserSerializer
 
 class JmxsSerializer(serializers.ModelSerializer):
@@ -13,6 +13,12 @@ class JmxsSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Jmxs
+        fields = "__all__"
+
+class CsvSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Csvs
         fields = "__all__"
 
 
@@ -47,4 +53,9 @@ class JmxThreadGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JmxThreadGroup
+        fields = "__all__"
+
+class SamplersChildrenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SamplersChildren
         fields = "__all__"

@@ -6,6 +6,7 @@
 from lxml import etree
 import logging
 import json
+import time
 from common.Tools import Tools
 
 logger = logging.getLogger(__file__)
@@ -15,7 +16,7 @@ class ReadJmx():
     def __init__(self, jmxPath):
         self.jmxPath = jmxPath
 
-    def analysis_jmx(self):
+    def analysis_jmx(self, upload=True):
         """
         解析jmx，获取sampler的信息
         :param jmxPath: jmx文件的绝对路径
@@ -67,16 +68,16 @@ class ReadJmx():
         teardown_csv_root_xpath = '//PostThreadGroup[1]/following-sibling::hashTree[1]/CSVDataSet'
 
         # 获取thread线程组的sampler和csv
-        thread_sapmlers_info = self._read_sampler(tree, thread_sapmler_root_xpath)
-        thread_csvs_info = self._read_csv(tree, thread_csv_root_xpath)
+        thread_sapmlers_info = self._read_sampler(tree, thread_sapmler_root_xpath, upload=upload)
+        thread_csvs_info = self._read_csv(tree, thread_csv_root_xpath, upload=upload)
 
         # 获取setup线程组的sampler和csv
-        setup_sapmlers_info = self._read_sampler(tree, setup_sapmler_root_xpath, thread_type='setup')
-        setup_csvs_info = self._read_csv(tree, setup_csv_root_xpath, thread_type='setup')
+        setup_sapmlers_info = self._read_sampler(tree, setup_sapmler_root_xpath, thread_type='setup', upload=upload)
+        setup_csvs_info = self._read_csv(tree, setup_csv_root_xpath, thread_type='setup', upload=upload)
 
         # 获取teardown线程组的sampler和csv
-        teardown_sapmlers_info = self._read_sampler(tree, teardown_sapmler_root_xpath, thread_type='teardown')
-        teardown_csvs_info = self._read_csv(tree, teardown_csv_root_xpath, thread_type='teardown')
+        teardown_sapmlers_info = self._read_sampler(tree, teardown_sapmler_root_xpath, thread_type='teardown', upload=upload)
+        teardown_csvs_info = self._read_csv(tree, teardown_csv_root_xpath, thread_type='teardown', upload=upload)
 
         # 获取线程组的信息
         thread_info = self._read_thread_info(tree)
@@ -87,7 +88,7 @@ class ReadJmx():
 
         return sapmlers_info, csvs_info, thread_info
 
-    def _read_sampler(self, tree, sapmler_root_xpath, thread_type='thread'):
+    def _read_sampler(self, tree, sapmler_root_xpath, thread_type='thread', upload=True):
         """
 
         :param tree:
@@ -121,9 +122,12 @@ class ReadJmx():
 
             # 取样器名称
             old_name = sampler.attrib['testname']
-            sampler_name = old_name + '.' + Tools.random_str(19)
-            sampler.attrib['testname'] = sampler_name
-            tree.write(self.jmxPath, encoding='utf-8')
+            if upload:
+                sampler_name = old_name + '.' + Tools.random_str(9)
+                sampler.attrib['testname'] = sampler_name
+                tree.write(self.jmxPath, encoding='utf-8')
+            else:
+                sampler_name = old_name
             sampler_info['name'] = old_name
 
             # 取样器xpath
@@ -165,11 +169,11 @@ class ReadJmx():
                             sampler_info['params'].append({"paramname": paramname, "paramvalue": paramvalue})
             sapmlers_info.append(sampler_info)
             # 获取sampler的子元素信息
-            sampler_info['children'] = self._read_sampler_children_info(tree, sampler_xpath)
+            sampler_info['children'] = self._read_sampler_children_info(tree, sampler_xpath, upload=upload)
 
         return sapmlers_info
 
-    def _read_csv(self, tree, csv_root_xpath, thread_type='thread'):
+    def _read_csv(self, tree, csv_root_xpath, thread_type='thread', upload=True):
         """
 
         :param tree:
@@ -193,13 +197,14 @@ class ReadJmx():
                 csv_xpath = f"{csv_root_xpath}[{cinx + 1}]"
 
                 old_name = csv.attrib['testname']
-                csv_name = old_name + '.' + Tools.random_str(19)
-                csv.attrib['testname'] = csv_name
+                if upload:
+                    csv_name = old_name + '.' + Tools.random_str(9)
+                    csv.attrib['testname'] = csv_name
+                    tree.write(self.jmxPath, encoding='utf-8')
+                else:
+                    csv_name = old_name
                 csv_info['name'] = old_name
-                tree.write(self.jmxPath, encoding='utf-8')
-
                 csv_info['xpath'] = f'{csv_root_xpath}/[@testname="{csv_name}"]'
-
                 filename_xpath = csv_xpath + '/stringProp[@name="filename"][1]'
                 filename = tree.xpath(filename_xpath)[0].text
                 csv_info['filename'] = filename
@@ -268,7 +273,7 @@ class ReadJmx():
 
         return thread_info
 
-    def _read_sampler_children_info(self, tree, sampler_xapth):
+    def _read_sampler_children_info(self, tree, sampler_xapth, upload=True):
         """
         读取sampler的子元素信息
         :param tree:
@@ -285,6 +290,9 @@ class ReadJmx():
         # 计数头信息
         header_count = 1
 
+        # 响应断言计数器
+        rsp_assert_count =1
+
         hashTree = tree.xpath(sampler_xapth)[0].getnext()
 
         if hashTree is not None:
@@ -294,9 +302,12 @@ class ReadJmx():
                 if cd.tag == "HeaderManager":
                     child['child_type'] = 'header'
                     old_header_name = cd.attrib['testname']
-                    new_header_name = old_header_name + Tools.random_str(9)
-                    cd.attrib['testname'] = new_header_name
-                    tree.write(self.jmxPath, encoding='utf-8')
+                    if upload:
+                        new_header_name = old_header_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_header_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_header_name = old_header_name
                     child['child_name'] = new_header_name
                     header_xpath = hashTreeXpath + f'/HeaderManager[@testname="{new_header_name}"]'
                     child['xpath'] = header_xpath
@@ -311,10 +322,34 @@ class ReadJmx():
                         header_param = {"paramname": param_name, "paramvalue": param_value}
                         params_list.append(header_param)
                     child['params'] = params_list
+                if cd.tag == "ResponseAssertion":
+                    child['child_type'] = 'rsp_assert'
+                    old_rsp_assert_name = cd.attrib['testname']
+                    if upload:
+                        new_rsp_assert_name = old_rsp_assert_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_rsp_assert_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_rsp_assert_name = old_rsp_assert_name
+                    child['child_name'] = new_rsp_assert_name
+                    rsp_assert_xpath = hashTreeXpath + f'/ResponseAssertion[@testname="{new_rsp_assert_name}"]'
+                    child['xpath'] = rsp_assert_xpath
+                    # 断言内容
+                    rsp_assert_content_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/collectionProp/stringProp'
+                    # 断言方式
+                    rsp_assert_type_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/intProp'
+                    rsp_assert_content = tree.xpath(rsp_assert_content_xpath)
+                    rsp_assert_content_list = []
+                    for rac in rsp_assert_content:
+                        rsp_assert_content_list.append(rac.text)
+                    rsp_assert_type = tree.xpath(rsp_assert_type_xpath)[0].text
+                    assert_type_dict = Tools.assert_type_dict()
+                    for key, value in assert_type_dict.items():
+                        if str(value) == rsp_assert_type:
+                            child['params'] = {"rsp_assert_content": rsp_assert_content_list, "rsp_assert_type": key}
                 if child:
                     children.append(child)
             return children
-
 
 class OperateJmx():
 
@@ -534,6 +569,7 @@ class ModifyJMX(OperateJmx):
         :return:
         """
         params_info = {}
+        sampler_info = {}
         try:
             # 如果是form格式，就需要转换为字典
             if params and isinstance(params, list):
@@ -557,7 +593,7 @@ class ModifyJMX(OperateJmx):
 
         self.remove_node_and_next(xpath)
 
-        name = name + Tools.random_str(19)
+        name = name + "." + Tools.random_str(9)
 
         HTTPSamplerProxy = accord_tag + f"/HTTPSamplerProxy[@testname='{name}']"
 
@@ -568,36 +604,35 @@ class ModifyJMX(OperateJmx):
         # 添加hashTree
         self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
+        sampler_info['params'] = ''
         if param_type == 'form' and params_info:
             self._add_form_data(HTTPSamplerProxy, params_info)
+            sampler_info['params'] = params_info
         elif param_type == 'raw' and params:
             self._add_raw_data(HTTPSamplerProxy, params)
+            sampler_info['params'] = params
 
         self._add_sampler_base(sp, url, method)
-
         self.save_change()
-
-        sampler_info = {}
         sampler_info['thread_type'] = accord
         sampler_info['name'] = name
         sampler_info['xpath'] = HTTPSamplerProxy
         sampler_info['url'] = url
         sampler_info['method'] = method
         sampler_info['param_type'] = param_type
-        sampler_info['params'] = params_info
+
 
         return sampler_info
 
-    def add_csv(self, name, filename, variableNames, ignoreFirstLine='false', recycle='false', stopThread='false', accord='thread', xpath=None):
+    def add_csv(self, filename, variableNames, delimiter=',', ignoreFirstLine='false', recycle='false', stopThread='false', accord='thread', xpath=None):
         """
         添加csv数据文件设置
-        :param name: 名称
         :param filename: 文件路径
         :param paramname: 参数名称，以逗号隔开
         :param ignoreFirstLine: 是否忽略首行数据，首行数据可能包含表头
         :param recycle: 遇到文件结束符是否再次循环
         :param stopThread: 遇到文件结束符是否结束线程
-        :param accord: 父路径
+        :param accord: 父路径，决定是setup,thread,teardown中添加
         :param xpath: 已存在的csv路径，修改时候，先删除，再添加
         :return:
         """
@@ -614,7 +649,7 @@ class ModifyJMX(OperateJmx):
 
         self.remove_node_and_next(xpath)
 
-        name = name + Tools.random_str(19)
+        name = 'CSV数据文件设置' + '.' + Tools.random_str(9)
 
         CSVDataSet = accord_tag + f"/CSVDataSet[@testname='{name}']"
 
@@ -625,7 +660,7 @@ class ModifyJMX(OperateJmx):
         # 添加hashTree
         self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
-        self.add_sub_node(csv, new_tag_name='stringProp', text=',', name="delimiter")
+        self.add_sub_node(csv, new_tag_name='stringProp', text=delimiter, name="delimiter")
         self.add_sub_node(csv, new_tag_name='stringProp', name="fileEncoding")
         self.add_sub_node(csv, new_tag_name='stringProp', text=filename, name="filename")
         self.add_sub_node(csv, new_tag_name='boolProp', text=ignoreFirstLine, name="ignoreFirstLine")
@@ -646,6 +681,7 @@ class ModifyJMX(OperateJmx):
         csv_info['ignoreFirstLine'] = ignoreFirstLine
         csv_info['recycle'] = recycle
         csv_info['stopThread'] = stopThread
+        csv_info['delimiter'] = delimiter
         csv_info['variableNames'] = variableNames
 
         return csv_info
@@ -725,7 +761,7 @@ class ModifyJMX(OperateJmx):
 
         self.save_change()
 
-    def add_header(self, sampler_xpath, header_xpath=None, header_name="HTTP信息头管理器", headers=None):
+    def add_header(self, sampler_xpath, headers, header_xpath=None):
         """
         添加请求头信息，一个sampler只允许添加一个
         :param sampler_xpath: sampler的xpath路径
@@ -741,26 +777,57 @@ class ModifyJMX(OperateJmx):
         except:
             logger.exception("获取sampler信息失败")
             raise
-
-        header_name = header_name + Tools.random_str(9)
-        header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel", testclass="HeaderManager",
-                          testname=header_name, enabled="true")
+        header_name = "HTTP信息头管理器" + "." + Tools.random_str(9)
+        header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel",
+                                   testclass="HeaderManager",
+                                   testname=header_name, enabled="true")
         # 添加hashTree
         self.add_sub_node(hashTree, new_tag_name="hashTree")
-        collectionProp = self.add_sub_node(header, new_tag_name='collectionProp', name="HeaderManager.headers")
-        if headers and isinstance(headers, list):
-            for item in headers:
-                try:
-                    self._add_headers_param(collectionProp, item['key'], item['value'])
-                except:
-                    logger.exception("参数错误，找不到键【key，value】！")
-                    raise
+        collectionProp = self.add_sub_node(header, new_tag_name="collectionProp", name="HeaderManager.headers")
+        for item in headers:
+            try:
+                self._add_headers_param(collectionProp, item['key'], item['value'])
+            except:
+                logger.exception("参数错误，找不到键【key，value】！")
+                raise
 
         new_header_xpath = sampler_xpath + f'/following-sibling::hashTree[1]/HeaderManager[@testname="{header_name}"]'
-
         self.save_change()
-
         return new_header_xpath
+
+    def add_rsp_assert(self, sampler_xpath, assert_str, assert_content, rsp_assert_xpath=None):
+        """
+        添加响应信息断言
+        :param sampler_xpath: 目标取样器
+        :param rsp_assert_xpath: 断言的xpath路径，方便后续修改，先删除，再修改
+        :param rsp_assert_name: 断言名称
+        :param assert_content: 断言内容
+        :return:
+        """
+        try:
+            if rsp_assert_xpath:
+                self.remove_node_and_next(rsp_assert_xpath)
+            hashTree = self.tree.xpath(sampler_xpath)[0].getnext()
+        except:
+            logger.exception("获取sampler信息失败")
+            raise
+
+        assert_type = self._to_assert_type(assert_str)
+        rsp_assert_name = "响应断言" + "." + Tools.random_str(9)
+        rsp_assert = self.add_sub_node(hashTree, new_tag_name="ResponseAssertion", guiclass="AssertionGui",
+                                       testclass="ResponseAssertion", testname=rsp_assert_name, enabled="true")
+        collectionProp = self.add_sub_node(rsp_assert, new_tag_name="collectionProp", name="Asserion.test_strings")
+        for ac in assert_content:
+            if ac['key']:
+                self.add_sub_node(collectionProp, new_tag_name="stringProp", text=ac['key'], name=str(time.time()))
+        self.add_sub_node(rsp_assert, new_tag_name="stringProp", name="Assertion.custom_message")
+        self.add_sub_node(rsp_assert, new_tag_name="stringProp", text="Assertion.response_data", name="Assertion.test_field")
+        self.add_sub_node(rsp_assert, new_tag_name="boolProp", text="false", name="Assertion.assume_success")
+        self.add_sub_node(rsp_assert, new_tag_name="intProp", text=assert_type, name="Assertion.test_type")
+
+        new_rsp_assert_xpath = sampler_xpath + f'/following-sibling::hashTree[1]/ResponseAssertion[@testname="{rsp_assert_name}"]'
+        self.save_change()
+        return new_rsp_assert_xpath
 
     def _add_param(self, parent_node, param_name, param_value):
         """
@@ -785,7 +852,7 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.domain")
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.port")
         self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.protocol")
-        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.contentEncoding")
+        self.add_sub_node(parent_node, new_tag_name='stringProp', name="HTTPSampler.contentEncoding", text="utf-8")
         self.add_sub_node(parent_node, new_tag_name='stringProp', text=url, name="HTTPSampler.path")
         self.add_sub_node(parent_node, new_tag_name='stringProp', text=method, name="HTTPSampler.method")
         self.add_sub_node(parent_node, new_tag_name='stringProp', text='true', name="HTTPSampler.follow_redirects")
@@ -875,6 +942,19 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=raw, name='Argument.value')
         self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
         self.save_change()
+
+    def _to_assert_type(self, assert_str):
+        """
+        生成断言代码
+        :param assert_str: 断言的字符
+        :return:
+        """
+        try:
+            assert_type_dict = Tools.assert_type_dict()
+            return str(assert_type_dict[assert_str])
+        except:
+            logger.exception("无效的断言字符参数")
+            raise
 
 if __name__ == '__main__':
     # r = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')

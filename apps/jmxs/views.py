@@ -4,8 +4,9 @@ from common.Tools import Tools
 from rest_framework.views import APIView
 from .models import JmxThreadGroup, SamplersChildren
 from jmeter_platform import settings
-from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, JmxsRunSerializer, JmxThreadGroupSerializer
-from .models import Jmxs
+from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, JmxsRunSerializer, \
+    JmxThreadGroupSerializer, CsvSerializer
+from .models import Jmxs, Csvs
 from rest_framework import status
 from rest_framework import generics
 from rest_framework import filters
@@ -225,15 +226,15 @@ class JmxCreateUpdateSapmler(APIView):
     """
     def post(self, request):
 
-        jmx_id = request.POST.get('jmxId')
+        jmx_id = request.data.get('jmxId')
         # 修改的时候才需要传入childid信息
-        child_id = request.POST.get('childId')
-        thread_type = request.POST.get('threadType')
-        sampler_name = request.POST.get('sapmplerName')
-        method = request.POST.get('method')
-        url = request.POST.get('url')
-        param_type = request.POST.get('paramType')
-        params = request.POST.get('params')
+        child_id = request.data.get('childId')
+        thread_type = request.data.get('threadType')
+        sampler_name = request.data.get('samplerName')
+        method = request.data.get('method')
+        url = request.data.get('url')
+        param_type = request.data.get('paramType')
+        params = request.data.get('params')
 
         jmx_path = Jmxs.objects.values('jmx').get(id=jmx_id)['jmx']
 
@@ -263,7 +264,7 @@ class JmxCreateUpdateSapmler(APIView):
                 s = JmxThreadGroup(jmx_id=jmx_id, child_name=sampler_name,
                                               child_info=json.dumps(rst), child_thread=thread_type)
                 s.save()
-                return APIRsp(msg='新增sampler成功！')
+                return APIRsp(msg='新增sampler成功！', data={'sapmlerId': s.id})
             except:
                 return APIRsp(code=400, msg='新增sapmler失败，sampler参数有误！', status=status.HTTP_400_BAD_REQUEST)
 
@@ -275,7 +276,11 @@ class JmxChildrenList(generics.GenericAPIView):
     queryset = JmxThreadGroup.objects.all().order_by('-add_time')
     serializer_class = JmxThreadGroupSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['child_thread']
+    # filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    # 精确搜索，使用的backend是DjangoFilterBackend，字段值如果是数据库中不存在的，则会抛异常
+    filterset_fields = ['child_thread', 'child_type']
+    # 模糊搜索，使用的backend是filters.SearchFilter，查询范围是child_thread，查询参数是search，可以在setting.py中设置
+    # search_fields = ['child_thread']
     def get(self, request, jmx_id):
         try:
             qs = self.get_queryset().filter(jmx_id=jmx_id)
@@ -283,8 +288,8 @@ class JmxChildrenList(generics.GenericAPIView):
             serializer = self.get_serializer(instance=qs, many=True)
             return APIRsp(data=serializer.data)
         except Exception as e:
-            logger.exception(f'生成聚合报告异常\n{e}')
-            return APIRsp(code=500, msg='生成聚合报告异常', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.exception(f'获取线程组子元素异常\n{e}')
+            return APIRsp(code=400, msg='获取线程组子元素异常', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class JmxDeleteChild(APIView):
     """
@@ -315,7 +320,7 @@ class JmxListView(generics.ListAPIView):
     queryset = Jmxs.objects.all().order_by('-add_time')
     serializer_class = JmxListSerializer
     filter_backends = [filters.SearchFilter]
-    # 可以搜索的字段
+    # 可以搜索的字段，搜索方式默认是?search=xxx
     search_fields = ['jmx_alias']
 
     def get(self, request, *args, **kwargs):
@@ -366,3 +371,81 @@ class JmxDestory(generics.DestroyAPIView):
             return APIRsp(code=404, msg='资源未找到', status=status.HTTP_404_NOT_FOUND)
 
 
+class CsvUpload(APIView):
+
+    def post(self, request):
+        """
+        :param request: :param request: {'csv': ,'jmx': , 'user': 1}
+        :return:
+        """
+        data = {}
+        # request.POST.get适用于form-data请求获取参数
+        csv = request.FILES.get('csv')
+        jmx_id = request.POST.get('jmxId')
+        user = request.POST.get('userId')
+        variableNames = request.POST.get('variableNames')
+        delimiter = request.POST.get('delimiter')
+        ignoreFirstLine = request.POST.get('ignoreFirstLine')
+        recycle = request.POST.get('recycle')
+        stopThread = request.POST.get('stopThread')
+        threadType = request.POST.get('threadType')
+        # 不传值，xpath就是None
+        xpath = request.POST.get('xpath')
+        if csv and jmx_id and user and variableNames and delimiter and ignoreFirstLine and recycle and stopThread and threadType:
+            csv_name_ext = os.path.splitext(csv.name)
+            csv_name = csv_name_ext[0]
+            csv_ext = csv_name_ext[1]
+            if csv_ext not in settings.CSV_ALLOWED_FILE_TYPE:
+                return APIRsp(code=205, msg='无效的格式，请上传.csv格式的文件', status=status.HTTP_205_RESET_CONTENT)
+            csvfile = csv_name + "." + Tools.random_str(9) + csv_ext
+            path = settings.CSV_URL + csvfile
+
+            with open(path, 'wb') as f:
+                for i in csv.chunks():
+                    f.write(i)
+
+            data['csv'] = csvfile
+            # csv不存在时，接口会报错
+            data['jmx'] = jmx_id
+            # user不存在时，接口会报错
+            data['add_user'] = user
+            obj = CsvSerializer(data=data)
+
+            if obj.is_valid():
+                obj.save()
+                jmx_path = Jmxs.objects.values('jmx').get(id=jmx_id)['jmx']
+                csv_info = ModifyJMX(jmx_path).add_csv(path, variableNames, ignoreFirstLine=ignoreFirstLine,
+                                                       delimiter=delimiter, recycle=recycle, stopThread=stopThread,
+                                                       accord=threadType, xpath=xpath)
+                # 保存csv信息
+                s = JmxThreadGroup(jmx_id=jmx_id, child_name=csv_info['name'], child_type='csv',
+                                              child_info=json.dumps(csv_info), child_thread=threadType)
+                s.save()
+                return APIRsp()
+
+            return APIRsp(code=500, msg='添加失败，校验未通过', status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return APIRsp(code=400, msg='添加失败，参数不完整', status=status.HTTP_400_BAD_REQUEST)
+
+
+class CsvListView(generics.ListAPIView):
+    queryset = Csvs.objects.all()
+    serializer_class = CsvSerializer
+
+    def get(self, request, *args, **kwargs):
+        rsp_data = self.list(request, *args, **kwargs)
+        if rsp_data.status_code == 200:
+            return APIRsp(data=rsp_data.data)
+        else:
+            return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)
+
+class JmxChildrenView(generics.RetrieveAPIView):
+    queryset = JmxThreadGroup.objects.all()
+    serializer_class = JmxThreadGroupSerializer
+
+    def get(self, request, *args, **kwargs):
+        rsp_data = self.retrieve(request, *args, **kwargs)
+        if rsp_data.status_code == 200:
+            return APIRsp(data=rsp_data.data)
+        else:
+            return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)

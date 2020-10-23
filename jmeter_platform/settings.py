@@ -60,7 +60,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'flower',
-    'csvs',
     'jmxs',
     'users',
     'tasks',
@@ -298,8 +297,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 每页显示的个数
     'PAGE_SIZE': '10',
-    # 第三方过滤器
-    'DEFAULT_FILTER_BACKENDS': 'django_filters.rest_framework.backends.DjangoFilterBackend'
+    # 第三方过滤器，不配置也没有报错，但是配置了会导致查询单个信息报错：django 'RenameAttributes' object is not iterable"
+    # 'DEFAULT_FILTER_BACKENDS': 'django_filters.rest_framework.backends.DjangoFilterBackend'
 }
 
 JWT_AUTH = {
