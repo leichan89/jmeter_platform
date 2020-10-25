@@ -17,13 +17,14 @@ urlpatterns = [
     path('jmxs/delete/<int:pk>', views.JmxDestory.as_view()),
     path('jmxs/create', views.JmxCreate.as_view()),
     path('jmxs/uploadcsv', views.CsvUpload.as_view()),
-    path('jmxs/thread_group_children/<int:jmx_id>', views.JmxChildrenList.as_view()),
+    # 查询jmx的所有子元素
+    path('jmxs/children/<int:jmx_id>', views.JmxChildrenList.as_view()),
+    # 查询jmx文件的单个元素的信息
+    path('jmxs/child/<int:pk>', views.JmxChildrenView.as_view()),
     path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
     path('samplers/header/create_update', views.SamplerCreateUpdateHeader.as_view()),
     path('samplers/assert/create_update_rsp', views.SamplerCreateUpdateRSPAssert.as_view()),
     path('samplers/delete/<int:child_id>', views.JmxDeleteChild.as_view()),
-    # 查询
-    path('samplers/<int:pk>', views.JmxChildrenView.as_view()),
     # 查询sampler的所有子类信息
     path('samplers/children/<int:sampler_id>', views.SamplerChildrenList.as_view()),
     # 查询sampler的子元素的详细信息，url参数为子元素的id

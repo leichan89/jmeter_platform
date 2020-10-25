@@ -461,7 +461,7 @@ class CsvListView(generics.ListAPIView):
 
 class JmxChildrenView(generics.RetrieveAPIView):
     """
-    获取jmx文件的子类详细信息
+    获取jmx文件的子类详细信息，比如sampler或者csv的详细信息
     """
     queryset = JmxThreadGroup.objects.all()
     serializer_class = JmxThreadGroupSerializer
