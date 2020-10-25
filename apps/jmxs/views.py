@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from .models import JmxThreadGroup, SamplersChildren
 from jmeter_platform import settings
 from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, JmxsRunSerializer, \
-    JmxThreadGroupSerializer, CsvSerializer
+    JmxThreadGroupSerializer, CsvSerializer, SamplersChildrenSerializer, SamplersChildSerializer
 from .models import Jmxs, Csvs
 from rest_framework import status
 from rest_framework import generics
@@ -392,7 +392,6 @@ class JmxDestory(generics.DestroyAPIView):
         except:
             return APIRsp(code=404, msg='资源未找到', status=status.HTTP_404_NOT_FOUND)
 
-
 class CsvUpload(APIView):
 
     def post(self, request):
@@ -449,7 +448,6 @@ class CsvUpload(APIView):
         else:
             return APIRsp(code=400, msg='添加失败，参数不完整', status=status.HTTP_400_BAD_REQUEST)
 
-
 class CsvListView(generics.ListAPIView):
     queryset = Csvs.objects.all()
     serializer_class = CsvSerializer
@@ -462,8 +460,42 @@ class CsvListView(generics.ListAPIView):
             return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)
 
 class JmxChildrenView(generics.RetrieveAPIView):
+    """
+    获取jmx文件的子类详细信息
+    """
     queryset = JmxThreadGroup.objects.all()
     serializer_class = JmxThreadGroupSerializer
+
+    def get(self, request, *args, **kwargs):
+        rsp_data = self.retrieve(request, *args, **kwargs)
+        if rsp_data.status_code == 200:
+            return APIRsp(data=rsp_data.data)
+        else:
+            return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)
+
+class SamplerChildrenList(generics.GenericAPIView):
+    """
+    获取sampler的子类
+    """
+    queryset = SamplersChildren.objects.all()
+    serializer_class = SamplersChildrenSerializer
+
+    def get(self, request, sampler_id):
+        try:
+            qs = self.get_queryset().filter(sampler_id=sampler_id)
+            qs = self.filter_queryset(qs)
+            serializer = self.get_serializer(instance=qs, many=True)
+            return APIRsp(data=serializer.data)
+        except Exception as e:
+            logger.exception(f'获取请求的子元素异常\n{e}')
+            return APIRsp(code=400, msg='获取请求的子元素异常', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class SamplerChildrenView(generics.RetrieveAPIView):
+    """
+    获取sampler的子类的详细信息，主要是header，断言等信息
+    """
+    queryset = SamplersChildren.objects.all()
+    serializer_class = SamplersChildSerializer
 
     def get(self, request, *args, **kwargs):
         rsp_data = self.retrieve(request, *args, **kwargs)

@@ -22,7 +22,12 @@ urlpatterns = [
     path('samplers/header/create_update', views.SamplerCreateUpdateHeader.as_view()),
     path('samplers/assert/create_update_rsp', views.SamplerCreateUpdateRSPAssert.as_view()),
     path('samplers/delete/<int:child_id>', views.JmxDeleteChild.as_view()),
+    # 查询
     path('samplers/<int:pk>', views.JmxChildrenView.as_view()),
+    # 查询sampler的所有子类信息
+    path('samplers/children/<int:sampler_id>', views.SamplerChildrenList.as_view()),
+    # 查询sampler的子元素的详细信息，url参数为子元素的id
+    path('samplers/child/<int:pk>', views.SamplerChildrenView.as_view()),
     path('csvs', views.CsvListView.as_view())
 ]
 

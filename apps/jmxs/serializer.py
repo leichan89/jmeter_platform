@@ -58,4 +58,9 @@ class JmxThreadGroupSerializer(serializers.ModelSerializer):
 class SamplersChildrenSerializer(serializers.ModelSerializer):
     class Meta:
         model = SamplersChildren
+        exclude = ["child_info"]
+
+class SamplersChildSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SamplersChildren
         fields = "__all__"
