@@ -147,7 +147,7 @@ class ReadJmx():
             if raw_param:
                 sampler_info['param_type'] = 'raw'
 
-            sampler_info['params'] = ""
+            sampler_info['params'] = []
 
             sampler_params = tree.xpath(sapmler_param_xpath)
             if sampler_params:
@@ -160,11 +160,14 @@ class ReadJmx():
                             if sampler_info['param_type'] == 'form':
                                 # key,value格式的参数
                                 # param.attrib['name']为参数的名称，value.text为参数的值
-                                sampler_info['params'] = []
                                 sampler_info['params'].append({"key": param.attrib['name'], "value": value.text})
                             else:
                                 # raw格式的参数，没有Argument.name这个标签
                                 sampler_info['params'] = value.text
+            if sampler_info['param_type'] == 'form' and not sampler_info['params']:
+                sampler_info['params'] = [{"key": "", "value": ""}]
+            elif sampler_info['param_type'] == 'raw' and not sampler_info['params']:
+                sampler_info['params'] = ''
             sapmlers_info.append(sampler_info)
             # 获取sampler的子元素信息
             sampler_info['children'] = self._read_sampler_children_info(tree, sampler_xpath, upload=upload)
@@ -318,6 +321,8 @@ class ReadJmx():
                         param_value = tree.xpath(param_value_xpath)[0].text
                         header_param = {"key": param_name, "value": param_value}
                         params_list.append(header_param)
+                    if not params_list:
+                        params_list = [{"key": "", "value": ""}]
                     child['params'] = params_list
                 if cd.tag == "ResponseAssertion":
                     child['child_type'] = 'rsp_assert'
@@ -338,7 +343,7 @@ class ReadJmx():
                     rsp_assert_content = tree.xpath(rsp_assert_content_xpath)
                     rsp_assert_content_list = []
                     for rac in rsp_assert_content:
-                        rsp_assert_content_list.append(rac.text)
+                        rsp_assert_content_list.append({'key': rac.text})
                     rsp_assert_type = tree.xpath(rsp_assert_type_xpath)[0].text
                     assert_type_dict = Tools.assert_type_dict()
                     for key, value in assert_type_dict.items():
@@ -836,7 +841,7 @@ class ModifyJMX(OperateJmx):
         child_info['child_type'] = "rsp_assert"
         child_info['child_name'] = rsp_assert_name
         child_info['xpath'] = new_rsp_assert_xpath
-        child_info['params'] = assert_content
+        child_info['params'] = {"rsp_assert_content": assert_content, "rsp_assert_type": assert_type}
         return child_info
 
     def _add_param(self, parent_node, param_name, param_value):
