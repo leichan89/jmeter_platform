@@ -184,10 +184,8 @@ class SamplerCreateUpdateHeader(APIView):
         sapmlerId = request.data.get('sapmlerId')
         childId = request.data.get('childId')
         params = request.data.get('params')
-        if not params:
+        if len(params) == 1 and params[0]['key'] == "" and params[0]['value'] == "":
             return APIRsp(msg='头参数为空，不创建头信息')
-        elif not isinstance(params, list):
-            return APIRsp(code=400, msg='参数应该是一个list')
         try:
             # 获取jmx的信息
             jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmlerId)
