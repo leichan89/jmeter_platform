@@ -17,6 +17,9 @@ urlpatterns = [
     path('jmxs/delete/<int:pk>', views.JmxDestory.as_view()),
     path('jmxs/create', views.JmxCreate.as_view()),
     path('jmxs/uploadcsv', views.CsvUpload.as_view()),
+    path('jmxs/thread_num/<int:pk>', views.JmxThreadNumView.as_view()),
+    # 修改线程组属性
+    path('jmxs/update_thread_num', views.JmxThreadNumUpdate.as_view()),
     # 查询jmx的所有子元素
     path('jmxs/children/<int:jmx_id>', views.JmxChildrenList.as_view()),
     # 查询jmx文件的单个元素的信息

@@ -230,7 +230,7 @@ class ReadJmx():
 
         return csvs_info
 
-    def _read_thread_info(self, tree, thread_type='thread'):
+    def _read_thread_info(self, tree):
         """
         获取第一个线程组的信息
         :param tree:
@@ -242,10 +242,6 @@ class ReadJmx():
         # thread_info['thread_type'] = thread_type
 
         thread_xpath = '//ThreadGroup[1]'
-
-        num_threads_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.num_threads']"
-        num_threads = tree.xpath(num_threads_xpath)[0].text
-        thread_info['num_threads'] = num_threads
 
         # 线程数
         num_threads_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.num_threads']"
@@ -270,7 +266,10 @@ class ReadJmx():
         # 持续时间
         duration_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.duration']"
         duration = tree.xpath(duration_xpath)[0].text
-        thread_info['duration'] = duration
+        if duration:
+            thread_info['duration'] = duration
+        else:
+            thread_info['duration'] = ""
 
         return thread_info
 
@@ -348,7 +347,7 @@ class ReadJmx():
                     assert_type_dict = Tools.assert_type_dict()
                     for key, value in assert_type_dict.items():
                         if str(value) == rsp_assert_type:
-                            child['params'] = {"rsp_assert_content": rsp_assert_content_list, "rsp_assert_type": key}
+                            child['params'] = {"rsp_assert_content": rsp_assert_content_list, "rsp_assert_type": list(key)}
                 if child:
                     children.append(child)
             return children
@@ -501,6 +500,40 @@ class ModifyJMX(OperateJmx):
         self.setup_accord_tag = '//SetupThreadGroup[1]/following-sibling::hashTree[1]'
         self.teardown_accord_tag = '//PostThreadGroup[1]/following-sibling::hashTree[1]'
         super().__init__(jmxPath)
+
+    def modify_thread_num(self, num_threads, ramp_time, loops, scheduler, duration):
+        """
+        获取第一个线程组的信息
+        :param tree:
+        :return:
+        """
+
+        thread_xpath = '//ThreadGroup[1]'
+
+        # 线程数
+        num_threads_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.num_threads']"
+        self.tree.xpath(num_threads_xpath)[0].text = num_threads
+
+        # Ramp-UP时间
+        ramp_time_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.ramp_time']"
+        self.tree.xpath(ramp_time_xpath)[0].text = ramp_time
+
+
+        # 循环次数，-1表示永远
+        loops_xpath = thread_xpath + "/elementProp/stringProp[@name='LoopController.loops']"
+        self.tree.xpath(loops_xpath)[0].text = loops
+
+
+        # 调度器配置，true or false
+        scheduler_xpath = thread_xpath + "/boolProp[@name='ThreadGroup.scheduler']"
+        self.tree.xpath(scheduler_xpath)[0].text = scheduler
+
+        if duration:
+            # 持续时间
+            duration_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.duration']"
+            self.tree.xpath(duration_xpath)[0].text = duration
+
+        self.save_change()
 
     def add_setup_thread(self):
         """
@@ -841,7 +874,7 @@ class ModifyJMX(OperateJmx):
         child_info['child_type'] = "rsp_assert"
         child_info['child_name'] = rsp_assert_name
         child_info['xpath'] = new_rsp_assert_xpath
-        child_info['params'] = {"rsp_assert_content": assert_content, "rsp_assert_type": assert_type}
+        child_info['params'] = {"rsp_assert_content": assert_content, "rsp_assert_type": list(assert_str)}
         return child_info
 
     def _add_param(self, parent_node, param_name, param_value):

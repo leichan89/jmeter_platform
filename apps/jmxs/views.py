@@ -5,7 +5,8 @@ from rest_framework.views import APIView
 from .models import JmxThreadGroup, SamplersChildren
 from jmeter_platform import settings
 from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, JmxsRunSerializer, \
-    JmxThreadGroupSerializer, CsvSerializer, SamplersChildrenSerializer, SamplersChildSerializer
+    JmxThreadGroupSerializer, CsvSerializer, SamplersChildrenSerializer, SamplersChildSerializer, \
+    JmxSerializerThreadNum
 from .models import Jmxs, Csvs
 from rest_framework import status
 from rest_framework import generics
@@ -175,6 +176,48 @@ class JmxCreate(APIView):
             return APIRsp(data={'sapmlerId': s.id}) # sampler的id
         os.remove(new_jmxpath)
         return APIRsp(code=400, msg='添加失败，参数校验未通过', status=status.HTTP_400_BAD_REQUEST)
+
+class JmxThreadNumView(generics.RetrieveAPIView):
+    """
+    查询单个jmx的线程组信息
+    """
+    queryset = Jmxs.objects.all()
+    serializer_class = JmxSerializerThreadNum
+
+    def get(self, request, *args, **kwargs):
+        rsp_data = self.retrieve(request, *args, **kwargs)
+        if rsp_data.status_code == 200:
+            return APIRsp(data=rsp_data.data)
+        else:
+            return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)
+
+class JmxThreadNumUpdate(APIView):
+    """
+    修改线程组
+    """
+    def post(self, request):
+        jmxId = request.data.get('jmxId')
+        numThreads = request.data.get('numThreads')
+        rampTime = request.data.get('rampTime')
+        loops = request.data.get('loops')
+        scheduler = request.data.get('scheduler')
+        duration = request.data.get('duration')
+        if not duration:
+            duration = ""
+        try:
+            jmx_path = Jmxs.objects.all().get(id=jmxId).jmx
+            ModifyJMX(jmx_path).modify_thread_num(numThreads, rampTime, loops, scheduler, duration)
+            thread_base_info = {
+                "num_threads": numThreads,
+                "ramp_time": rampTime,
+                "loops": loops,
+                "scheduler": scheduler,
+                "duration": duration
+            }
+            Jmxs.objects.filter(id=jmxId).update(thread_base_info=json.dumps(thread_base_info))
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg="修改线程组属性异常")
 
 class SamplerCreateUpdateHeader(APIView):
     """
