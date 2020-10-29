@@ -806,14 +806,7 @@ class ModifyJMX(OperateJmx):
         :param header_name: 信息头名称
         :return:
         """
-        try:
-            # 如果是修改，则先删除原来的header，再进行添加
-            if header_xpath:
-                self.remove_node_and_next(header_xpath)
-            hashTree = self.tree.xpath(sampler_xpath)[0].getnext()
-        except:
-            logger.exception("获取sampler信息失败")
-            raise
+        hashTree = self._remove_sampler_child(sampler_xpath, header_xpath)
         header_name = "HTTP信息头管理器" + "." + Tools.random_str(9)
         header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel",
                                    testclass="HeaderManager",
@@ -846,18 +839,12 @@ class ModifyJMX(OperateJmx):
         :param assert_content: 断言内容
         :return:
         """
-        try:
-            if rsp_assert_xpath:
-                self.remove_node_and_next(rsp_assert_xpath)
-            hashTree = self.tree.xpath(sampler_xpath)[0].getnext()
-        except:
-            logger.exception("获取sampler信息失败")
-            raise
-
+        hashTree = self._remove_sampler_child(sampler_xpath, rsp_assert_xpath)
         assert_type = self._to_assert_type(assert_str)
         rsp_assert_name = "响应断言" + "." + Tools.random_str(9)
         rsp_assert = self.add_sub_node(hashTree, new_tag_name="ResponseAssertion", guiclass="AssertionGui",
                                        testclass="ResponseAssertion", testname=rsp_assert_name, enabled="true")
+        self.add_sub_node(hashTree, new_tag_name="hashTree")
         collectionProp = self.add_sub_node(rsp_assert, new_tag_name="collectionProp", name="Asserion.test_strings")
         for ac in assert_content:
             if ac['key']:
@@ -875,6 +862,98 @@ class ModifyJMX(OperateJmx):
         child_info['child_name'] = rsp_assert_name
         child_info['xpath'] = new_rsp_assert_xpath
         child_info['params'] = {"rsp_assert_content": assert_content, "rsp_assert_type": list(assert_str)}
+        return child_info
+
+    def add_json_extract(self, sampler_xpath, name, params, express, match_num, json_extract_xpath=None):
+        """
+        添加json提取器
+        :param sampler_xpath: sampler的路径
+        :param name: json提取器名称，匹配多个以分号隔开
+        :param params: json提取器参数，匹配多个以分号隔开
+        :param json_extract_xpath: json提取器路径，如果传了，则删除原有的，如果没有，则新增
+        :return:
+        """
+        hashTree = self._remove_sampler_child(sampler_xpath, json_extract_xpath)
+        json_extract_name = name + "." + Tools.random_str(9)
+        json_extract = self.add_sub_node(hashTree, new_tag_name="JSONPostProcessor", guiclass="JSONPostProcessorGui",
+                                       testclass="JSONPostProcessor", testname=json_extract_name, enabled="true")
+        self.add_sub_node(hashTree, new_tag_name="hashTree")
+        self.add_sub_node(json_extract, new_tag_name="stringProp", text=params, name="JSONPostProcessor.referenceNames")
+        self.add_sub_node(json_extract, new_tag_name="stringProp", text=express, name="JSONPostProcessor.jsonPathExprs")
+        self.add_sub_node(json_extract, new_tag_name="stringProp", text=str(match_num), name="JSONPostProcessor.match_numbers")
+
+        new_json_extract_xpath = f'//JSONPostProcessor[@testname="{json_extract_name}"]'
+        self.save_change()
+
+        child_info = {}
+        child_info['child_type'] = "json_extract"
+        child_info['child_name'] = json_extract_name
+        child_info['xpath'] = new_json_extract_xpath
+        child_info['params'] = {"params": params, "express": express, "match_num": match_num}
+        return child_info
+
+    def add_affter_beanshell(self, sampler_xpath, name, to_beanshell_param, express, affter_beanshell_xpath=None):
+        """
+        添加后置处理器
+        :param sampler_xpath:
+        :param name:
+        :param to_beanshell_param:
+        :param express:
+        :param affter_beanshell_xpath:
+        :return:
+        """
+
+        hashTree = self._remove_sampler_child(sampler_xpath, affter_beanshell_xpath)
+        affter_beanshell_name = name + "." + Tools.random_str(9)
+
+        affter_beanshell = self.add_sub_node(hashTree, new_tag_name="BeanShellPostProcessor", guiclass="TestBeanGUI",
+                                       testclass="BeanShellPostProcessor", testname=affter_beanshell_name, enabled="true")
+        self.add_sub_node(hashTree, new_tag_name="hashTree")
+        self.add_sub_node(affter_beanshell, new_tag_name="stringProp", name="filename")
+        self.add_sub_node(affter_beanshell, new_tag_name="stringProp", text=to_beanshell_param, name="parameters")
+        self.add_sub_node(affter_beanshell, new_tag_name="boolProp", text="false", name="resetInterpreter")
+        self.add_sub_node(affter_beanshell, new_tag_name="stringProp", text=express, name="script")
+
+        new_affter_beanshell_xpath = f'//BeanShellPostProcessor[@testname="{affter_beanshell_name}"]'
+        self.save_change()
+
+        child_info = {}
+        child_info['child_type'] = "json_extract"
+        child_info['child_name'] = affter_beanshell_name
+        child_info['xpath'] = new_affter_beanshell_xpath
+        child_info['params'] = {"to_beanshell_param": to_beanshell_param, "express": express}
+        return child_info
+
+    def add_pre_beanshell(self, sampler_xpath, name, to_beanshell_param, express, pre_beanshell_xpath=None):
+        """
+        添加前置处理器
+        :param sampler_xpath:
+        :param name:
+        :param to_beanshell_param:
+        :param express:
+        :param pre_beanshell_xpath:
+        :return:
+        """
+
+        hashTree = self._remove_sampler_child(sampler_xpath, pre_beanshell_xpath)
+        pre_beanshell_name = name + "." + Tools.random_str(9)
+
+        pre_beanshell = self.add_sub_node(hashTree, new_tag_name="BeanShellPreProcessor", guiclass="TestBeanGUI",
+                                       testclass="BeanShellPreProcessor", testname=pre_beanshell_name, enabled="true")
+        self.add_sub_node(hashTree, new_tag_name="hashTree")
+        self.add_sub_node(pre_beanshell, new_tag_name="stringProp", name="filename")
+        self.add_sub_node(pre_beanshell, new_tag_name="stringProp", text=to_beanshell_param, name="parameters")
+        self.add_sub_node(pre_beanshell, new_tag_name="boolProp", text="false", name="resetInterpreter")
+        self.add_sub_node(pre_beanshell, new_tag_name="stringProp", text=express, name="script")
+
+        new_pre_beanshell_name_xpath = f'//BeanShellPreProcessor[@testname="{pre_beanshell_name}"]'
+        self.save_change()
+
+        child_info = {}
+        child_info['child_type'] = "json_extract"
+        child_info['child_name'] = pre_beanshell_name
+        child_info['xpath'] = new_pre_beanshell_name_xpath
+        child_info['params'] = {"to_beanshell_param": to_beanshell_param, "express": express}
         return child_info
 
     def _add_param(self, parent_node, param_name, param_value):
@@ -998,6 +1077,22 @@ class ModifyJMX(OperateJmx):
             return str(assert_type_dict[assert_str])
         except:
             logger.exception("无效的断言字符参数")
+            raise
+
+    def _remove_sampler_child(self, sampler_xpath, child_xpath):
+        """
+        移除sampler子元素
+        :param sampler_xpath:
+        :param child_xpath:
+        :return:
+        """
+        try:
+            if child_xpath:
+                self.remove_node_and_next(child_xpath)
+            hashTree = self.tree.xpath(sampler_xpath)[0].getnext()
+            return hashTree
+        except:
+            logger.exception("获取sampler信息失败")
             raise
 
 if __name__ == '__main__':

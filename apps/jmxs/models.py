@@ -76,8 +76,8 @@ class SamplersChildren(models.Model):
         ('json_assert', 'json断言'),
         ('re_extract', '正则提取器'),
         ('json_extract', 'json提取器'),
-        ('beanshell_start', 'beanshell前置处理器'),
-        ('beanshell_end', 'beanshell后置处理器')
+        ('pre_beanshell', 'beanshell前置处理器'),
+        ('affter_beanshell', 'beanshell后置处理器')
     )
     sampler = models.ForeignKey(JmxThreadGroup, on_delete=models.CASCADE)
     child_name = models.CharField("子元素名称", max_length=500)

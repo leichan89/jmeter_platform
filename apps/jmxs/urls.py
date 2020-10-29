@@ -27,6 +27,9 @@ urlpatterns = [
     path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
     path('samplers/header/create_update', views.SamplerCreateUpdateHeader.as_view()),
     path('samplers/assert/create_update_rsp', views.SamplerCreateUpdateRSPAssert.as_view()),
+    path('samplers/beanshell/create_update_pre', views.SamplerCreateUpdatePreBeanShell.as_view()),
+    path('samplers/beanshell/create_update_affter', views.SamplerCreateUpdateAfterBeanShell.as_view()),
+    path('samplers/extract/create_update_json', views.SamplerCreateUpdateJsonExtract.as_view()),
     path('samplers/delete/<int:child_id>', views.JmxDeleteChild.as_view()),
     # 查询sampler的所有子类信息
     path('samplers/children/<int:sampler_id>', views.SamplerChildrenList.as_view()),

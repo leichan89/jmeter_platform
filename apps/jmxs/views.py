@@ -173,7 +173,7 @@ class JmxCreate(APIView):
                 s = JmxThreadGroup(jmx_id=jmx_id, child_name=sampler_info['name'],
                                               child_info=json.dumps(sampler_info), child_thread=sampler_info['thread_type'])
                 s.save()
-            return APIRsp(data={'sapmlerId': s.id}) # sampler的id
+            return APIRsp(data={'samplerId': s.id}) # sampler的id
         os.remove(new_jmxpath)
         return APIRsp(code=400, msg='添加失败，参数校验未通过', status=status.HTTP_400_BAD_REQUEST)
 
@@ -219,70 +219,6 @@ class JmxThreadNumUpdate(APIView):
         except:
             return APIRsp(code=400, msg="修改线程组属性异常")
 
-class SamplerCreateUpdateHeader(APIView):
-    """
-    创建sampler的header
-    """
-    def post(self, request):
-        sapmlerId = request.data.get('sapmlerId')
-        childId = request.data.get('childId')
-        params = request.data.get('params')
-        if len(params) == 1 and params[0]['key'] == "" and params[0]['value'] == "":
-            return APIRsp(msg='头参数为空，不创建头信息')
-        try:
-            # 获取jmx的信息
-            jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmlerId)
-            jmx_path = jmxInfo[0].jmx
-            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
-            if childId:
-                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
-                child_xpath = child_info['xpath']
-                new_child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params, header_xpath=child_xpath)
-                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
-            else:
-                child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params)
-                s = SamplersChildren(sampler_id=sapmlerId, child_name=child_info['child_name'], child_type='header',
-                                     child_info=json.dumps(child_info))
-                s.save()
-            return APIRsp()
-        except:
-            return APIRsp(code=400, msg='创建header失败，参数错误！')
-
-class SamplerCreateUpdateRSPAssert(APIView):
-    """
-    创建sampler的响应断言
-    """
-    def post(self, request):
-        sapmlerId = request.data.get('sapmlerId')
-        childId = request.data.get('childId')
-        radioStr = request.data.get('radioStr')
-        checkedFalseStr = request.data.get('checkedFalseStr')
-        checkedOrStr = request.data.get('checkedOrStr')
-        assert_content = request.data.get('assertContent')
-        assert_str = radioStr + checkedFalseStr + checkedOrStr
-        if len(assert_content) == 1 and assert_content[0]['key'] == "":
-            return APIRsp(msg='断言参数为空，不创建响应断言')
-        try:
-            # 获取jmx的信息
-            jmxInfo = JmxThreadGroup.objects.all().filter(id=sapmlerId)
-            jmx_path = jmxInfo[0].jmx
-            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
-            if childId:
-                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
-                child_xpath = child_info['xpath']
-                new_child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str,
-                                                        assert_content=assert_content, rsp_assert_xpath=child_xpath)
-                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
-            else:
-                child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str,
-                                                                     assert_content=assert_content)
-                s = SamplersChildren(sampler_id=sapmlerId, child_name=child_info['child_name'], child_type='rsp_assert',
-                                     child_info=json.dumps(child_info))
-                s.save()
-            return APIRsp()
-        except:
-            return APIRsp(code=400, msg='创建响应断言失败，参数错误！')
-
 class JmxCreateUpdateSapmler(APIView):
     """
     创建或修改sampler
@@ -327,9 +263,172 @@ class JmxCreateUpdateSapmler(APIView):
                 s = JmxThreadGroup(jmx_id=jmx_id, child_name=sampler_name,
                                               child_info=json.dumps(rst), child_thread=thread_type)
                 s.save()
-                return APIRsp(msg='新增sampler成功！', data={'sapmlerId': s.id})
+                return APIRsp(msg='新增sampler成功！', data={'samplerId': s.id})
             except:
                 return APIRsp(code=400, msg='新增sapmler失败，sampler参数有误！', status=status.HTTP_400_BAD_REQUEST)
+
+class SamplerCreateUpdateHeader(APIView):
+    """
+    创建sampler的header
+    """
+    def post(self, request):
+        samplerId = request.data.get('samplerId')
+        childId = request.data.get('childId')
+        params = request.data.get('params')
+        if len(params) == 1 and params[0]['key'] == "" and params[0]['value'] == "":
+            return APIRsp(msg='头参数为空，不创建头信息')
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params, header_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params)
+                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='header',
+                                     child_info=json.dumps(child_info))
+                s.save()
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建header失败，参数错误！')
+
+class SamplerCreateUpdateRSPAssert(APIView):
+    """
+    创建sampler的响应断言
+    """
+    def post(self, request):
+        samplerId = request.data.get('samplerId')
+        childId = request.data.get('childId')
+        radioStr = request.data.get('radioStr')
+        checkedFalseStr = request.data.get('checkedFalseStr')
+        checkedOrStr = request.data.get('checkedOrStr')
+        assert_content = request.data.get('assertContent')
+        assert_str = radioStr + checkedFalseStr + checkedOrStr
+        if len(assert_content) == 1 and assert_content[0]['key'] == "":
+            return APIRsp(msg='断言参数为空，不创建响应断言')
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str,
+                                                        assert_content=assert_content, rsp_assert_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str,
+                                                                     assert_content=assert_content)
+                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='rsp_assert',
+                                     child_info=json.dumps(child_info))
+                s.save()
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建响应断言失败，参数错误！')
+
+class SamplerCreateUpdatePreBeanShell(APIView):
+    """
+    创建前置处理器
+    """
+    def post(self, request):
+        samplerId = request.data.get('samplerId')
+        childId = request.data.get('childId')
+        name = request.data.get('name')
+        toBeanShellParam = request.data.get('toBeanShellParam')
+        express = request.data.get('express')
+        if not express:
+            return APIRsp(msg='BeanShell脚本信息为空，不创建!')
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_pre_beanshell(sampler_xpath, name, toBeanShellParam,
+                                                                               express, pre_beanshell_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_pre_beanshell(sampler_xpath, name, toBeanShellParam, express)
+                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='pre_beanshell',
+                                     child_info=json.dumps(child_info))
+                s.save()
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建BeanShell后置处理器失败，参数错误！')
+
+class SamplerCreateUpdateAfterBeanShell(APIView):
+    """
+    创建后置处理器
+    """
+    def post(self, request):
+        samplerId = request.data.get('samplerId')
+        childId = request.data.get('childId')
+        name = request.data.get('name')
+        toBeanShellParam = request.data.get('toBeanShellParam')
+        express = request.data.get('express')
+        if not express:
+            return APIRsp(msg='BeanShell脚本信息为空，不创建!')
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_affter_beanshell(sampler_xpath, name, toBeanShellParam,
+                                                                               express, affter_beanshell_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_affter_beanshell(sampler_xpath, name, toBeanShellParam, express)
+                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='affter_beanshell',
+                                     child_info=json.dumps(child_info))
+                s.save()
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建BeanShell后置处理器失败，参数错误！')
+
+class SamplerCreateUpdateJsonExtract(APIView):
+    """
+    创建Json提取器
+    """
+    def post(self, request):
+        samplerId = request.data.get('samplerId')
+        childId = request.data.get('childId')
+        name = request.data.get('name')
+        params = request.data.get('params')
+        express = request.data.get('express')
+        match_num = request.data.get('match_num')
+        if not params and not express:
+            return APIRsp(msg='参数为空，不创建Json提取器')
+        if not match_num:
+            match_num = ""
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_json_extract(sampler_xpath, name, params, express,
+                                                                           match_num, json_extract_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_json_extract(sampler_xpath, name, params, express, match_num)
+                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='json_extract',
+                                     child_info=json.dumps(child_info))
+                s.save()
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建Json提取器失败，参数错误！')
 
 class JmxChildrenList(generics.GenericAPIView):
     """
