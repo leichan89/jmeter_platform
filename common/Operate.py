@@ -949,7 +949,7 @@ class ModifyJMX(OperateJmx):
             raise
         for param in params:
             sub_elementProp = collectionProp + f'/elementProp[{count}]'
-            self.add_sub_node(collectionProp, new_tag_name='elementProp', name=param['value'], elementType='HTTPArgument')
+            self.add_sub_node(collectionProp, new_tag_name='elementProp', name=param['key'], elementType='HTTPArgument')
             self.add_sub_node(sub_elementProp, new_tag_name='boolProp', text='false', name='HTTPArgument.always_encode')
             self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text=param['value'], name='Argument.value')
             self.add_sub_node(sub_elementProp, new_tag_name='stringProp', text='=', name='Argument.metadata')
