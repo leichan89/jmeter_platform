@@ -644,10 +644,10 @@ class ModifyJMX(OperateJmx):
             self.add_sub_node(accord_tag, new_tag_name='hashTree')
 
         sampler_info['params'] = ''
-        if param_type == 'form' and params_info:
+        if param_type == 'form':
             self._add_form_data(HTTPSamplerProxy, params_info)
             sampler_info['params'] = params_info
-        elif param_type == 'raw' and params:
+        elif param_type == 'raw':
             self._add_raw_data(HTTPSamplerProxy, params)
             sampler_info['params'] = params
 
@@ -798,7 +798,7 @@ class ModifyJMX(OperateJmx):
 
         self.save_change()
 
-    def add_header(self, sampler_xpath, headers, header_xpath=None):
+    def add_header(self, sampler_xpath, name, headers, header_xpath=None):
         """
         添加请求头信息，一个sampler只允许添加一个
         :param sampler_xpath: sampler的xpath路径
@@ -807,7 +807,7 @@ class ModifyJMX(OperateJmx):
         :return:
         """
         hashTree = self._remove_sampler_child(sampler_xpath, header_xpath)
-        header_name = "HTTP信息头管理器" + "." + Tools.random_str(9)
+        header_name = name + "." + Tools.random_str(9)
         header = self.add_sub_node(hashTree, new_tag_name='HeaderManager', guiclass="HeaderPanel",
                                    testclass="HeaderManager",
                                    testname=header_name, enabled="true")
@@ -825,12 +825,12 @@ class ModifyJMX(OperateJmx):
         self.save_change()
         child_info = {}
         child_info['child_type'] = "header"
-        child_info['child_name'] = header_name
+        child_info['child_name'] = name
         child_info['xpath'] = new_header_xpath
         child_info['params'] = headers
         return child_info
 
-    def add_rsp_assert(self, sampler_xpath, assert_str, assert_content, rsp_assert_xpath=None):
+    def add_rsp_assert(self, sampler_xpath, name, assert_str, assert_content, rsp_assert_xpath=None):
         """
         添加响应信息断言
         :param sampler_xpath: 目标取样器
@@ -841,7 +841,7 @@ class ModifyJMX(OperateJmx):
         """
         hashTree = self._remove_sampler_child(sampler_xpath, rsp_assert_xpath)
         assert_type = self._to_assert_type(assert_str)
-        rsp_assert_name = "响应断言" + "." + Tools.random_str(9)
+        rsp_assert_name = name + "." + Tools.random_str(9)
         rsp_assert = self.add_sub_node(hashTree, new_tag_name="ResponseAssertion", guiclass="AssertionGui",
                                        testclass="ResponseAssertion", testname=rsp_assert_name, enabled="true")
         self.add_sub_node(hashTree, new_tag_name="hashTree")
@@ -859,7 +859,7 @@ class ModifyJMX(OperateJmx):
 
         child_info = {}
         child_info['child_type'] = "rsp_assert"
-        child_info['child_name'] = rsp_assert_name
+        child_info['child_name'] = name
         child_info['xpath'] = new_rsp_assert_xpath
         child_info['params'] = {"rsp_assert_content": assert_content, "rsp_assert_type": list(assert_str)}
         return child_info
@@ -892,35 +892,35 @@ class ModifyJMX(OperateJmx):
         child_info['params'] = {"params": params, "express": express, "match_num": match_num}
         return child_info
 
-    def add_affter_beanshell(self, sampler_xpath, name, to_beanshell_param, express, affter_beanshell_xpath=None):
+    def add_after_beanshell(self, sampler_xpath, name, to_beanshell_param, express, after_beanshell_xpath=None):
         """
         添加后置处理器
         :param sampler_xpath:
         :param name:
         :param to_beanshell_param:
         :param express:
-        :param affter_beanshell_xpath:
+        :param after_beanshell_xpath:
         :return:
         """
 
-        hashTree = self._remove_sampler_child(sampler_xpath, affter_beanshell_xpath)
-        affter_beanshell_name = name + "." + Tools.random_str(9)
+        hashTree = self._remove_sampler_child(sampler_xpath, after_beanshell_xpath)
+        after_beanshell_name = name + "." + Tools.random_str(9)
 
-        affter_beanshell = self.add_sub_node(hashTree, new_tag_name="BeanShellPostProcessor", guiclass="TestBeanGUI",
-                                       testclass="BeanShellPostProcessor", testname=affter_beanshell_name, enabled="true")
+        after_beanshell = self.add_sub_node(hashTree, new_tag_name="BeanShellPostProcessor", guiclass="TestBeanGUI",
+                                       testclass="BeanShellPostProcessor", testname=after_beanshell_name, enabled="true")
         self.add_sub_node(hashTree, new_tag_name="hashTree")
-        self.add_sub_node(affter_beanshell, new_tag_name="stringProp", name="filename")
-        self.add_sub_node(affter_beanshell, new_tag_name="stringProp", text=to_beanshell_param, name="parameters")
-        self.add_sub_node(affter_beanshell, new_tag_name="boolProp", text="false", name="resetInterpreter")
-        self.add_sub_node(affter_beanshell, new_tag_name="stringProp", text=express, name="script")
+        self.add_sub_node(after_beanshell, new_tag_name="stringProp", name="filename")
+        self.add_sub_node(after_beanshell, new_tag_name="stringProp", text=to_beanshell_param, name="parameters")
+        self.add_sub_node(after_beanshell, new_tag_name="boolProp", text="false", name="resetInterpreter")
+        self.add_sub_node(after_beanshell, new_tag_name="stringProp", text=express, name="script")
 
-        new_affter_beanshell_xpath = f'//BeanShellPostProcessor[@testname="{affter_beanshell_name}"]'
+        new_after_beanshell_xpath = f'//BeanShellPostProcessor[@testname="{after_beanshell_name}"]'
         self.save_change()
 
         child_info = {}
         child_info['child_type'] = "json_extract"
-        child_info['child_name'] = affter_beanshell_name
-        child_info['xpath'] = new_affter_beanshell_xpath
+        child_info['child_name'] = after_beanshell_name
+        child_info['xpath'] = new_after_beanshell_xpath
         child_info['params'] = {"to_beanshell_param": to_beanshell_param, "express": express}
         return child_info
 

@@ -1,13 +1,13 @@
 192.168.62.131:8000
 
+启动redis
+redis-server
+
 启动celery
 Celery -A jmeter_platform worker -l info
 
 启动flower
 celery flower --broker='redis://127.0.0.1:6379/0'  -A jmeter_platform --address=127.0.0.1 --port=5558
-
-启动redis
-redis-server
 
 启动influxd
 influxd -config /usr/local/etc/influxdb.conf

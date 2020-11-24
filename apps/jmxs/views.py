@@ -170,7 +170,7 @@ class JmxCreate(APIView):
             if sampler_info:
                 # 保存sampler信息
                 del sampler_info['children']
-                s = JmxThreadGroup(jmx_id=jmx_id, child_name=sampler_info['name'],
+                s = JmxThreadGroup(jmx_id=jmx_id, child_name=sampler_name,
                                               child_info=json.dumps(sampler_info), child_thread=sampler_info['thread_type'])
                 s.save()
             return APIRsp(data={'samplerId': s.id}) # sampler的id
@@ -274,8 +274,11 @@ class SamplerCreateUpdateHeader(APIView):
     def post(self, request):
         samplerId = request.data.get('samplerId')
         childId = request.data.get('childId')
+        name = request.data.get('name')
         params = request.data.get('params')
-        if len(params) == 1 and params[0]['key'] == "" and params[0]['value'] == "":
+        if not name:
+            name = "HTTP信息头管理器"
+        if len(params) == 1 and params[0]['key'] == "" and params[0]['value'] == "" and not childId:
             return APIRsp(msg='头参数为空，不创建头信息')
         try:
             # 获取jmx的信息
@@ -285,10 +288,11 @@ class SamplerCreateUpdateHeader(APIView):
             if childId:
                 child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
                 child_xpath = child_info['xpath']
-                new_child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params, header_xpath=child_xpath)
-                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+                new_child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, name, headers=params,
+                                                                     header_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_name=name, child_info=json.dumps(new_child_info))
             else:
-                child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, headers=params)
+                child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, name, headers=params)
                 s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='header',
                                      child_info=json.dumps(child_info))
                 s.save()
@@ -303,12 +307,15 @@ class SamplerCreateUpdateRSPAssert(APIView):
     def post(self, request):
         samplerId = request.data.get('samplerId')
         childId = request.data.get('childId')
+        name = request.data.get('name')
+        if not name:
+            name = "响应断言"
         radioStr = request.data.get('radioStr')
         checkedFalseStr = request.data.get('checkedFalseStr')
         checkedOrStr = request.data.get('checkedOrStr')
         assert_content = request.data.get('assertContent')
         assert_str = radioStr + checkedFalseStr + checkedOrStr
-        if len(assert_content) == 1 and assert_content[0]['key'] == "":
+        if len(assert_content) == 1 and assert_content[0]['key'] == "" and not childId:
             return APIRsp(msg='断言参数为空，不创建响应断言')
         try:
             # 获取jmx的信息
@@ -318,11 +325,11 @@ class SamplerCreateUpdateRSPAssert(APIView):
             if childId:
                 child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
                 child_xpath = child_info['xpath']
-                new_child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str,
+                new_child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, name, assert_str=assert_str,
                                                         assert_content=assert_content, rsp_assert_xpath=child_xpath)
-                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+                SamplersChildren.objects.filter(id=childId).update(child_name=name, child_info=json.dumps(new_child_info))
             else:
-                child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, assert_str=assert_str,
+                child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, name, assert_str=assert_str,
                                                                      assert_content=assert_content)
                 s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='rsp_assert',
                                      child_info=json.dumps(child_info))
@@ -341,8 +348,10 @@ class SamplerCreateUpdatePreBeanShell(APIView):
         name = request.data.get('name')
         toBeanShellParam = request.data.get('toBeanShellParam')
         express = request.data.get('express')
-        if not express:
-            return APIRsp(msg='BeanShell脚本信息为空，不创建!')
+        if not express or not name and not childId:
+            return APIRsp(msg='存在参数为空，不创建BeanShell前置处理器!')
+        if not toBeanShellParam:
+            toBeanShellParam = ""
         try:
             # 获取jmx的信息
             jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
@@ -353,10 +362,10 @@ class SamplerCreateUpdatePreBeanShell(APIView):
                 child_xpath = child_info['xpath']
                 new_child_info = ModifyJMX(str(jmx_path)).add_pre_beanshell(sampler_xpath, name, toBeanShellParam,
                                                                                express, pre_beanshell_xpath=child_xpath)
-                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+                SamplersChildren.objects.filter(id=childId).update(child_name=name, child_info=json.dumps(new_child_info))
             else:
                 child_info = ModifyJMX(str(jmx_path)).add_pre_beanshell(sampler_xpath, name, toBeanShellParam, express)
-                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='pre_beanshell',
+                s = SamplersChildren(sampler_id=samplerId, child_name=name, child_type='pre_beanshell',
                                      child_info=json.dumps(child_info))
                 s.save()
             return APIRsp()
@@ -373,8 +382,10 @@ class SamplerCreateUpdateAfterBeanShell(APIView):
         name = request.data.get('name')
         toBeanShellParam = request.data.get('toBeanShellParam')
         express = request.data.get('express')
-        if not express:
-            return APIRsp(msg='BeanShell脚本信息为空，不创建!')
+        if not express or not name and not childId:
+            return APIRsp(msg='存在参数为空，不创建BeanShell后置处理器!')
+        if not toBeanShellParam:
+            toBeanShellParam = ""
         try:
             # 获取jmx的信息
             jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
@@ -383,12 +394,12 @@ class SamplerCreateUpdateAfterBeanShell(APIView):
             if childId:
                 child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
                 child_xpath = child_info['xpath']
-                new_child_info = ModifyJMX(str(jmx_path)).add_affter_beanshell(sampler_xpath, name, toBeanShellParam,
-                                                                               express, affter_beanshell_xpath=child_xpath)
-                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+                new_child_info = ModifyJMX(str(jmx_path)).add_after_beanshell(sampler_xpath, name, toBeanShellParam,
+                                                                               express, after_beanshell_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_name=name, child_info=json.dumps(new_child_info))
             else:
-                child_info = ModifyJMX(str(jmx_path)).add_affter_beanshell(sampler_xpath, name, toBeanShellParam, express)
-                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='affter_beanshell',
+                child_info = ModifyJMX(str(jmx_path)).add_after_beanshell(sampler_xpath, name, toBeanShellParam, express)
+                s = SamplersChildren(sampler_id=samplerId, child_name=name, child_type='after_beanshell',
                                      child_info=json.dumps(child_info))
                 s.save()
             return APIRsp()
@@ -406,8 +417,8 @@ class SamplerCreateUpdateJsonExtract(APIView):
         params = request.data.get('params')
         express = request.data.get('express')
         match_num = request.data.get('match_num')
-        if not params and not express:
-            return APIRsp(msg='参数为空，不创建Json提取器')
+        if not params or not express or not name and not childId:
+            return APIRsp(msg='存在参数为空，不创建Json提取器')
         if not match_num:
             match_num = ""
         try:
@@ -420,10 +431,10 @@ class SamplerCreateUpdateJsonExtract(APIView):
                 child_xpath = child_info['xpath']
                 new_child_info = ModifyJMX(str(jmx_path)).add_json_extract(sampler_xpath, name, params, express,
                                                                            match_num, json_extract_xpath=child_xpath)
-                SamplersChildren.objects.filter(id=childId).update(child_info=json.dumps(new_child_info))
+                SamplersChildren.objects.filter(id=childId).update(child_name=name, child_info=json.dumps(new_child_info))
             else:
                 child_info = ModifyJMX(str(jmx_path)).add_json_extract(sampler_xpath, name, params, express, match_num)
-                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='json_extract',
+                s = SamplersChildren(sampler_id=samplerId, child_name=name, child_type='json_extract',
                                      child_info=json.dumps(child_info))
                 s.save()
             return APIRsp()
@@ -617,7 +628,7 @@ class SamplerChildrenList(generics.GenericAPIView):
     """
     获取sampler的子类
     """
-    queryset = SamplersChildren.objects.all()
+    queryset = SamplersChildren.objects.all().order_by('-add_time')
     serializer_class = SamplersChildrenSerializer
 
     def get(self, request, sampler_id):
