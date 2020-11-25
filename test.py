@@ -2275,5 +2275,5 @@
 #     print('a')
 #
 
-s = 'asd'
+s = 'asd'.lower()
 print(list(s))

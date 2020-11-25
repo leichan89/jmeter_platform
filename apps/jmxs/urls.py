@@ -24,18 +24,23 @@ urlpatterns = [
     path('jmxs/children/<int:jmx_id>', views.JmxChildrenList.as_view()),
     # 查询jmx文件的单个元素的信息
     path('jmxs/child/<int:pk>', views.JmxChildrenView.as_view()),
+    # 删除jmx的子元素
+    path('jmxs/child/delete/<int:childId>', views.JmxDeleteChild.as_view()),
     path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
     path('samplers/header/create_update', views.SamplerCreateUpdateHeader.as_view()),
     path('samplers/assert/create_update_rsp', views.SamplerCreateUpdateRSPAssert.as_view()),
     path('samplers/beanshell/create_update_pre', views.SamplerCreateUpdatePreBeanShell.as_view()),
     path('samplers/beanshell/create_update_after', views.SamplerCreateUpdateAfterBeanShell.as_view()),
     path('samplers/extract/create_update_json', views.SamplerCreateUpdateJsonExtract.as_view()),
-    path('samplers/delete/<int:child_id>', views.JmxDeleteChild.as_view()),
     # 查询sampler的所有子类信息
     path('samplers/children/<int:sampler_id>', views.SamplerChildrenList.as_view()),
     # 查询sampler的子元素的详细信息，url参数为子元素的id
     path('samplers/child/<int:pk>', views.SamplerChildrenView.as_view()),
-    path('csvs', views.CsvListView.as_view())
+    # 删除sampler的子元素
+    path('samplers/delete/<int:samplerId>/<int:childId>', views.SamplerDeleteChild.as_view()),
+    path('csvs', views.CsvListView.as_view()),
+    # 更新csv信息
+    path('csvs/update', views.CsvModify.as_view())
 ]
 
 

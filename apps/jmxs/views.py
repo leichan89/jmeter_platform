@@ -464,25 +464,25 @@ class JmxChildrenList(generics.GenericAPIView):
             logger.exception(f'获取线程组子元素异常\n{e}')
             return APIRsp(code=400, msg='获取线程组子元素异常', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class JmxDeleteChild(APIView):
+class JmxDeleteChild(generics.RetrieveAPIView):
     """
     删除sampler或者csv
     """
-    def post(self, request, child_id):
+    def post(self, request, childId):
         try:
-            qs = JmxThreadGroup.objects.get(id=child_id)
+            qs = JmxThreadGroup.objects.get(id=childId)
             if not qs:
                 return APIRsp(code=400, msg='无效的id')
             jmx_path = str(qs.jmx)
             child_info = json.loads(qs.child_info)
             # 删除sampler或者csv
-            op = OperateJmx(jmx_path)
+            op = OperateJmx(str(jmx_path))
             op.remove_node_and_next(child_info['xpath'])
             op.save_change()
-            JmxThreadGroup.objects.filter(id=child_id).delete()
+            JmxThreadGroup.objects.filter(id=childId).delete()
             return APIRsp()
         except:
-            return APIRsp(code=500, msg='删除失败')
+            return APIRsp(code=400, msg='删除失败')
 
 class JmxListView(generics.ListAPIView):
     """
@@ -553,6 +553,7 @@ class CsvUpload(APIView):
         data = {}
         # request.POST.get适用于form-data请求获取参数
         csv = request.FILES.get('csv')
+        name = request.POST.get('name')
         jmx_id = request.POST.get('jmxId')
         user = request.POST.get('userId')
         variableNames = request.POST.get('variableNames')
@@ -561,8 +562,6 @@ class CsvUpload(APIView):
         recycle = request.POST.get('recycle')
         stopThread = request.POST.get('stopThread')
         threadType = request.POST.get('threadType')
-        # 不传值，xpath就是None
-        xpath = request.POST.get('xpath')
         if csv and jmx_id and user and variableNames and delimiter and ignoreFirstLine and recycle and stopThread and threadType:
             csv_name_ext = os.path.splitext(csv.name)
             csv_name = csv_name_ext[0]
@@ -586,11 +585,11 @@ class CsvUpload(APIView):
             if obj.is_valid():
                 obj.save()
                 jmx_path = Jmxs.objects.values('jmx').get(id=jmx_id)['jmx']
-                csv_info = ModifyJMX(jmx_path).add_csv(path, variableNames, ignoreFirstLine=ignoreFirstLine,
+                csv_info = ModifyJMX(jmx_path).add_csv(name, path, variableNames, ignoreFirstLine=ignoreFirstLine,
                                                        delimiter=delimiter, recycle=recycle, stopThread=stopThread,
-                                                       accord=threadType, xpath=xpath)
+                                                       accord=threadType)
                 # 保存csv信息
-                s = JmxThreadGroup(jmx_id=jmx_id, child_name=csv_info['name'], child_type='csv',
+                s = JmxThreadGroup(jmx_id=jmx_id, child_name=name, child_type='csv',
                                               child_info=json.dumps(csv_info), child_thread=threadType)
                 s.save()
                 return APIRsp()
@@ -598,6 +597,35 @@ class CsvUpload(APIView):
             return APIRsp(code=500, msg='添加失败，校验未通过', status=status.HTTP_400_BAD_REQUEST)
         else:
             return APIRsp(code=400, msg='添加失败，参数不完整', status=status.HTTP_400_BAD_REQUEST)
+
+class CsvModify(APIView):
+
+    def post(self, request):
+        """
+        修改csv信息
+        """
+        childId = request.data.get('childId')
+        name = request.data.get('name')
+        variableNames = request.data.get('variableNames')
+        delimiter = request.data.get('delimiter')
+        ignoreFirstLine = str(request.data.get('ignoreFirstLine')).lower()
+        recycle = str(request.data.get('recycle')).lower()
+        stopThread = str(request.data.get('stopThread')).lower()
+        if childId and variableNames and ignoreFirstLine and recycle and stopThread:
+            csv_base_info = JmxThreadGroup.objects.get(id=childId)
+            jmx_path = csv_base_info.jmx
+            child_info = json.loads(csv_base_info.child_info)
+            xpath = child_info['xpath']
+            threadType = str(csv_base_info.child_thread)
+            csv_path = child_info['filename']
+            csv_info = ModifyJMX(str(jmx_path)).add_csv(name, csv_path, variableNames, ignoreFirstLine=ignoreFirstLine,
+                                                   delimiter=delimiter, recycle=recycle, stopThread=stopThread,
+                                                   accord=threadType, xpath=xpath)
+            # 更新csv信息
+            JmxThreadGroup.objects.filter(id=childId).update(child_name=name,child_info=json.dumps(csv_info))
+            return APIRsp()
+        else:
+            return APIRsp(code=400, msg='修改失败，参数不完整', status=status.HTTP_400_BAD_REQUEST)
 
 class CsvListView(generics.ListAPIView):
     queryset = Csvs.objects.all()
@@ -654,3 +682,25 @@ class SamplerChildrenView(generics.RetrieveAPIView):
             return APIRsp(data=rsp_data.data)
         else:
             return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)
+
+class SamplerDeleteChild(generics.RetrieveAPIView):
+    """
+    删除sampler的子元素
+    """
+    def post(self, request, samplerId, childId):
+        try:
+            qs = SamplersChildren.objects.get(id=childId)
+            if not qs:
+                return APIRsp(code=400, msg='无效的id')
+            child_xpath = json.loads(qs.child_info)['xpath']
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
+            jmx_path = jmxInfo[0].jmx
+            # 删除子元素
+            op = OperateJmx(str(jmx_path))
+            op.remove_node_and_next(child_xpath)
+            op.save_change()
+            SamplersChildren.objects.filter(id=childId).delete()
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='删除失败')

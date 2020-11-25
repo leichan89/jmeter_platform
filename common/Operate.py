@@ -661,7 +661,7 @@ class ModifyJMX(OperateJmx):
         sampler_info['param_type'] = param_type
         return sampler_info
 
-    def add_csv(self, filename, variableNames, delimiter=',', ignoreFirstLine='false', recycle='false', stopThread='false', accord='thread', xpath=None):
+    def add_csv(self, name, filename, variableNames, delimiter, ignoreFirstLine, recycle, stopThread, accord, xpath=None):
         """
         添加csv数据文件设置
         :param filename: 文件路径
@@ -686,13 +686,13 @@ class ModifyJMX(OperateJmx):
 
         self.remove_node_and_next(xpath)
 
-        name = 'CSV数据文件设置' + '.' + Tools.random_str(9)
+        csvname = name + '.' + Tools.random_str(9)
 
-        CSVDataSet = accord_tag + f"/CSVDataSet[@testname='{name}']"
+        CSVDataSet = accord_tag + f"/CSVDataSet[@testname='{csvname}']"
 
         # 在最后的位置插入sampler
         csv = self.add_sub_node(accord_tag, new_tag_name='CSVDataSet', guiclass="TestBeanGUI",
-                               testclass="CSVDataSet", testname=name, enabled="true")
+                               testclass="CSVDataSet", testname=csvname, enabled="true")
 
         # 添加hashTree
         self.add_sub_node(accord_tag, new_tag_name='hashTree')
