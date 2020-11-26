@@ -480,6 +480,12 @@ class JmxDeleteChild(generics.RetrieveAPIView):
             op.remove_node_and_next(child_info['xpath'])
             op.save_change()
             JmxThreadGroup.objects.filter(id=childId).delete()
+            Csvs.objects.filter(jmx_id=int(qs.jmx_id)).delete()
+            child_type = str(qs.child_type)
+            if child_type == 'csv':
+                os.remove(child_info['filename'])
+            return APIRsp()
+        except FileNotFoundError:
             return APIRsp()
         except:
             return APIRsp(code=400, msg='删除失败')
@@ -529,19 +535,23 @@ class JmxView(generics.RetrieveAPIView):
         else:
             return APIRsp(code='400', msg='无数据', status=rsp.status_code, data=rsp.data)
 
-class JmxDestory(generics.DestroyAPIView):
+class JmxDelete(generics.RetrieveAPIView):
     """
-    删除指定jmx
+    删除sampler或者csv
     """
-    queryset = Jmxs.objects.all()
-    serializer_class = JmxsRunSerializer
-
-    def delete(self, request, *args, **kwargs):
+    def post(self, request, jmxId):
         try:
-            self.destroy(request, *args, **kwargs)
+            qs = Jmxs.objects.get(id=jmxId)
+            if not qs:
+                return APIRsp(code=400, msg='无效的id')
+            Jmxs.objects.filter(id=jmxId).delete()
+            jmx_path = str(qs.jmx)
+            os.remove(jmx_path)
+            return APIRsp()
+        except FileNotFoundError:
             return APIRsp()
         except:
-            return APIRsp(code=404, msg='资源未找到', status=status.HTTP_404_NOT_FOUND)
+            return APIRsp(code=400, msg='删除失败')
 
 class CsvUpload(APIView):
 
