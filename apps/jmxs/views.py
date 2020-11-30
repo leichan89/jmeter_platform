@@ -631,8 +631,8 @@ class CsvUpload(APIView):
             if obj.is_valid():
                 obj.save()
                 jmx_path = Jmxs.objects.values('jmx').get(id=jmx_id)['jmx']
-                csv_info = ModifyJMX(jmx_path).add_csv(name, path, variableNames, ignoreFirstLine=ignoreFirstLine,
-                                                       delimiter=delimiter, recycle=recycle, stopThread=stopThread,
+                csv_info = ModifyJMX(jmx_path).add_csv(name, path, variableNames, ignoreFirstLine=Tools.strToBool(ignoreFirstLine),
+                                                       delimiter=delimiter, recycle=Tools.strToBool(recycle), stopThread=Tools.strToBool(stopThread),
                                                        accord=threadType)
                 # 保存csv信息
                 s = JmxThreadGroup(jmx_id=jmx_id, child_name=name, child_type='csv',
@@ -654,10 +654,10 @@ class CsvModify(APIView):
         name = request.data.get('name')
         variableNames = request.data.get('variableNames')
         delimiter = request.data.get('delimiter')
-        ignoreFirstLine = str(request.data.get('ignoreFirstLine')).lower()
-        recycle = str(request.data.get('recycle')).lower()
-        stopThread = str(request.data.get('stopThread')).lower()
-        if childId and variableNames and ignoreFirstLine and recycle and stopThread:
+        ignoreFirstLine = request.data.get('ignoreFirstLine')
+        recycle = request.data.get('recycle')
+        stopThread = request.data.get('stopThread')
+        if childId and variableNames:
             csv_base_info = JmxThreadGroup.objects.get(id=childId)
             jmx_path = csv_base_info.jmx
             child_info = json.loads(csv_base_info.child_info)

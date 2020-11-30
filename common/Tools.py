@@ -106,6 +106,20 @@ class Tools:
 
         return assert_dict
 
+    @staticmethod
+    def boolToStr(param):
+        if param == True or param == False:
+            return str(param).lower()
+        return param
+
+    @staticmethod
+    def strToBool(param):
+        if param == 'true':
+            return True
+        elif param == 'false':
+            return False
+        return param
+
 
 if __name__ == "__main__":
 

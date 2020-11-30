@@ -802,11 +802,11 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(csv, new_tag_name='stringProp', text=delimiter, name="delimiter")
         self.add_sub_node(csv, new_tag_name='stringProp', name="fileEncoding")
         self.add_sub_node(csv, new_tag_name='stringProp', text=filename, name="filename")
-        self.add_sub_node(csv, new_tag_name='boolProp', text=ignoreFirstLine, name="ignoreFirstLine")
+        self.add_sub_node(csv, new_tag_name='boolProp', text=Tools.boolToStr(ignoreFirstLine), name="ignoreFirstLine")
         self.add_sub_node(csv, new_tag_name='boolProp', text='false', name="c")
-        self.add_sub_node(csv, new_tag_name='boolProp', text=recycle, name="recycle")
+        self.add_sub_node(csv, new_tag_name='boolProp', text=Tools.boolToStr(recycle), name="recycle")
         self.add_sub_node(csv, new_tag_name='stringProp', text='shareMode.all', name="shareMode")
-        self.add_sub_node(csv, new_tag_name='boolProp', text=stopThread, name="stopThread")
+        self.add_sub_node(csv, new_tag_name='boolProp', text=Tools.boolToStr(stopThread), name="stopThread")
         self.add_sub_node(csv, new_tag_name='stringProp', text=variableNames, name="variableNames")
 
         self.save_change()
@@ -822,7 +822,6 @@ class ModifyJMX(OperateJmx):
         csv_info['stopThread'] = stopThread
         csv_info['delimiter'] = delimiter
         csv_info['variableNames'] = variableNames
-
         return csv_info
 
     def add_backendListener(self, influxdb_url, application_name, measurement_name='jmeter'):
