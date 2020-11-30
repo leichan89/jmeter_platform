@@ -603,6 +603,7 @@ class CsvUpload(APIView):
         user = request.POST.get('userId')
         variableNames = request.POST.get('variableNames')
         delimiter = request.POST.get('delimiter')
+        # mult-form-data会将json中的true或者false转换为字符串
         ignoreFirstLine = request.POST.get('ignoreFirstLine')
         recycle = request.POST.get('recycle')
         stopThread = request.POST.get('stopThread')
