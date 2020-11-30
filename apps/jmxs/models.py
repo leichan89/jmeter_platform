@@ -88,5 +88,5 @@ class SamplersChildren(models.Model):
     class Meta:
         verbose_name = "sampler子元素信息"
         verbose_name_plural = verbose_name
-        unique_together = ['sampler', 'child_name', 'child_type']
+        # unique_together = ['sampler', 'child_name', 'child_type']
 

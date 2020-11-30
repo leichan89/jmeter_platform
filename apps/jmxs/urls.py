@@ -29,6 +29,7 @@ urlpatterns = [
     path('samplers/create_update', views.JmxCreateUpdateSapmler.as_view()),
     path('samplers/header/create_update', views.SamplerCreateUpdateHeader.as_view()),
     path('samplers/assert/create_update_rsp', views.SamplerCreateUpdateRSPAssert.as_view()),
+    path('samplers/assert/create_update_json', views.SamplerCreateUpdateJsonAssert.as_view()),
     path('samplers/beanshell/create_update_pre', views.SamplerCreateUpdatePreBeanShell.as_view()),
     path('samplers/beanshell/create_update_after', views.SamplerCreateUpdateAfterBeanShell.as_view()),
     path('samplers/extract/create_update_json', views.SamplerCreateUpdateJsonExtract.as_view()),

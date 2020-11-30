@@ -291,7 +291,19 @@ class ReadJmx():
         header_count = 1
 
         # 响应断言计数器
-        rsp_assert_count =1
+        rsp_assert_count = 1
+
+        # JSON断言计数器
+        json_assert_count = 1
+
+        # JSON提取器计数器
+        json_extract_count = 1
+
+        # 前置处理器计数器
+        pre_beanshell_count = 1
+
+        # 后置处理器计数器
+        after_beanshell_count = 1
 
         hashTree = tree.xpath(sampler_xapth)[0].getnext()
 
@@ -308,7 +320,7 @@ class ReadJmx():
                         tree.write(self.jmxPath, encoding='utf-8')
                     else:
                         new_header_name = old_header_name
-                    child['child_name'] = new_header_name
+                    child['child_name'] = old_header_name
                     child['xpath'] = f'//HeaderManager[@testname="{new_header_name}"]'
                     header_temp_xpath = hashTreeXpath + f'/HeaderManager[{header_count}]/collectionProp/elementProp'
                     header_param_info = tree.xpath(header_temp_xpath)
@@ -323,6 +335,7 @@ class ReadJmx():
                     if not params_list:
                         params_list = [{"key": "", "value": ""}]
                     child['params'] = params_list
+                    header_count += 1
                 if cd.tag == "ResponseAssertion":
                     child['child_type'] = 'rsp_assert'
                     old_rsp_assert_name = cd.attrib['testname']
@@ -332,7 +345,7 @@ class ReadJmx():
                         tree.write(self.jmxPath, encoding='utf-8')
                     else:
                         new_rsp_assert_name = old_rsp_assert_name
-                    child['child_name'] = new_rsp_assert_name
+                    child['child_name'] = old_rsp_assert_name
                     rsp_assert_xpath = f'/ResponseAssertion[@testname="{new_rsp_assert_name}"]'
                     child['xpath'] = rsp_assert_xpath
                     # 断言内容
@@ -348,6 +361,86 @@ class ReadJmx():
                     for key, value in assert_type_dict.items():
                         if str(value) == rsp_assert_type:
                             child['params'] = {"rsp_assert_content": rsp_assert_content_list, "rsp_assert_type": list(key)}
+                    rsp_assert_count += 1
+                if cd.tag == "JSONPathAssertion":
+                    child['child_type'] = 'json_assert'
+                    old_json_assert_name = cd.attrib['testname']
+                    if upload:
+                        new_json_assert_name = old_json_assert_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_json_assert_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_json_assert_name = old_json_assert_name
+                    child['child_name'] = old_json_assert_name
+                    json_assert_xpath = f'/JSONPathAssertion[@testname="{new_json_assert_name}"]'
+                    child['xpath'] = json_assert_xpath
+                    json_assert_base_xpath = hashTreeXpath + f'/JSONPathAssertion[{json_assert_count}]'
+                    json_assert_json_path_xpath = json_assert_base_xpath + '/stringProp[@name="JSON_PATH"]'
+                    json_assert_expected_value_xpath = json_assert_base_xpath + '/stringProp[@name="EXPECTED_VALUE"]'
+                    json_assert_expect_null_xpath = json_assert_base_xpath + '/boolProp[@name="EXPECT_NULL"]'
+                    json_assert_is_regex_xpath = json_assert_base_xpath + '/boolProp[@name="ISREGEX"]'
+
+                    child['params'] = {"json_path": tree.xpath(json_assert_json_path_xpath)[0].text,
+                                       "expected_value": tree.xpath(json_assert_expected_value_xpath)[0].text,
+                                       "expect_null": tree.xpath(json_assert_expect_null_xpath)[0].text,
+                                       "invert": tree.xpath(json_assert_is_regex_xpath)[0].text}
+                    json_assert_count += 1
+                if cd.tag == "JSONPostProcessor":
+                    child['child_type'] = 'json_extract'
+                    old_json_extract_name = cd.attrib['testname']
+                    if upload:
+                        new_json_extract_name = old_json_extract_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_json_extract_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_json_extract_name = old_json_extract_name
+                    child['child_name'] = old_json_extract_name
+                    json_extract_xpath = f'/JSONPostProcessor[@testname="{new_json_extract_name}"]'
+                    child['xpath'] = json_extract_xpath
+                    json_extract_base_xpath = hashTreeXpath + f'/JSONPostProcessor[{json_extract_count}]'
+                    json_extract_params_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.referenceNames"]'
+                    json_extract_express_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.jsonPathExprs"]'
+                    json_extract_match_num_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.match_numbers"]'
+                    child['params'] = {"params": tree.xpath(json_extract_params_xpath)[0].text,
+                                       "express": tree.xpath(json_extract_express_xpath)[0].text,
+                                       "match_num": tree.xpath(json_extract_match_num_xpath)[0].text}
+                    json_extract_count += 1
+                if cd.tag == "BeanShellPreProcessor":
+                    child['child_type'] = 'pre_beanshell'
+                    old_pre_beanshell_name = cd.attrib['testname']
+                    if upload:
+                        new_pre_beanshell_name = old_pre_beanshell_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_pre_beanshell_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_pre_beanshell_name = old_pre_beanshell_name
+                    child['child_name'] = old_pre_beanshell_name
+                    pre_beanshell_xpath = f'/BeanShellPreProcessor[@testname="{new_pre_beanshell_name}"]'
+                    child['xpath'] = pre_beanshell_xpath
+                    pre_beanshell_base_xpath = hashTreeXpath + f'/BeanShellPreProcessor[{pre_beanshell_count}]'
+                    pre_beanshell_params_xpath = pre_beanshell_base_xpath + '/stringProp[@name="parameters"]'
+                    pre_beanshell_express_xpath = pre_beanshell_base_xpath + '/stringProp[@name="script"]'
+                    child['params'] = {"to_beanshell_param": tree.xpath(pre_beanshell_params_xpath)[0].text,
+                                       "express": tree.xpath(pre_beanshell_express_xpath)[0].text}
+                    pre_beanshell_count += 1
+                if cd.tag == "BeanShellPostProcessor":
+                    child['child_type'] = 'after_beanshell'
+                    old_after_beanshell_name = cd.attrib['testname']
+                    if upload:
+                        new_after_beanshell_name = old_after_beanshell_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_after_beanshell_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_after_beanshell_name = old_after_beanshell_name
+                    child['child_name'] = old_after_beanshell_name
+                    after_beanshell_xpath = f'/BeanShellPostProcessor[@testname="{new_after_beanshell_name}"]'
+                    child['xpath'] = after_beanshell_xpath
+                    after_beanshell_base_xpath = hashTreeXpath + f'/BeanShellPostProcessor[{after_beanshell_count}]'
+                    after_beanshell_params_xpath = after_beanshell_base_xpath + '/stringProp[@name="parameters"]'
+                    after_beanshell_express_xpath = after_beanshell_base_xpath + '/stringProp[@name="script"]'
+                    child['params'] = {"to_beanshell_param": tree.xpath(after_beanshell_params_xpath)[0].text,
+                                       "express": tree.xpath(after_beanshell_express_xpath)[0].text}
+                    after_beanshell_count += 1
                 if child:
                     children.append(child)
             return children
@@ -825,7 +918,6 @@ class ModifyJMX(OperateJmx):
         self.save_change()
         child_info = {}
         child_info['child_type'] = "header"
-        child_info['child_name'] = name
         child_info['xpath'] = new_header_xpath
         child_info['params'] = headers
         return child_info
@@ -859,7 +951,6 @@ class ModifyJMX(OperateJmx):
 
         child_info = {}
         child_info['child_type'] = "rsp_assert"
-        child_info['child_name'] = name
         child_info['xpath'] = new_rsp_assert_xpath
         child_info['params'] = {"rsp_assert_content": assert_content, "rsp_assert_type": list(assert_str)}
         return child_info
@@ -887,7 +978,6 @@ class ModifyJMX(OperateJmx):
 
         child_info = {}
         child_info['child_type'] = "json_extract"
-        child_info['child_name'] = json_extract_name
         child_info['xpath'] = new_json_extract_xpath
         child_info['params'] = {"params": params, "express": express, "match_num": match_num}
         return child_info
@@ -919,7 +1009,6 @@ class ModifyJMX(OperateJmx):
 
         child_info = {}
         child_info['child_type'] = "json_extract"
-        child_info['child_name'] = after_beanshell_name
         child_info['xpath'] = new_after_beanshell_xpath
         child_info['params'] = {"to_beanshell_param": to_beanshell_param, "express": express}
         return child_info
@@ -951,9 +1040,42 @@ class ModifyJMX(OperateJmx):
 
         child_info = {}
         child_info['child_type'] = "json_extract"
-        child_info['child_name'] = pre_beanshell_name
         child_info['xpath'] = new_pre_beanshell_name_xpath
         child_info['params'] = {"to_beanshell_param": to_beanshell_param, "express": express}
+        return child_info
+
+    def add_json_assert(self, sampler_xpath, name, json_path, expected_value, expect_null, invert, json_aassert_xpath=None):
+        """
+        json断言
+        :param sampler_xpath: 取样器的路径
+        :param name: json断言名称
+        :param json_path: json断言路径
+        :param expected_value: 期望值
+        :param expect_null: 取值为空
+        :param invert: 断言结果取反
+        :return:
+        """
+
+        hashTree = self._remove_sampler_child(sampler_xpath, json_aassert_xpath)
+        json_assert_name = name + "." + Tools.random_str(9)
+
+        json_assert = self.add_sub_node(hashTree, new_tag_name="JSONPathAssertion", guiclass="JSONPathAssertionGui",
+                                       testclass="JSONPathAssertion", testname=json_assert_name, enabled="true")
+        self.add_sub_node(hashTree, new_tag_name="hashTree")
+        self.add_sub_node(json_assert, new_tag_name="stringProp", text=json_path, name="JSON_PATH")
+        self.add_sub_node(json_assert, new_tag_name="stringProp", text=expected_value, name="EXPECTED_VALUE")
+        self.add_sub_node(json_assert, new_tag_name="boolProp", text="true", name="JSONVALIDATION")
+        self.add_sub_node(json_assert, new_tag_name="boolProp", text="false", name="EXPECT_NULL")
+        self.add_sub_node(json_assert, new_tag_name="boolProp", text="false", name="INVERT")
+        self.add_sub_node(json_assert, new_tag_name="boolProp", text="true", name="ISREGEX")
+
+        new_json_assert_name_xpath = f'//JSONPathAssertion[@testname="{json_assert_name}"]'
+        self.save_change()
+
+        child_info = {}
+        child_info['child_type'] = "json_extract"
+        child_info['xpath'] = new_json_assert_name_xpath
+        child_info['params'] = {"json_path": json_path, "expected_value": expected_value, "expect_null": expect_null, "invert": invert}
         return child_info
 
     def _add_param(self, parent_node, param_name, param_value):

@@ -4,7 +4,7 @@ from common.Tools import Tools
 from rest_framework.views import APIView
 from .models import JmxThreadGroup, SamplersChildren
 from jmeter_platform import settings
-from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, JmxsRunSerializer, \
+from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, \
     JmxThreadGroupSerializer, CsvSerializer, SamplersChildrenSerializer, SamplersChildSerializer, \
     JmxSerializerThreadNum
 from .models import Jmxs, Csvs
@@ -293,7 +293,7 @@ class SamplerCreateUpdateHeader(APIView):
                 SamplersChildren.objects.filter(id=childId).update(child_name=name, child_info=json.dumps(new_child_info))
             else:
                 child_info = ModifyJMX(str(jmx_path)).add_header(sampler_xpath, name, headers=params)
-                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='header',
+                s = SamplersChildren(sampler_id=samplerId, child_name=name, child_type='header',
                                      child_info=json.dumps(child_info))
                 s.save()
             return APIRsp()
@@ -331,12 +331,47 @@ class SamplerCreateUpdateRSPAssert(APIView):
             else:
                 child_info = ModifyJMX(str(jmx_path)).add_rsp_assert(sampler_xpath, name, assert_str=assert_str,
                                                                      assert_content=assert_content)
-                s = SamplersChildren(sampler_id=samplerId, child_name=child_info['child_name'], child_type='rsp_assert',
+                s = SamplersChildren(sampler_id=samplerId, child_name=name, child_type='rsp_assert',
                                      child_info=json.dumps(child_info))
                 s.save()
             return APIRsp()
         except:
             return APIRsp(code=400, msg='创建响应断言失败，参数错误！')
+
+class SamplerCreateUpdateJsonAssert(APIView):
+    """
+    JSON断言
+    """
+    def post(self, request):
+        samplerId = request.data.get('samplerId')
+        childId = request.data.get('childId')
+        name = request.data.get('name')
+        jsonPath = request.data.get('jsonPath')
+        expectedValue = request.data.get('expectedValue')
+        expectNull = request.data.get('expectNull')
+        invert = request.data.get('invert')
+        if not jsonPath or not invert or not name and not childId:
+            return APIRsp(msg='存在参数为空，不创建JSON断言')
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_json_assert(sampler_xpath, name, jsonPath, expectedValue,
+                                                                           expectNull, invert, json_aassert_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_name=name, child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_json_assert(sampler_xpath, name, jsonPath, expectedValue,
+                                                                           expectNull, invert)
+                s = SamplersChildren(sampler_id=samplerId, child_name=name, child_type='json_assert',
+                                     child_info=json.dumps(child_info))
+                s.save()
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建Json断言失败，参数错误！')
 
 class SamplerCreateUpdatePreBeanShell(APIView):
     """
