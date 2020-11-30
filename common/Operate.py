@@ -379,11 +379,20 @@ class ReadJmx():
                     json_assert_expected_value_xpath = json_assert_base_xpath + '/stringProp[@name="EXPECTED_VALUE"]'
                     json_assert_expect_null_xpath = json_assert_base_xpath + '/boolProp[@name="EXPECT_NULL"]'
                     json_assert_is_regex_xpath = json_assert_base_xpath + '/boolProp[@name="ISREGEX"]'
-
+                    expect_null = tree.xpath(json_assert_expect_null_xpath)[0].text
+                    if expect_null == 'true':
+                        expect_null = True
+                    elif expect_null == 'false':
+                        expect_null = False
+                    invert = tree.xpath(json_assert_is_regex_xpath)[0].text
+                    if invert == 'true':
+                        invert = True
+                    elif invert == 'false':
+                        invert = False
                     child['params'] = {"json_path": tree.xpath(json_assert_json_path_xpath)[0].text,
                                        "expected_value": tree.xpath(json_assert_expected_value_xpath)[0].text,
-                                       "expect_null": tree.xpath(json_assert_expect_null_xpath)[0].text,
-                                       "invert": tree.xpath(json_assert_is_regex_xpath)[0].text}
+                                       "expect_null": expect_null,
+                                       "invert": invert}
                     json_assert_count += 1
                 if cd.tag == "JSONPostProcessor":
                     child['child_type'] = 'json_extract'

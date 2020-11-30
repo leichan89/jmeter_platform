@@ -280,3 +280,9 @@
 
 s = 'asd'.lower()
 print(list(s))
+
+
+s = {"aa": True}
+
+import json
+print(json.dumps(s))
