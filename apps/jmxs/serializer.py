@@ -15,6 +15,14 @@ class JmxsSerializer(serializers.ModelSerializer):
         model = Jmxs
         fields = "__all__"
 
+class JmxNameSerializer(serializers.ModelSerializer):
+    """
+    获取别名
+    """
+    class Meta:
+        model = Jmxs
+        fields = ["jmx_alias"]
+
 class CsvSerializer(serializers.ModelSerializer):
 
     class Meta:

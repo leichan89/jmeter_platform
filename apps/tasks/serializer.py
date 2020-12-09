@@ -6,6 +6,7 @@
 from rest_framework import serializers
 from .models import Tasks, TasksDetails, FlowTaskAggregateReport, TaskFlow
 from users.serializer import UserSerializer
+from jmxs.serializer import JmxNameSerializer
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -28,6 +29,8 @@ class TasksDetailsSerializer(serializers.ModelSerializer):
     """
     获取任务绑定的jmx信息
     """
+    # 将jmx_id替换成jmx的别名
+    jmx = JmxNameSerializer()
     class Meta:
         model = TasksDetails
         fields = "__all__"

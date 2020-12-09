@@ -2,12 +2,11 @@ from common.APIResponse import APIRsp
 from common.Operate import ReadJmx, ModifyJMX, OperateJmx
 from common.Tools import Tools
 from rest_framework.views import APIView
-from .models import JmxThreadGroup, SamplersChildren
+from .models import JmxThreadGroup, SamplersChildren, Jmxs, Csvs
 from jmeter_platform import settings
 from jmxs.serializer import JmxsSerializer, JmxListSerializer, JmxSerializer, \
     JmxThreadGroupSerializer, CsvSerializer, SamplersChildrenSerializer, SamplersChildSerializer, \
     JmxSerializerThreadNum
-from .models import Jmxs, Csvs
 from rest_framework import status
 from rest_framework import generics
 from rest_framework import filters
@@ -499,7 +498,7 @@ class JmxChildrenList(generics.GenericAPIView):
             logger.exception(f'获取线程组子元素异常\n{e}')
             return APIRsp(code=400, msg='获取线程组子元素异常', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class JmxDeleteChild(generics.RetrieveAPIView):
+class JmxDeleteChild(APIView):
     """
     删除sampler或者csv
     """
@@ -570,7 +569,7 @@ class JmxView(generics.RetrieveAPIView):
         else:
             return APIRsp(code='400', msg='无数据', status=rsp.status_code, data=rsp.data)
 
-class JmxDelete(generics.RetrieveAPIView):
+class JmxDelete(APIView):
     """
     删除sampler或者csv
     """
@@ -584,7 +583,10 @@ class JmxDelete(generics.RetrieveAPIView):
                 child_info = json.loads(q.child_info)
                 child_type = str(q.child_type)
                 if child_type == 'csv':
-                    os.remove(child_info['filename'])
+                    try:
+                        os.remove(child_info['filename'])
+                    except:
+                        pass
             # 再删除jmx
             qs = Jmxs.objects.get(id=jmxId)
             if not qs:
@@ -828,7 +830,7 @@ class SamplerChildrenView(generics.RetrieveAPIView):
         else:
             return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)
 
-class SamplerDeleteChild(generics.RetrieveAPIView):
+class SamplerDeleteChild(APIView):
     """
     删除sampler的子元素
     """
