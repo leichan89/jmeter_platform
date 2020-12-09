@@ -1,6 +1,7 @@
 from rest_framework.exceptions import UnsupportedMediaType
 from jmeter_platform import settings
-from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer, TasksListSerializer, TaskFlowSerializer
+from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer,\
+    TasksListSerializer, TaskFlowSerializer, TasksBindJmxSerializer
 from .models import Tasks, TaskFlow, FlowTaskAggregateReport, TasksDetails
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -52,22 +53,6 @@ class TaskDetail(APIView):
             logger.exception(f'获取任务列表异常\n{e}')
             return APIRsp(code=400, msg='获取任务列表异常', status=status.HTTP_400_BAD_REQUEST)
 
-class TaskDelete(generics.RetrieveDestroyAPIView):
-    """
-    删除任务
-    """
-    queryset = Tasks.objects.all()
-    serializer_class = TaskSerializer
-
-    def delete(self, request, *args, **kwargs):
-        rsp = self.destroy(request, *args, **kwargs)
-        try:
-            if rsp.status_code == 204:
-                return APIRsp(code=200, msg='删除成功')
-        except Exception as e:
-            return APIRsp(code=400, msg=f'删除异常：{str(e)}')
-        return rsp
-
 class CreateTask(generics.CreateAPIView):
     """
     创建任务
@@ -91,7 +76,7 @@ class JmxBindTask(generics.CreateAPIView):
     将jmx关联上task
     """
     queryset = TasksDetails.objects.all()
-    serializer_class = TasksDetailsSerializer
+    serializer_class = TasksBindJmxSerializer
 
     def post(self, request, *args, **kwargs):
         try:
@@ -201,8 +186,23 @@ class FlowTaskAggregateReportView(APIView):
             logger.exception(f'生成聚合报告异常\n{e}')
             return APIRsp(code=500, msg='生成聚合报告异常', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class TaskDeleteJmx(generics.RetrieveDestroyAPIView):
+    """
+    删除任务
+    """
+    queryset = TasksDetails.objects.all()
+    serializer_class = TasksBindJmxSerializer
 
-class DestoryTask(generics.DestroyAPIView):
+    def delete(self, request, *args, **kwargs):
+        rsp = self.destroy(request, *args, **kwargs)
+        try:
+            if rsp.status_code == 204:
+                return APIRsp(code=200, msg='删除成功')
+        except Exception as e:
+            return APIRsp(code=400, msg=f'删除异常：{str(e)}')
+        return rsp
+
+class DeleteTask(generics.DestroyAPIView):
     """
     删除task，会集联删除
     """
@@ -211,11 +211,13 @@ class DestoryTask(generics.DestroyAPIView):
     serializer_class = TaskSerializer
 
     def delete(self, request, *args, **kwargs):
+        rsp = self.destroy(request, *args, **kwargs)
         try:
-            self.destroy(request, *args, **kwargs)
-            return APIRsp()
-        except:
-            return APIRsp(code=404, msg='资源未找到', status=status.HTTP_404_NOT_FOUND)
+            if rsp.status_code == 204:
+                return APIRsp(code=200, msg='删除成功')
+        except Exception as e:
+            return APIRsp(code=400, msg=f'删除异常：{str(e)}')
+        return rsp
 
 class FlowsList(generics.ListAPIView):
     """

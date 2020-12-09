@@ -66,9 +66,9 @@ class FlowTaskAggregateReport(models.Model):
     label = models.CharField("Label", max_length=1000)
     samplers = models.CharField("样本名称", max_length=500)
     average_req = models.CharField("平均值", max_length=100)
-    median_req = models.CharField("中位数", max_length=100)
-    line90_req = models.CharField("90%百分位", max_length=100)
-    line95_req = models.CharField("95%百分位", max_length=100)
+    median_req = models.IntegerField("中位数", max_length=100)
+    line90_req = models.IntegerField("90%百分位", max_length=100)
+    line95_req = models.IntegerField("95%百分位", max_length=100)
     line99_req = models.CharField("99%百分位", max_length=100)
     min_req = models.CharField("最小值", max_length=100)
     max_req = models.CharField("最大值", max_length=100)
@@ -80,6 +80,7 @@ class FlowTaskAggregateReport(models.Model):
     class Meta:
         verbose_name = "jtl转换为csv聚合报告"
         verbose_name_plural = verbose_name
+        ordering = ['-line95_req']
 
     def __str__(self):
         return f"{self.task}:{self.flow}"

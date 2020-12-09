@@ -25,6 +25,14 @@ class TaskNameSerializer(serializers.ModelSerializer):
         model = Tasks
         fields = ['id', 'task_name']
 
+class TasksBindJmxSerializer(serializers.ModelSerializer):
+    """
+    绑定jmx到任务
+    """
+    class Meta:
+        model = TasksDetails
+        fields = "__all__"
+
 class TasksDetailsSerializer(serializers.ModelSerializer):
     """
     获取任务绑定的jmx信息
