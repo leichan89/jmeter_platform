@@ -698,6 +698,94 @@ class JmxChildrenView(generics.RetrieveAPIView):
         else:
             return APIRsp(code='400', msg='无数据', status=rsp_data.status_code, data=rsp_data.data)
 
+class JmxCopy(APIView):
+    """
+    复制JMX
+    """
+    def post(self, request):
+        """
+        修改csv信息
+        """
+        data = {}
+        old_jmx_id = request.data.get('jmxId')
+        user = request.data.get('userId')
+        if old_jmx_id:
+            jmx_path = str(Jmxs.objects.get(id=old_jmx_id).jmx)
+            temp_jmx_path = settings.JMX_URL + Tools.random_str(9) + '.jmx'
+            shutil.copyfile(jmx_path, temp_jmx_path)
+            new_jmx_name = Tools.filename(Tools.filename(jmx_path)) + '.' + Tools.random_str(9)
+            new_jmx_path = settings.JMX_URL + new_jmx_name + '.jmx'
+            # 解析JMX
+            jmxinfo = ReadJmx(temp_jmx_path).analysis_jmx()
+            if not jmxinfo:
+                return APIRsp(code=400, msg='添加失败，jmx文件错误', status=status.HTTP_400_BAD_REQUEST)
+
+            samplers_info = jmxinfo[0]
+            csvs_info = jmxinfo[1]
+            thread_info = jmxinfo[2]
+
+            # jmx路径
+            data['jmx'] = new_jmx_path
+
+            # jmx别名
+            data['jmx_alias'] = new_jmx_name
+
+            # user的id不存在时，会校验失败
+            data['add_user'] = user
+
+            # 线程组基础信息
+            data['thread_base_info'] = json.dumps(thread_info)
+
+            obj = JmxsSerializer(data=data)
+
+            # 校验数据格式
+            if obj.is_valid():
+                obj.save()
+                new_jmx_id = obj.data['id']
+                for sampler in samplers_info:
+                    # 保存sampler信息
+                    sampler_children = sampler['children']
+                    del sampler['children']
+
+                    sp = JmxThreadGroup(jmx_id=new_jmx_id, child_name=sampler['name'],
+                                        child_info=json.dumps(sampler), child_thread=sampler['thread_type'])
+
+                    sp.save()
+                    # 获取保存后得到的id
+                    sampler_id = sp.id
+                    for child in sampler_children:
+                        sc = SamplersChildren(sampler_id=sampler_id, child_name=child['child_name'],
+                                              child_type=child['child_type'], child_info=json.dumps(child))
+                        sc.save()
+                if csvs_info:
+                    for csv in csvs_info:
+                        old_csv_name = csv['name']
+                        new_csv_name = Tools.filename(Tools.filename(csv['name'])) + '.' + Tools.random_str(9)
+                        new_csv_path = settings.CSV_URL + new_csv_name + '.csv'
+                        with open(new_jmx_path, 'w') as fw:
+                            with open(temp_jmx_path, 'r') as fr:
+                                for line in fr:
+                                    if old_csv_name in line:
+                                        line = line.replace(csv['name'], new_csv_name)
+                                    fw.write(line)
+                        shutil.copyfile(csv['filename'], new_csv_path)
+                        csv['filename'] = new_csv_path
+                        c = JmxThreadGroup(jmx_id=new_jmx_id, child_name=csv['name'], child_type='csv',
+                                                   child_info=json.dumps(csv), child_thread=csv['thread_type'])
+                        c.save()
+                        # 保存csv到数据库
+                        co = Csvs(csv=new_csv_path, jmx_id=new_jmx_id, add_user_id=user)
+                        co.save()
+                else:
+                    shutil.copyfile(temp_jmx_path, new_jmx_path)
+                os.remove(temp_jmx_path)
+                return APIRsp()
+            os.remove(new_jmx_path)
+            os.remove(temp_jmx_path)
+            return APIRsp(code=400, msg='添加失败，参数校验未通过', status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return APIRsp(code=400, msg='修改失败，参数不完整', status=status.HTTP_400_BAD_REQUEST)
+
 class SamplerChildrenList(generics.GenericAPIView):
     """
     获取sampler的子类

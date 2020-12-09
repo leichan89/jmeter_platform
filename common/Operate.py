@@ -121,13 +121,13 @@ class ReadJmx():
             sapmler_param_xpath = f"{sapmler_root_xpath}[{sidx + 1}]/elementProp/collectionProp/elementProp"
 
             # 取样器名称
-            old_name = sampler.attrib['testname']
+            old_name = Tools.filename(sampler.attrib['testname'])
             if upload:
                 sampler_name = old_name + '.' + Tools.random_str(9)
                 sampler.attrib['testname'] = sampler_name
                 tree.write(self.jmxPath, encoding='utf-8')
             else:
-                sampler_name = old_name
+                sampler_name = sampler.attrib['testname']
             sampler_info['name'] = old_name
 
             # 取样器xpath
@@ -197,7 +197,7 @@ class ReadJmx():
 
                 csv_xpath = f"{csv_root_xpath}[{cinx + 1}]"
 
-                old_name = csv.attrib['testname']
+                old_name = Tools.filename(csv.attrib['testname'])
                 if upload:
                     csv_name = old_name + '.' + Tools.random_str(9)
                     csv.attrib['testname'] = csv_name
@@ -210,17 +210,21 @@ class ReadJmx():
                 filename = tree.xpath(filename_xpath)[0].text
                 csv_info['filename'] = filename
 
+                delimiter_xpath = csv_root_xpath + '/stringProp[@name="delimiter"]'
+                delimiter = tree.xpath(delimiter_xpath)[0].text
+                csv_info['delimiter'] = delimiter
+
                 ignoreFirstLine_xpath = csv_xpath + '/boolProp[@name="ignoreFirstLine"]'
                 ignoreFirstLine = tree.xpath(ignoreFirstLine_xpath)[0].text
-                csv_info['ignoreFirstLine'] = ignoreFirstLine
+                csv_info['ignoreFirstLine'] = Tools.strToBool(ignoreFirstLine)
 
                 recycle_xpath = csv_xpath + '/boolProp[@name="recycle"]'
                 recycle = tree.xpath(recycle_xpath)[0].text
-                csv_info['recycle'] = recycle
+                csv_info['recycle'] = Tools.strToBool(recycle)
 
                 stopThread_xpath = csv_xpath + '/boolProp[@name="stopThread"]'
                 stopThread = tree.xpath(stopThread_xpath)[0].text
-                csv_info['stopThread'] = stopThread
+                csv_info['stopThread'] = Tools.strToBool(stopThread)
 
                 variableNames_xpath = csv_xpath + '/stringProp[@name="variableNames"]'
                 variableNames = tree.xpath(variableNames_xpath)[0].text
@@ -313,13 +317,13 @@ class ReadJmx():
                 # 获取头信息
                 if cd.tag == "HeaderManager":
                     child['child_type'] = 'header'
-                    old_header_name = cd.attrib['testname']
+                    old_header_name = Tools.filename(cd.attrib['testname'])
                     if upload:
                         new_header_name = old_header_name + "." + Tools.random_str(9)
                         cd.attrib['testname'] = new_header_name
                         tree.write(self.jmxPath, encoding='utf-8')
                     else:
-                        new_header_name = old_header_name
+                        new_header_name = cd.attrib['testname']
                     child['child_name'] = old_header_name
                     child['xpath'] = f'//HeaderManager[@testname="{new_header_name}"]'
                     header_temp_xpath = hashTreeXpath + f'/HeaderManager[{header_count}]/collectionProp/elementProp'
@@ -338,13 +342,13 @@ class ReadJmx():
                     header_count += 1
                 if cd.tag == "ResponseAssertion":
                     child['child_type'] = 'rsp_assert'
-                    old_rsp_assert_name = cd.attrib['testname']
+                    old_rsp_assert_name = Tools.filename(cd.attrib['testname'])
                     if upload:
                         new_rsp_assert_name = old_rsp_assert_name + "." + Tools.random_str(9)
                         cd.attrib['testname'] = new_rsp_assert_name
                         tree.write(self.jmxPath, encoding='utf-8')
                     else:
-                        new_rsp_assert_name = old_rsp_assert_name
+                        new_rsp_assert_name = cd.attrib['testname']
                     child['child_name'] = old_rsp_assert_name
                     rsp_assert_xpath = f'/ResponseAssertion[@testname="{new_rsp_assert_name}"]'
                     child['xpath'] = rsp_assert_xpath
@@ -364,7 +368,7 @@ class ReadJmx():
                     rsp_assert_count += 1
                 if cd.tag == "JSONPathAssertion":
                     child['child_type'] = 'json_assert'
-                    old_json_assert_name = cd.attrib['testname']
+                    old_json_assert_name = Tools.filename(cd.attrib['testname'])
                     if upload:
                         new_json_assert_name = old_json_assert_name + "." + Tools.random_str(9)
                         cd.attrib['testname'] = new_json_assert_name
@@ -396,7 +400,7 @@ class ReadJmx():
                     json_assert_count += 1
                 if cd.tag == "JSONPostProcessor":
                     child['child_type'] = 'json_extract'
-                    old_json_extract_name = cd.attrib['testname']
+                    old_json_extract_name = Tools.filename(cd.attrib['testname'])
                     if upload:
                         new_json_extract_name = old_json_extract_name + "." + Tools.random_str(9)
                         cd.attrib['testname'] = new_json_extract_name
@@ -416,7 +420,7 @@ class ReadJmx():
                     json_extract_count += 1
                 if cd.tag == "BeanShellPreProcessor":
                     child['child_type'] = 'pre_beanshell'
-                    old_pre_beanshell_name = cd.attrib['testname']
+                    old_pre_beanshell_name = Tools.filename(cd.attrib['testname'])
                     if upload:
                         new_pre_beanshell_name = old_pre_beanshell_name + "." + Tools.random_str(9)
                         cd.attrib['testname'] = new_pre_beanshell_name
@@ -434,7 +438,7 @@ class ReadJmx():
                     pre_beanshell_count += 1
                 if cd.tag == "BeanShellPostProcessor":
                     child['child_type'] = 'after_beanshell'
-                    old_after_beanshell_name = cd.attrib['testname']
+                    old_after_beanshell_name = Tools.filename(cd.attrib['testname'])
                     if upload:
                         new_after_beanshell_name = old_after_beanshell_name + "." + Tools.random_str(9)
                         cd.attrib['testname'] = new_after_beanshell_name

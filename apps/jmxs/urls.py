@@ -16,6 +16,7 @@ urlpatterns = [
     # 删除接口
     path('jmxs/delete/<int:jmxId>', views.JmxDelete.as_view()),
     path('jmxs/create', views.JmxCreate.as_view()),
+    path('jmxs/copy', views.JmxCopy.as_view()),
     path('jmxs/uploadcsv', views.CsvUpload.as_view()),
     path('jmxs/thread_num/<int:pk>', views.JmxThreadNumView.as_view()),
     # 修改线程组属性
