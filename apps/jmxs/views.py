@@ -576,12 +576,23 @@ class JmxDelete(generics.RetrieveAPIView):
     """
     def post(self, request, jmxId):
         try:
+            # 先删除CSV记录
+            Csvs.objects.filter(jmx_id=jmxId).delete()
+            # 删除CSV文件
+            qs = JmxThreadGroup.objects.all().filter(jmx_id=jmxId)
+            for q in qs:
+                child_info = json.loads(q.child_info)
+                child_type = str(q.child_type)
+                if child_type == 'csv':
+                    os.remove(child_info['filename'])
+            # 再删除jmx
             qs = Jmxs.objects.get(id=jmxId)
             if not qs:
                 return APIRsp(code=400, msg='无效的id')
             Jmxs.objects.filter(id=jmxId).delete()
             jmx_path = str(qs.jmx)
             os.remove(jmx_path)
+
             return APIRsp()
         except FileNotFoundError:
             return APIRsp()
