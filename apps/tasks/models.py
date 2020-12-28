@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from jmxs.models import Jmxs
+from jmxs.models import Jmxs, JmxThreadGroup
 
 Users = get_user_model()
 
@@ -66,9 +66,9 @@ class FlowTaskAggregateReport(models.Model):
     label = models.CharField("Label", max_length=1000)
     samplers = models.CharField("样本名称", max_length=500)
     average_req = models.CharField("平均值", max_length=100)
-    median_req = models.IntegerField("中位数", max_length=100)
-    line90_req = models.IntegerField("90%百分位", max_length=100)
-    line95_req = models.IntegerField("95%百分位", max_length=100)
+    median_req = models.IntegerField("中位数")
+    line90_req = models.IntegerField("90%百分位")
+    line95_req = models.IntegerField("95%百分位")
     line99_req = models.CharField("99%百分位", max_length=100)
     min_req = models.CharField("最小值", max_length=100)
     max_req = models.CharField("最大值", max_length=100)
@@ -84,3 +84,15 @@ class FlowTaskAggregateReport(models.Model):
 
     def __str__(self):
         return f"{self.task}:{self.flow}"
+
+class RspResult(models.Model):
+    """
+    保存响应结果信息
+    """
+    sampler = models.ForeignKey(JmxThreadGroup, on_delete=models.CASCADE, verbose_name="取样器ID")
+    response = models.TextField("响应信息")
+    count = models.IntegerField("出现次数")
+
+    class Meta:
+        verbose_name = "保存响应结果信息"
+        verbose_name_plural = verbose_name

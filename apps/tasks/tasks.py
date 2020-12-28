@@ -13,6 +13,7 @@ from jmeter_platform import settings
 from common.Operate import ModifyJMX
 from celery.utils.log import get_task_logger
 from datetime import datetime
+import json
 
 logger = get_task_logger('celery_task')
 
@@ -28,11 +29,12 @@ def run_task(taskid, task_flow_str, jmxs):
     django.setup()
 
     from jtls.models import JtlsSummary
-    from tasks.models import TaskFlow, FlowTaskAggregateReport
+    from tasks.models import TaskFlow, FlowTaskAggregateReport, RspResult
+    from jmxs.models import JmxThreadGroup, Jmxs
 
     try:
-        jmx_ids = []
         cmds = []
+        save_path_dict = {}
         temp_dir = settings.TEMP_URL + task_flow_str
         jtl = settings.JTL_URL + task_flow_str + '.jtl'
         logger.debug(f'创建临时目录{temp_dir}')
@@ -40,12 +42,29 @@ def run_task(taskid, task_flow_str, jmxs):
         logger.debug('将jmx复制到临时目录下')
         for sjmx in jmxs:
             jmx = sjmx['jmx']
-            jmx_ids.append(sjmx['id'])
+            jmx_id = sjmx['id']
+            thread_base_info = Jmxs.objects.get(id=jmx_id).thread_base_info
+            num_threads = json.loads(thread_base_info)['num_threads']
+            samplers_info = JmxThreadGroup.objects.values('id', 'child_info').filter(jmx_id=jmx_id, child_type="sampler")
             jmx_name = Tools.filename(jmx)
             shutil.copy(jmx, temp_dir)
             # 在这里查找替换变量{{}}
             temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
             ModifyJMX(temp_jmx).add_backendListener(influxdb_url=settings.INFLUXDB_URL, application_name=task_flow_str)
+            for sampler in samplers_info:
+                sampler_id = sampler['id']
+                sampler_info = json.loads(sampler['child_info'])
+                sampler_xpath = sampler_info['xpath']
+                # 创建保存取样器响应的目录
+                save_path = temp_dir + os.sep + str(sampler_id)
+                os.makedirs(save_path)
+                save_path_dict[sampler_id] = save_path
+                if str(num_threads) == '1':
+                    # 线程是1时，保存错误和异常日志
+                    ModifyJMX(temp_jmx).save_rsp_data(sampler_xpath, save_path)
+                else:
+                    # 线程不为1时，只保存错误日志
+                    ModifyJMX(temp_jmx).save_rsp_data(sampler_xpath, save_path, errorsonly=True)
             cmd = f"{settings.JMETER} -n -t {temp_jmx} -l {jtl}"
             cmds.append(cmd)
 
@@ -63,10 +82,6 @@ def run_task(taskid, task_flow_str, jmxs):
             os.remove(jtl)
             raise
 
-        # 更新流水任务的状态为3，完成状态
-        logger.debug('更新流水任务状态为完成状态')
-        TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=3, end_time=datetime.now())
-
         logger.debug('将jtl文件转换为csv文件')
         summary_csv = settings.TEMP_URL + task_flow_str + os.sep + 'temp.csv'
         to_csv_cmd = f'{settings.JMETER_PLUGINS_CMD} --generate-csv {summary_csv} --input-jtl {jtl} --plugin-type AggregateReport'
@@ -75,20 +90,28 @@ def run_task(taskid, task_flow_str, jmxs):
         if os.path.exists(summary_csv):
             logger.info('jtl转为csv成功')
             csv_info = Tools.read_csv_info(summary_csv)
-            for idx, info in enumerate(csv_info):
-                if idx == 0:
-                    continue
-                try:
+            try:
+                for idx, info in enumerate(csv_info):
+                    if idx == 0:
+                        continue
                     csv_to_db = FlowTaskAggregateReport(task_id=taskid, flow_id=flow_id, label=Tools.filename(info[0]),
                                                         samplers=info[1], average_req=info[2],median_req=info[3],
                                                         line90_req=info[4], line95_req=info[5], line99_req=info[6],
                                                         min_req=info[7], max_req=info[8], error_rate=info[9],
                                                         tps=str(float(info[10])), recieved_per=str(float(info[11])))
                     csv_to_db.save()
-                except:
-                    logger.error('保存聚合报告数据失败')
-                    raise
-            logger.debug('流水任务执行完成')
+                for sampler_id, save_path in save_path_dict.items():
+                    count_rsp = Tools.count_rsp(save_path)
+                    for key, value in count_rsp.items():
+                        rr = RspResult(sampler_id=sampler_id, response=key, count=value)
+                        rr.save()
+                # 更新流水任务的状态为3，完成状态
+                logger.debug('更新流水任务状态为完成状态')
+                TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=3, end_time=datetime.now())
+                logger.debug('流水任务执行完成')
+            except:
+                logger.error('保存聚合报告数据失败')
+                raise
         else:
             logger.error('jtl转为csvs失败')
             raise

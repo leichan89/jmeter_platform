@@ -4,7 +4,7 @@
 # @File    : serializer.py
 
 from rest_framework import serializers
-from .models import Tasks, TasksDetails, FlowTaskAggregateReport, TaskFlow
+from .models import Tasks, TasksDetails, FlowTaskAggregateReport, TaskFlow, RspResult
 from users.serializer import UserSerializer
 from jmxs.serializer import JmxNameSerializer
 
@@ -70,6 +70,14 @@ class TasksListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tasks
+        fields = "__all__"
+
+class RspResultSerializer(serializers.ModelSerializer):
+    """
+    获取响应信息
+    """
+    class Meta:
+        model = RspResult
         fields = "__all__"
 
 

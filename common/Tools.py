@@ -9,6 +9,8 @@ import random
 import os
 import csv
 import logging
+import hashlib
+from collections import Counter
 
 logger = logging.getLogger('collect')
 
@@ -41,6 +43,38 @@ class Tools:
             return name
         except:
             return filepath
+
+    # @staticmethod
+    # def count_rsp(rsp_path):
+    #     md5list = []
+    #     md5dict = {}
+    #     filelist = os.listdir(rsp_path)
+    #     for file in filelist:
+    #         with open(os.path.join(rsp_path, file), 'rb') as f:
+    #             data = f.read()
+    #         md5 = hashlib.md5(data).hexdigest()
+    #         md5dict[md5] = [bytes.decode(data)]
+    #         md5list.append(md5)
+    #     for key, value in md5dict.items():
+    #         md5dict[key].append(md5list.count(key))
+    #     return md5dict.values()
+
+
+    @staticmethod
+    def count_rsp(rsp_path):
+        """
+        统计返回的响应数据，计算不同响应出现的次数
+        :param rsp_path:
+        :return:
+        """
+        md5list = []
+        filelist = os.listdir(rsp_path)
+        for file in filelist:
+            with open(os.path.join(rsp_path, file), 'rb') as f:
+                data = bytes.decode(f.read())
+            md5list.append(data)
+        # 返回的是一个字典
+        return Counter(md5list)
 
     # @staticmethod
     # def summary_jtl(temp_jtl, summary_jtl, stnames):
@@ -127,7 +161,17 @@ if __name__ == "__main__":
     #
     # print(Tools.analysis_jmx(j))
 
-    p = '/Users/chenlei/jmeter5/jmx_folder/django.jmx'
+    # p = '/Users/chenlei/jmeter5/jmx_folder/django.jmx'
+    # s = Tools.md5sum('/Users/chenlei/mytemp/rsp/xx.text1.unknown')
+    # print(s)
+
+
+    s = Tools.count_rsp('/Users/chenlei/mytemp/rsp')
+    for i in s:
+        print(i)
+
+
+
     # s = Tools.analysis_jmx(p)
     import json
     # print(json.dumps(s))

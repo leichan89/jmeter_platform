@@ -7,6 +7,7 @@ from lxml import etree
 import logging
 import json
 import time
+import os
 from common.Tools import Tools
 
 logger = logging.getLogger(__file__)
@@ -1090,6 +1091,27 @@ class ModifyJMX(OperateJmx):
         child_info['params'] = {"json_path": json_path, "expected_value": expected_value, "expect_null": expect_null, "invert": invert}
         return child_info
 
+    def save_rsp_data(self, sampler_xpath, save_path, errorsonly=False):
+        """
+        保存响应到文件
+        :param sampler_xpath: 取样器xpath
+        :param sampler_id: 取样器id
+        :param save_path: 保存路径
+        :param include_success_data: 未True时只保存错误日志
+        :return:
+        """
+        hashTree = self._remove_sampler_child(sampler_xpath, child_xpath=None)
+        rsp_save = self.add_sub_node(hashTree, new_tag_name="ResultSaver", guiclass="ResultSaverGui",
+                                       testclass="ResultSaver", testname="保存响应到文件", enabled="true")
+        self.add_sub_node(hashTree, new_tag_name="hashTree")
+        self.add_sub_node(rsp_save, new_tag_name="stringProp", text=save_path + os.sep + 'rsp.text', name="FileSaver.filename")
+        self.add_sub_node(rsp_save, new_tag_name="boolProp", text=Tools.boolToStr(errorsonly), name="FileSaver.errorsonly")
+        self.add_sub_node(rsp_save, new_tag_name="boolProp", text="false", name="FileSaver.successonly")
+        self.add_sub_node(rsp_save, new_tag_name="boolProp", text="false", name="FileSaver.skipsuffix")
+        self.add_sub_node(rsp_save, new_tag_name="boolProp", text="false", name="FileSaver.skipautonumber")
+        self.add_sub_node(rsp_save, new_tag_name="boolProp", text="false", name="FileSaver.ignoreTC")
+        self.save_change()
+
     def _add_param(self, parent_node, param_name, param_value):
         """
         常规参数
@@ -1233,13 +1255,13 @@ if __name__ == '__main__':
     # r = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
     # s = r.add_sampler(name='sampler', url='http://www.baidu.com', method="GET")
     # print(s)
-    jmx = '/Users/chenlei/python-project/jmeter_platform/performance_files/jmx/新增jmx-1600051758672.jmx'
+    jmx = '/Users/chenlei/python-project/jmeter_platform/performance_files/temp/PP7Jxlb3Hs4LQxj1Rjeu1609143914/致用.Jycyn0URD1608722118.jmx'
     # o = ModifyJMX(jmx)
     # xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[@testname="xxx"]'
     # o.add_header(sampler_xpath=xpath, headers={'aaaa': 'bbaa'}, header_name="aaaaaaa")
-    r = ReadJmx(jmx)
-    s = r.analysis_jmx()
-    print(json.dumps(s))
+    r = ModifyJMX(jmx)
+    r.save_rsp_data(sampler_xpath='//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[@testname="证书管理.S6vWuo0bg1608722119"]', save_path='/Users/chenlei/python-project/jmeter_platform/performance_files/temp/PP7Jxlb3Hs4LQxj1Rjeu1609143914/503')
+
 
 
 
