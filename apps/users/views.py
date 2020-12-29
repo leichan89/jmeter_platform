@@ -91,23 +91,23 @@ class MenuList(APIView):
                         ],
                         "order":2
                     },
-                    {
-                        "id":145,
-                        "authName":"报告管理",
-                        "path":"reports",
-                        "children":[
-                            {
-                                "id":146,
-                                "authName":"报告列表",
-                                "path":"reports",
-                                "children":[
-
-                                ],
-                                "order":None
-                            }
-                        ],
-                        "order":5
-                    },
+                    # {
+                    #     "id":145,
+                    #     "authName":"报告管理",
+                    #     "path":"reports",
+                    #     "children":[
+                    #         {
+                    #             "id":146,
+                    #             "authName":"报告列表",
+                    #             "path":"reports",
+                    #             "children":[
+                    #
+                    #             ],
+                    #             "order":None
+                    #         }
+                    #     ],
+                    #     "order":5
+                    # },
                     {
                         "id":102,
                         "authName":"参数管理",
