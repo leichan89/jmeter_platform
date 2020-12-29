@@ -1,8 +1,8 @@
 from rest_framework.exceptions import UnsupportedMediaType
 from jmeter_platform import settings
 from .serializer import TaskSerializer, TasksDetailsSerializer, FlowTaskAggregateReportSerializer,\
-    TasksListSerializer, TaskFlowSerializer, TasksBindJmxSerializer
-from .models import Tasks, TaskFlow, FlowTaskAggregateReport, TasksDetails
+    TasksListSerializer, TaskFlowSerializer, TasksBindJmxSerializer, RspResultSerializer
+from .models import Tasks, TaskFlow, FlowTaskAggregateReport, TasksDetails, RspResult
 from rest_framework import generics
 from rest_framework.views import APIView
 from jmxs.models import Jmxs
@@ -240,6 +240,19 @@ class FlowsList(generics.ListAPIView):
             return APIRsp(data=data)
         else:
             return APIRsp(code=400, msg='查询失败', status=rsp_data.status_code, data=rsp_data.data)
+
+class RspResultList(APIView):
+    """
+    获取单个sampler的响应信息
+    """
+    def get(self, request, flow_id, sampler_id):
+        try:
+            qs = RspResult.objects.all().filter(flow_id=flow_id, sampler_id=sampler_id)
+            serializer = RspResultSerializer(qs, many=True)
+            return APIRsp(data=serializer.data)
+        except Exception as e:
+            logger.exception(f'获取任务列表异常\n{e}')
+            return APIRsp(code=400, msg='获取任务列表异常', status=status.HTTP_400_BAD_REQUEST)
 
 
 

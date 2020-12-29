@@ -20,7 +20,10 @@ urlpatterns = [
     path('tasks/deletejmx/<int:pk>', views.TaskDeleteJmx.as_view()),
     path('tasks/flows', views.FlowsList.as_view()),
     # 任务详细
-    path('tasks/details/<int:task_id>', views.TaskDetail.as_view())
+    path('tasks/details/<int:task_id>', views.TaskDetail.as_view()),
+    # 获取单个sampler的响应信息
+    path('tasks/rsp/<int:flow_id>/<int:sampler_id>', views.RspResultList.as_view())
+
 ]
 
 

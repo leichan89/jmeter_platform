@@ -35,6 +35,7 @@ def run_task(taskid, task_flow_str, jmxs):
     try:
         cmds = []
         save_path_dict = {}
+        sampler_id_name_dict = {}
         temp_dir = settings.TEMP_URL + task_flow_str
         jtl = settings.JTL_URL + task_flow_str + '.jtl'
         logger.debug(f'创建临时目录{temp_dir}')
@@ -55,6 +56,8 @@ def run_task(taskid, task_flow_str, jmxs):
                 sampler_id = sampler['id']
                 sampler_info = json.loads(sampler['child_info'])
                 sampler_xpath = sampler_info['xpath']
+                # 提取ID和实际名称的对于关系
+                sampler_id_name_dict[sampler_xpath.split('@testname="')[1].split('"]')[0]] = sampler_id
                 # 创建保存取样器响应的目录
                 save_path = temp_dir + os.sep + str(sampler_id)
                 os.makedirs(save_path)
@@ -94,7 +97,11 @@ def run_task(taskid, task_flow_str, jmxs):
                 for idx, info in enumerate(csv_info):
                     if idx == 0:
                         continue
-                    csv_to_db = FlowTaskAggregateReport(task_id=taskid, flow_id=flow_id, label=Tools.filename(info[0]),
+                    try:
+                        sampler_id = sampler_id_name_dict[info[0]]
+                    except KeyError:
+                        sampler_id = -1
+                    csv_to_db = FlowTaskAggregateReport(task_id=taskid, flow_id=flow_id, sampler_id=sampler_id, label=Tools.filename(info[0]),
                                                         samplers=info[1], average_req=info[2],median_req=info[3],
                                                         line90_req=info[4], line95_req=info[5], line99_req=info[6],
                                                         min_req=info[7], max_req=info[8], error_rate=info[9],
@@ -103,14 +110,14 @@ def run_task(taskid, task_flow_str, jmxs):
                 for sampler_id, save_path in save_path_dict.items():
                     count_rsp = Tools.count_rsp(save_path)
                     for key, value in count_rsp.items():
-                        rr = RspResult(sampler_id=sampler_id, response=key, count=value)
+                        rr = RspResult(sampler_id=sampler_id, flow_id=flow_id, response=key, count=value)
                         rr.save()
                 # 更新流水任务的状态为3，完成状态
                 logger.debug('更新流水任务状态为完成状态')
                 TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=3, end_time=datetime.now())
                 logger.debug('流水任务执行完成')
             except:
-                logger.error('保存聚合报告数据失败')
+                logger.error('保存数据失败')
                 raise
         else:
             logger.error('jtl转为csvs失败')

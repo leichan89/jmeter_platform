@@ -50,7 +50,7 @@ class FlowTaskAggregateReportSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = FlowTaskAggregateReport
-        exclude = ['id', 'task', 'flow']
+        exclude = ['id', 'task']
 
 class TaskFlowSerializer(serializers.ModelSerializer):
     """
@@ -78,7 +78,7 @@ class RspResultSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = RspResult
-        fields = "__all__"
+        fields = ['response', 'count']
 
 
 

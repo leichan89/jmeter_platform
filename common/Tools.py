@@ -72,6 +72,8 @@ class Tools:
         for file in filelist:
             with open(os.path.join(rsp_path, file), 'rb') as f:
                 data = bytes.decode(f.read())
+            if not data:
+                data = "[接口未返回响应数据]"
             md5list.append(data)
         # 返回的是一个字典
         return Counter(md5list)
@@ -165,11 +167,13 @@ if __name__ == "__main__":
     # s = Tools.md5sum('/Users/chenlei/mytemp/rsp/xx.text1.unknown')
     # print(s)
 
+    #
+    # s = Tools.count_rsp('/Users/chenlei/mytemp/rsp')
+    # for i in s:
+    #     print(i)
 
-    s = Tools.count_rsp('/Users/chenlei/mytemp/rsp')
-    for i in s:
-        print(i)
-
+    xpath = '"//SetupThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[@testname="登陆.9CUb0Q3BP1607434958"]"'
+    s =  xpath.split('@testname="')[1].split('"]"')[0]
 
 
     # s = Tools.analysis_jmx(p)

@@ -63,6 +63,7 @@ class FlowTaskAggregateReport(models.Model):
     """
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name="任务id")
     flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE)
+    sampler_id = models.IntegerField("取样器ID", default=-1)
     label = models.CharField("Label", max_length=1000)
     samplers = models.CharField("样本名称", max_length=500)
     average_req = models.CharField("平均值", max_length=100)
@@ -80,7 +81,7 @@ class FlowTaskAggregateReport(models.Model):
     class Meta:
         verbose_name = "jtl转换为csv聚合报告"
         verbose_name_plural = verbose_name
-        ordering = ['-line95_req']
+        # ordering = ['-line95_req']
 
     def __str__(self):
         return f"{self.task}:{self.flow}"
@@ -90,6 +91,7 @@ class RspResult(models.Model):
     保存响应结果信息
     """
     sampler = models.ForeignKey(JmxThreadGroup, on_delete=models.CASCADE, verbose_name="取样器ID")
+    flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE)
     response = models.TextField("响应信息")
     count = models.IntegerField("出现次数")
 
