@@ -22,7 +22,9 @@ urlpatterns = [
     # 任务详细
     path('tasks/details/<int:task_id>', views.TaskDetail.as_view()),
     # 获取单个sampler的响应信息
-    path('tasks/rsp/<int:flow_id>/<int:sampler_id>', views.RspResultList.as_view())
+    path('tasks/rsp/<int:flow_id>/<int:sampler_id>', views.RspResultList.as_view()),
+    # 获取流水任务的图片
+    path('tasks/png/<int:flow_id>', views.PngResultView.as_view())
 
 ]
 

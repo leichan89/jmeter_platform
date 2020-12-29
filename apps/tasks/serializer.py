@@ -4,7 +4,7 @@
 # @File    : serializer.py
 
 from rest_framework import serializers
-from .models import Tasks, TasksDetails, FlowTaskAggregateReport, TaskFlow, RspResult
+from .models import Tasks, TasksDetails, FlowTaskAggregateReport, TaskFlow, RspResult, PngResult
 from users.serializer import UserSerializer
 from jmxs.serializer import JmxNameSerializer
 
@@ -80,6 +80,14 @@ class RspResultSerializer(serializers.ModelSerializer):
         model = RspResult
         fields = ['response', 'count']
 
+
+class PngResultSerializer(serializers.ModelSerializer):
+    """
+    获取响应图片
+    """
+    class Meta:
+        model = PngResult
+        exclude = ['id']
 
 
 

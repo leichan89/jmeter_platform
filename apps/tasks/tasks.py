@@ -29,7 +29,7 @@ def run_task(taskid, task_flow_str, jmxs):
     django.setup()
 
     from jtls.models import JtlsSummary
-    from tasks.models import TaskFlow, FlowTaskAggregateReport, RspResult
+    from tasks.models import TaskFlow, FlowTaskAggregateReport, RspResult, PngResult
     from jmxs.models import JmxThreadGroup, Jmxs
 
     try:
@@ -87,8 +87,14 @@ def run_task(taskid, task_flow_str, jmxs):
 
         logger.debug('将jtl文件转换为csv文件')
         summary_csv = settings.TEMP_URL + task_flow_str + os.sep + 'temp.csv'
+        rt_png = settings.PIC_URL + f"{task_flow_str}_ResponseTimesOverTime.png"
+        tps_png = settings.PIC_URL+ f"{task_flow_str}_TransactionsPerSecond.png"
         to_csv_cmd = f'{settings.JMETER_PLUGINS_CMD} --generate-csv {summary_csv} --input-jtl {jtl} --plugin-type AggregateReport'
+        to_rt_png = f'{settings.JMETER_PLUGINS_CMD} --generate-png {rt_png} --input-jtl {jtl} --plugin-type ResponseTimesOverTime'
+        to_tps_png = f'{settings.JMETER_PLUGINS_CMD} --generate-png {tps_png} --input-jtl {jtl} --plugin-type TransactionsPerSecond'
         os.system(to_csv_cmd)
+        os.system(to_rt_png)
+        os.system(to_tps_png)
 
         if os.path.exists(summary_csv):
             logger.info('jtl转为csv成功')
@@ -112,6 +118,8 @@ def run_task(taskid, task_flow_str, jmxs):
                     for key, value in count_rsp.items():
                         rr = RspResult(sampler_id=sampler_id, flow_id=flow_id, response=key, count=value)
                         rr.save()
+                png = PngResult(flow_id=flow_id, rt_png_url=os.sep + rt_png, tps_png_url=os.sep + tps_png)
+                png.save()
                 # 更新流水任务的状态为3，完成状态
                 logger.debug('更新流水任务状态为完成状态')
                 TaskFlow.objects.filter(randomstr=task_flow_str).update(task_status=3, end_time=datetime.now())
@@ -130,7 +138,7 @@ def run_task(taskid, task_flow_str, jmxs):
     finally:
         try:
             logger.debug('删除任务流水目录')
-            shutil.rmtree(settings.TEMP_URL + task_flow_str)
+            # shutil.rmtree(settings.TEMP_URL + task_flow_str)
         except:
             logger.debug('任务流水目录不存在')
 

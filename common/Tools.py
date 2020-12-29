@@ -46,19 +46,22 @@ class Tools:
 
     # @staticmethod
     # def count_rsp(rsp_path):
+    #     # 可能会丢消息
     #     md5list = []
     #     md5dict = {}
     #     filelist = os.listdir(rsp_path)
     #     for file in filelist:
     #         with open(os.path.join(rsp_path, file), 'rb') as f:
     #             data = f.read()
+    #         if not data:
+    #             data = "[接口未返回响应数据]"
     #         md5 = hashlib.md5(data).hexdigest()
     #         md5dict[md5] = [bytes.decode(data)]
     #         md5list.append(md5)
-    #     for key, value in md5dict.items():
+    #     for key in md5dict.keys():
     #         md5dict[key].append(md5list.count(key))
-    #     return md5dict.values()
-
+    #     for value in md5dict.values():
+    #         return {value[0]: value[1]}
 
     @staticmethod
     def count_rsp(rsp_path):

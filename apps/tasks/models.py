@@ -98,3 +98,15 @@ class RspResult(models.Model):
     class Meta:
         verbose_name = "保存响应结果信息"
         verbose_name_plural = verbose_name
+
+class PngResult(models.Model):
+    """
+    保存图片
+    """
+    flow = models.ForeignKey(TaskFlow, on_delete=models.CASCADE)
+    rt_png_url = models.CharField("响应时间曲线图", max_length=150)
+    tps_png_url = models.CharField("TPS曲线图", max_length=150)
+
+    class Meta:
+        verbose_name = "保存图片"
+        verbose_name_plural = verbose_name

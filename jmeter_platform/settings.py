@@ -263,12 +263,16 @@ LOGGING = {
 AUTH_USER_MODEL = 'users.UserProfile'
 # 不能删除STATIC_URL
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+  os.path.join(BASE_DIR, "static")
+]
 
 JMX_URL = "performance_files/jmx/"
 CSV_URL = "performance_files/csv/"
 JTL_URL = "performance_files/jtl/"
 OUTPUT_URL = "performance_files/output/"
 TEMP_URL = "performance_files/temp/"
+PIC_URL = "static/pic/"
 JMX_CSV_DIR = os.path.join(BASE_DIR, "performance_files")
 JMETER = os.path.join(BASE_DIR, "jmeter5/bin/jmeter.sh")
 JMETER_PLUGINS_CMD = os.path.join(BASE_DIR, "jmeter5/bin/JMeterPluginsCMD.sh")
