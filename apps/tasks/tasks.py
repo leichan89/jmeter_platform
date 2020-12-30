@@ -138,7 +138,7 @@ def run_task(taskid, task_flow_str, jmxs):
     finally:
         try:
             logger.debug('删除任务流水目录')
-            # shutil.rmtree(settings.TEMP_URL + task_flow_str)
+            shutil.rmtree(settings.TEMP_URL + task_flow_str)
         except:
             logger.debug('任务流水目录不存在')
 
