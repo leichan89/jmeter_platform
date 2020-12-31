@@ -475,6 +475,41 @@ class SamplerCreateUpdateJsonExtract(APIView):
         except:
             return APIRsp(code=400, msg='创建Json提取器失败，参数错误！')
 
+class SamplerCreateUpdateJSR223(APIView):
+    """
+    创建SR223
+    """
+    def post(self, request):
+        samplerId = request.data.get('samplerId')
+        childId = request.data.get('childId')
+        name = request.data.get('name')
+        language = request.data.get('language')
+        to_JSR223_param = request.data.get('to_JSR223_param')
+        express = request.data.get('express')
+        if not express or not name and not childId:
+            return APIRsp(msg='存在参数为空，不创建JSR223!')
+        if not to_JSR223_param:
+            to_JSR223_param = ""
+        try:
+            # 获取jmx的信息
+            jmxInfo = JmxThreadGroup.objects.all().filter(id=samplerId)
+            jmx_path = jmxInfo[0].jmx
+            sampler_xpath = json.loads(jmxInfo[0].child_info)['xpath']
+            if childId:
+                child_info = json.loads(str(SamplersChildren.objects.get(id=childId).child_info))
+                child_xpath = child_info['xpath']
+                new_child_info = ModifyJMX(str(jmx_path)).add_JSR223(sampler_xpath, name, language, to_JSR223_param,
+                                                                               express, JSR223_xpath=child_xpath)
+                SamplersChildren.objects.filter(id=childId).update(child_name=name, child_info=json.dumps(new_child_info))
+            else:
+                child_info = ModifyJMX(str(jmx_path)).add_JSR223(sampler_xpath, name, language, to_JSR223_param, express)
+                s = SamplersChildren(sampler_id=samplerId, child_name=name, child_type='JSR223',
+                                     child_info=json.dumps(child_info))
+                s.save()
+            return APIRsp()
+        except:
+            return APIRsp(code=400, msg='创建JSR223，参数错误！')
+
 class JmxChildrenList(generics.GenericAPIView):
     """
     查询Jmx的子元素，安装第三方过滤库DjangoFilterBackend

@@ -34,6 +34,7 @@ urlpatterns = [
     path('samplers/beanshell/create_update_pre', views.SamplerCreateUpdatePreBeanShell.as_view()),
     path('samplers/beanshell/create_update_after', views.SamplerCreateUpdateAfterBeanShell.as_view()),
     path('samplers/extract/create_update_json', views.SamplerCreateUpdateJsonExtract.as_view()),
+    path('samplers/JSR223/create_update_JSR223', views.SamplerCreateUpdateJSR223.as_view()),
     # 查询sampler的所有子类信息
     path('samplers/children/<int:sampler_id>', views.SamplerChildrenList.as_view()),
     # 查询sampler的子元素的详细信息，url参数为子元素的id

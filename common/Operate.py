@@ -739,9 +739,9 @@ class ModifyJMX(OperateJmx):
             for child in sampler_children:
                 child.getparent().remove(child)
             sampler.attrib['testname'] = name
-            HTTPSamplerProxy = accord_tag + f"/HTTPSamplerProxy[@testname='{name}']"
+            HTTPSamplerProxy = accord_tag + f'/HTTPSamplerProxy[@testname="{name}"]'
         else:
-            HTTPSamplerProxy = accord_tag + f"/HTTPSamplerProxy[@testname='{name}']"
+            HTTPSamplerProxy = accord_tag + f'/HTTPSamplerProxy[@testname="{name}"]'
 
             # 在最后的位置插入sampler
             self.add_sub_node(accord_tag, new_tag_name='HTTPSamplerProxy', guiclass="HttpTestSampleGui",
@@ -795,7 +795,7 @@ class ModifyJMX(OperateJmx):
 
         csvname = name + '.' + Tools.random_str(9)
 
-        CSVDataSet = accord_tag + f"/CSVDataSet[@testname='{csvname}']"
+        CSVDataSet = accord_tag + f'/CSVDataSet[@testname="{csvname}"]'
 
         # 在最后的位置插入sampler
         csv = self.add_sub_node(accord_tag, new_tag_name='CSVDataSet', guiclass="TestBeanGUI",
@@ -1021,9 +1021,42 @@ class ModifyJMX(OperateJmx):
         self.save_change()
 
         child_info = {}
-        child_info['child_type'] = "json_extract"
+        child_info['child_type'] = "after_beanshell"
         child_info['xpath'] = new_after_beanshell_xpath
         child_info['params'] = {"to_beanshell_param": to_beanshell_param, "express": express}
+        return child_info
+
+    def add_JSR223(self, sampler_xpath, name, language, to_JSR223_param, express, JSR223_xpath=None):
+        """
+        添加JSR223
+        :param sampler_xpath:
+        :param name:
+        :param language:
+        :param to_JSR223_param:
+        :param express:
+        :param JSR223_xpath:
+        :return:
+        """
+
+        hashTree = self._remove_sampler_child(sampler_xpath, JSR223_xpath)
+        JSR223_name = name + "." + Tools.random_str(9)
+
+        JSR223 = self.add_sub_node(hashTree, new_tag_name="JSR223PreProcessor", guiclass="TestBeanGUI",
+                                       testclass="JSR223PreProcessor", testname=JSR223_name, enabled="true")
+        self.add_sub_node(hashTree, new_tag_name="hashTree")
+        self.add_sub_node(JSR223, new_tag_name="stringProp", text=language, name="scriptLanguage")
+        self.add_sub_node(JSR223, new_tag_name="stringProp", text=to_JSR223_param, name="parameters")
+        self.add_sub_node(JSR223, new_tag_name="stringProp", name="filename")
+        self.add_sub_node(JSR223, new_tag_name="stringProp", name="cacheKey")
+        self.add_sub_node(JSR223, new_tag_name="stringProp", text=express, name="script")
+
+        new_JSR223_xpath = f'//JSR223PreProcessor[@testname="{JSR223_name}"]'
+        self.save_change()
+
+        child_info = {}
+        child_info['child_type'] = "JSR223"
+        child_info['xpath'] = new_JSR223_xpath
+        child_info['params'] = {"language": language, "to_JSR223_param": to_JSR223_param, "express": express}
         return child_info
 
     def add_pre_beanshell(self, sampler_xpath, name, to_beanshell_param, express, pre_beanshell_xpath=None):
@@ -1052,7 +1085,7 @@ class ModifyJMX(OperateJmx):
         self.save_change()
 
         child_info = {}
-        child_info['child_type'] = "json_extract"
+        child_info['child_type'] = "pre_beanshell"
         child_info['xpath'] = new_pre_beanshell_name_xpath
         child_info['params'] = {"to_beanshell_param": to_beanshell_param, "express": express}
         return child_info
@@ -1086,7 +1119,7 @@ class ModifyJMX(OperateJmx):
         self.save_change()
 
         child_info = {}
-        child_info['child_type'] = "json_extract"
+        child_info['child_type'] = "json_assert"
         child_info['xpath'] = new_json_assert_name_xpath
         child_info['params'] = {"json_path": json_path, "expected_value": expected_value, "expect_null": expect_null, "invert": invert}
         return child_info

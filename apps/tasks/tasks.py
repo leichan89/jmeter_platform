@@ -107,11 +107,15 @@ def run_task(taskid, task_flow_str, jmxs):
                         sampler_id = sampler_id_name_dict[info[0]]
                     except KeyError:
                         sampler_id = -1
+                    try:
+                        tps = str(float(info[10]))
+                    except:
+                        tps = '0/sec'
                     csv_to_db = FlowTaskAggregateReport(task_id=taskid, flow_id=flow_id, sampler_id=sampler_id, label=Tools.filename(info[0]),
                                                         samplers=info[1], average_req=info[2],median_req=info[3],
                                                         line90_req=info[4], line95_req=info[5], line99_req=info[6],
                                                         min_req=info[7], max_req=info[8], error_rate=info[9],
-                                                        tps=str(float(info[10])), recieved_per=str(float(info[11])))
+                                                        tps=tps, recieved_per=str(float(info[11])))
                     csv_to_db.save()
                 for sampler_id, save_path in save_path_dict.items():
                     count_rsp = Tools.count_rsp(save_path)
