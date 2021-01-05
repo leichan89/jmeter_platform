@@ -310,6 +310,9 @@ class ReadJmx():
         # 后置处理器计数器
         after_beanshell_count = 1
 
+        # JSR223计数器
+        JSR223_count = 1
+
         hashTree = tree.xpath(sampler_xapth)[0].getnext()
 
         if hashTree is not None:
@@ -455,6 +458,24 @@ class ReadJmx():
                     child['params'] = {"to_beanshell_param": tree.xpath(after_beanshell_params_xpath)[0].text,
                                        "express": tree.xpath(after_beanshell_express_xpath)[0].text}
                     after_beanshell_count += 1
+                if cd.tag == "JSR223PreProcessor":
+                    child['child_type'] = 'JSR223'
+                    old_JSR223_name = Tools.filename(cd.attrib['testname'])
+                    if upload:
+                        new_JSR223_name = old_JSR223_name + "." + Tools.random_str(9)
+                        cd.attrib['testname'] = new_JSR223_name
+                        tree.write(self.jmxPath, encoding='utf-8')
+                    else:
+                        new_JSR223_name = old_JSR223_name
+                    child['child_name'] = old_JSR223_name
+                    JSR223_xpath = f'/JSR223PreProcessor[@testname="{new_JSR223_name}"]'
+                    child['xpath'] = JSR223_xpath
+                    JSR223_base_xpath = hashTreeXpath + f'/JSR223PreProcessor[{after_beanshell_count}]'
+                    JSR223_params_xpath = JSR223_base_xpath + '/stringProp[@name="parameters"]'
+                    JSR223_express_xpath = JSR223_base_xpath + '/stringProp[@name="script"]'
+                    child['params'] = {"to_JSR223_param": tree.xpath(JSR223_params_xpath)[0].text,
+                                       "express": tree.xpath(JSR223_express_xpath)[0].text}
+                    JSR223_count += 1
                 if child:
                     children.append(child)
             return children
@@ -1026,9 +1047,9 @@ class ModifyJMX(OperateJmx):
         child_info['params'] = {"to_beanshell_param": to_beanshell_param, "express": express}
         return child_info
 
-    def add_JSR223(self, sampler_xpath, name, language, to_JSR223_param, express, JSR223_xpath=None):
+    def add_JSR223(self, sampler_xpath, name, to_JSR223_param, express, JSR223_xpath=None):
         """
-        添加JSR223
+        添加JSR223（jpython语言）
         :param sampler_xpath:
         :param name:
         :param language:
@@ -1044,7 +1065,7 @@ class ModifyJMX(OperateJmx):
         JSR223 = self.add_sub_node(hashTree, new_tag_name="JSR223PreProcessor", guiclass="TestBeanGUI",
                                        testclass="JSR223PreProcessor", testname=JSR223_name, enabled="true")
         self.add_sub_node(hashTree, new_tag_name="hashTree")
-        self.add_sub_node(JSR223, new_tag_name="stringProp", text=language, name="scriptLanguage")
+        self.add_sub_node(JSR223, new_tag_name="stringProp", text="jython", name="scriptLanguage")
         self.add_sub_node(JSR223, new_tag_name="stringProp", text=to_JSR223_param, name="parameters")
         self.add_sub_node(JSR223, new_tag_name="stringProp", name="filename")
         self.add_sub_node(JSR223, new_tag_name="stringProp", name="cacheKey")
@@ -1056,7 +1077,7 @@ class ModifyJMX(OperateJmx):
         child_info = {}
         child_info['child_type'] = "JSR223"
         child_info['xpath'] = new_JSR223_xpath
-        child_info['params'] = {"language": language, "to_JSR223_param": to_JSR223_param, "express": express}
+        child_info['params'] = {"to_JSR223_param": to_JSR223_param, "express": express}
         return child_info
 
     def add_pre_beanshell(self, sampler_xpath, name, to_beanshell_param, express, pre_beanshell_xpath=None):
@@ -1111,8 +1132,8 @@ class ModifyJMX(OperateJmx):
         self.add_sub_node(json_assert, new_tag_name="stringProp", text=json_path, name="JSON_PATH")
         self.add_sub_node(json_assert, new_tag_name="stringProp", text=expected_value, name="EXPECTED_VALUE")
         self.add_sub_node(json_assert, new_tag_name="boolProp", text="true", name="JSONVALIDATION")
-        self.add_sub_node(json_assert, new_tag_name="boolProp", text="false", name="EXPECT_NULL")
-        self.add_sub_node(json_assert, new_tag_name="boolProp", text="false", name="INVERT")
+        self.add_sub_node(json_assert, new_tag_name="boolProp", text=Tools.boolToStr(expect_null), name="EXPECT_NULL")
+        self.add_sub_node(json_assert, new_tag_name="boolProp", text=Tools.boolToStr(invert), name="INVERT")
         self.add_sub_node(json_assert, new_tag_name="boolProp", text="true", name="ISREGEX")
 
         new_json_assert_name_xpath = f'//JSONPathAssertion[@testname="{json_assert_name}"]'

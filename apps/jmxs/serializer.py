@@ -54,7 +54,7 @@ class JmxSerializerThreadNum(serializers.ModelSerializer):
     """
     class Meta:
         model = Jmxs
-        fields = ['thread_base_info']
+        fields = ['jmx_alias', 'thread_base_info']
 
 
 class JmxsRunSerializer(serializers.ModelSerializer):
