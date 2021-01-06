@@ -350,7 +350,7 @@ class SamplerCreateUpdateJsonAssert(APIView):
         expectedValue = request.data.get('expectedValue')
         expectNull = request.data.get('expectNull')
         invert = request.data.get('invert')
-        if not jsonPath or not invert or not name and not childId:
+        if not jsonPath or not name:
             return APIRsp(msg='存在参数为空，不创建JSON断言')
         try:
             # 获取jmx的信息
@@ -383,7 +383,7 @@ class SamplerCreateUpdatePreBeanShell(APIView):
         name = request.data.get('name')
         toBeanShellParam = request.data.get('toBeanShellParam')
         express = request.data.get('express')
-        if not express or not name and not childId:
+        if not express or not name:
             return APIRsp(msg='存在参数为空，不创建BeanShell前置处理器!')
         if not toBeanShellParam:
             toBeanShellParam = ""
@@ -417,7 +417,7 @@ class SamplerCreateUpdateAfterBeanShell(APIView):
         name = request.data.get('name')
         toBeanShellParam = request.data.get('toBeanShellParam')
         express = request.data.get('express')
-        if not express or not name and not childId:
+        if not express or not name:
             return APIRsp(msg='存在参数为空，不创建BeanShell后置处理器!')
         if not toBeanShellParam:
             toBeanShellParam = ""
@@ -452,7 +452,7 @@ class SamplerCreateUpdateJsonExtract(APIView):
         params = request.data.get('params')
         express = request.data.get('express')
         match_num = request.data.get('match_num')
-        if not params or not express or not name and not childId:
+        if not params or not express or not name:
             return APIRsp(msg='存在参数为空，不创建Json提取器')
         if not match_num:
             match_num = ""
@@ -486,7 +486,7 @@ class SamplerCreateUpdateJSR223(APIView):
         name = request.data.get('name')
         to_JSR223_param = request.data.get('to_JSR223_param')
         express = request.data.get('express')
-        if not express or not name and not childId:
+        if not express or not name:
             return APIRsp(msg='存在参数为空，不创建JSR223!')
         if not to_JSR223_param:
             to_JSR223_param = ""
