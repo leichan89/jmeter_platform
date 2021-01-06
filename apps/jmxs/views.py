@@ -758,10 +758,12 @@ class JmxCopy(APIView):
         old_jmx_id = request.data.get('jmxId')
         user = request.data.get('userId')
         if old_jmx_id:
-            jmx_path = str(Jmxs.objects.get(id=old_jmx_id).jmx)
+            jmx_info = Jmxs.objects.get(id=old_jmx_id)
+            jmx_path = str(jmx_info.jmx)
+            jmx_alias = str(jmx_info.jmx_alias)
             temp_jmx_path = settings.JMX_URL + Tools.random_str(9) + '.jmx'
             shutil.copyfile(jmx_path, temp_jmx_path)
-            new_jmx_name = Tools.filename(Tools.filename(jmx_path)) + '.' + Tools.random_str(9)
+            new_jmx_name = jmx_alias + '.' + Tools.random_str(9)
             new_jmx_path = settings.JMX_URL + new_jmx_name + '.jmx'
             # 解析JMX
             jmxinfo = ReadJmx(temp_jmx_path).analysis_jmx()

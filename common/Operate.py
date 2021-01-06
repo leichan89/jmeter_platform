@@ -354,12 +354,12 @@ class ReadJmx():
                     else:
                         new_rsp_assert_name = cd.attrib['testname']
                     child['child_name'] = old_rsp_assert_name
-                    rsp_assert_xpath = f'/ResponseAssertion[@testname="{new_rsp_assert_name}"]'
+                    rsp_assert_xpath = f'//ResponseAssertion[@testname="{new_rsp_assert_name}"]'
                     child['xpath'] = rsp_assert_xpath
                     # 断言内容
-                    rsp_assert_content_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/collectionProp/stringProp'
+                    rsp_assert_content_xpath = hashTreeXpath + f'//ResponseAssertion[{rsp_assert_count}]/collectionProp/stringProp'
                     # 断言方式
-                    rsp_assert_type_xpath = hashTreeXpath + f'/ResponseAssertion[{rsp_assert_count}]/intProp'
+                    rsp_assert_type_xpath = hashTreeXpath + f'//ResponseAssertion[{rsp_assert_count}]/intProp'
                     rsp_assert_content = tree.xpath(rsp_assert_content_xpath)
                     rsp_assert_content_list = []
                     for rac in rsp_assert_content:
@@ -380,9 +380,9 @@ class ReadJmx():
                     else:
                         new_json_assert_name = old_json_assert_name
                     child['child_name'] = old_json_assert_name
-                    json_assert_xpath = f'/JSONPathAssertion[@testname="{new_json_assert_name}"]'
+                    json_assert_xpath = f'//JSONPathAssertion[@testname="{new_json_assert_name}"]'
                     child['xpath'] = json_assert_xpath
-                    json_assert_base_xpath = hashTreeXpath + f'/JSONPathAssertion[{json_assert_count}]'
+                    json_assert_base_xpath = hashTreeXpath + f'//JSONPathAssertion[{json_assert_count}]'
                     json_assert_json_path_xpath = json_assert_base_xpath + '/stringProp[@name="JSON_PATH"]'
                     json_assert_expected_value_xpath = json_assert_base_xpath + '/stringProp[@name="EXPECTED_VALUE"]'
                     json_assert_expect_null_xpath = json_assert_base_xpath + '/boolProp[@name="EXPECT_NULL"]'
@@ -412,9 +412,9 @@ class ReadJmx():
                     else:
                         new_json_extract_name = old_json_extract_name
                     child['child_name'] = old_json_extract_name
-                    json_extract_xpath = f'/JSONPostProcessor[@testname="{new_json_extract_name}"]'
+                    json_extract_xpath = f'//JSONPostProcessor[@testname="{new_json_extract_name}"]'
                     child['xpath'] = json_extract_xpath
-                    json_extract_base_xpath = hashTreeXpath + f'/JSONPostProcessor[{json_extract_count}]'
+                    json_extract_base_xpath = hashTreeXpath + f'//JSONPostProcessor[{json_extract_count}]'
                     json_extract_params_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.referenceNames"]'
                     json_extract_express_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.jsonPathExprs"]'
                     json_extract_match_num_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.match_numbers"]'
@@ -432,9 +432,9 @@ class ReadJmx():
                     else:
                         new_pre_beanshell_name = old_pre_beanshell_name
                     child['child_name'] = old_pre_beanshell_name
-                    pre_beanshell_xpath = f'/BeanShellPreProcessor[@testname="{new_pre_beanshell_name}"]'
+                    pre_beanshell_xpath = f'//BeanShellPreProcessor[@testname="{new_pre_beanshell_name}"]'
                     child['xpath'] = pre_beanshell_xpath
-                    pre_beanshell_base_xpath = hashTreeXpath + f'/BeanShellPreProcessor[{pre_beanshell_count}]'
+                    pre_beanshell_base_xpath = hashTreeXpath + f'//BeanShellPreProcessor[{pre_beanshell_count}]'
                     pre_beanshell_params_xpath = pre_beanshell_base_xpath + '/stringProp[@name="parameters"]'
                     pre_beanshell_express_xpath = pre_beanshell_base_xpath + '/stringProp[@name="script"]'
                     child['params'] = {"to_beanshell_param": tree.xpath(pre_beanshell_params_xpath)[0].text,
@@ -450,9 +450,9 @@ class ReadJmx():
                     else:
                         new_after_beanshell_name = old_after_beanshell_name
                     child['child_name'] = old_after_beanshell_name
-                    after_beanshell_xpath = f'/BeanShellPostProcessor[@testname="{new_after_beanshell_name}"]'
+                    after_beanshell_xpath = f'//BeanShellPostProcessor[@testname="{new_after_beanshell_name}"]'
                     child['xpath'] = after_beanshell_xpath
-                    after_beanshell_base_xpath = hashTreeXpath + f'/BeanShellPostProcessor[{after_beanshell_count}]'
+                    after_beanshell_base_xpath = hashTreeXpath + f'//BeanShellPostProcessor[{after_beanshell_count}]'
                     after_beanshell_params_xpath = after_beanshell_base_xpath + '/stringProp[@name="parameters"]'
                     after_beanshell_express_xpath = after_beanshell_base_xpath + '/stringProp[@name="script"]'
                     child['params'] = {"to_beanshell_param": tree.xpath(after_beanshell_params_xpath)[0].text,
@@ -468,9 +468,9 @@ class ReadJmx():
                     else:
                         new_JSR223_name = old_JSR223_name
                     child['child_name'] = old_JSR223_name
-                    JSR223_xpath = f'/JSR223PreProcessor[@testname="{new_JSR223_name}"]'
+                    JSR223_xpath = f'//JSR223PreProcessor[@testname="{new_JSR223_name}"]'
                     child['xpath'] = JSR223_xpath
-                    JSR223_base_xpath = hashTreeXpath + f'/JSR223PreProcessor[{after_beanshell_count}]'
+                    JSR223_base_xpath = hashTreeXpath + f'//JSR223PreProcessor[{after_beanshell_count}]'
                     JSR223_params_xpath = JSR223_base_xpath + '/stringProp[@name="parameters"]'
                     JSR223_express_xpath = JSR223_base_xpath + '/stringProp[@name="script"]'
                     child['params'] = {"to_JSR223_param": tree.xpath(JSR223_params_xpath)[0].text,
