@@ -89,6 +89,14 @@ class ReadJmx():
 
         return sapmlers_info, csvs_info, thread_info
 
+    def _getText(self, tree, xpath):
+        try:
+            text = tree.xpath(xpath)[0].text
+        except:
+            logger.debug(f"获取text异常：{xpath}")
+            text = ""
+        return text
+
     def _read_sampler(self, tree, sapmler_root_xpath, thread_type='thread', upload=True):
         """
 
@@ -112,11 +120,11 @@ class ReadJmx():
 
             sampler_xpath = f'{sapmler_root_xpath}[{sidx + 1}]'
 
-            sampler_url_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.path']"
+            sampler_url_xpath = f'{sampler_xpath}/stringProp[@name="HTTPSampler.path"]'
 
-            sampler_method_xpath = f"{sampler_xpath}/stringProp[@name='HTTPSampler.method']"
+            sampler_method_xpath = f'{sampler_xpath}/stringProp[@name="HTTPSampler.method"]'
 
-            param_type_xpath = f"{sampler_xpath}/boolProp[@name='HTTPSampler.postBodyRaw']"
+            param_type_xpath = f'{sampler_xpath}/boolProp[@name="HTTPSampler.postBodyRaw"]'
 
             # jmx请求参数的节点，get请求的参数可能会有多个elementProp，一个参数一个
             sapmler_param_xpath = f"{sapmler_root_xpath}[{sidx + 1}]/elementProp/collectionProp/elementProp"
@@ -135,11 +143,11 @@ class ReadJmx():
             sampler_info['xpath'] = f'{sapmler_root_xpath}[@testname="{sampler_name}"]'
 
             # 取样器url
-            sampler_url = tree.xpath(sampler_url_xpath)[0].text
+            sampler_url = self._getText(tree, sampler_url_xpath)
             sampler_info['url'] = sampler_url
 
             # 取样器方法
-            sampler_method = tree.xpath(sampler_method_xpath)[0].text
+            sampler_method = self._getText(tree, sampler_method_xpath)
             sampler_info['method'] = sampler_method
 
             # 判断是否是raw格式的请求
@@ -208,27 +216,27 @@ class ReadJmx():
                 csv_info['name'] = old_name
                 csv_info['xpath'] = f'{csv_root_xpath}/[@testname="{csv_name}"]'
                 filename_xpath = csv_xpath + '/stringProp[@name="filename"][1]'
-                filename = tree.xpath(filename_xpath)[0].text
+                filename = self._getText(tree, filename_xpath)
                 csv_info['filename'] = filename
 
                 delimiter_xpath = csv_root_xpath + '/stringProp[@name="delimiter"]'
-                delimiter = tree.xpath(delimiter_xpath)[0].text
+                delimiter = self._getText(tree, delimiter_xpath)
                 csv_info['delimiter'] = delimiter
 
                 ignoreFirstLine_xpath = csv_xpath + '/boolProp[@name="ignoreFirstLine"]'
-                ignoreFirstLine = tree.xpath(ignoreFirstLine_xpath)[0].text
+                ignoreFirstLine = self._getText(tree, ignoreFirstLine_xpath)
                 csv_info['ignoreFirstLine'] = Tools.strToBool(ignoreFirstLine)
 
                 recycle_xpath = csv_xpath + '/boolProp[@name="recycle"]'
-                recycle = tree.xpath(recycle_xpath)[0].text
+                recycle = self._getText(tree, recycle_xpath)
                 csv_info['recycle'] = Tools.strToBool(recycle)
 
                 stopThread_xpath = csv_xpath + '/boolProp[@name="stopThread"]'
-                stopThread = tree.xpath(stopThread_xpath)[0].text
+                stopThread = self._getText(tree, stopThread_xpath)
                 csv_info['stopThread'] = Tools.strToBool(stopThread)
 
                 variableNames_xpath = csv_xpath + '/stringProp[@name="variableNames"]'
-                variableNames = tree.xpath(variableNames_xpath)[0].text
+                variableNames = self._getText(tree, variableNames_xpath)
                 csv_info['variableNames'] = variableNames
 
                 csvs_info.append(csv_info)
@@ -249,32 +257,29 @@ class ReadJmx():
         thread_xpath = '//ThreadGroup[1]'
 
         # 线程数
-        num_threads_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.num_threads']"
-        num_threads = tree.xpath(num_threads_xpath)[0].text
+        num_threads_xpath = thread_xpath + '/stringProp[@name="ThreadGroup.num_threads"]'
+        num_threads = self._getText(tree, num_threads_xpath)
         thread_info['num_threads'] = num_threads
 
         # Ramp-UP时间
-        ramp_time_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.ramp_time']"
-        ramp_time = tree.xpath(ramp_time_xpath)[0].text
+        ramp_time_xpath = thread_xpath + '/stringProp[@name="ThreadGroup.ramp_time"]'
+        ramp_time = self._getText(tree, ramp_time_xpath)
         thread_info['ramp_time'] = ramp_time
 
         # 循环次数，-1表示永远
-        loops_xpath = thread_xpath + "/elementProp/stringProp[@name='LoopController.loops']"
-        loops = tree.xpath(loops_xpath)[0].text
+        loops_xpath = thread_xpath + '/elementProp/stringProp[@name="LoopController.loops"]'
+        loops = self._getText(tree, loops_xpath)
         thread_info['loops'] = loops
 
         # 调度器配置，true or false
-        scheduler_xpath = thread_xpath + "/boolProp[@name='ThreadGroup.scheduler']"
-        scheduler = tree.xpath(scheduler_xpath)[0].text
+        scheduler_xpath = thread_xpath + '/boolProp[@name="ThreadGroup.scheduler"]'
+        scheduler = self._getText(tree, scheduler_xpath)
         thread_info['scheduler'] = scheduler
 
         # 持续时间
-        duration_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.duration']"
-        duration = tree.xpath(duration_xpath)[0].text
-        if duration:
-            thread_info['duration'] = duration
-        else:
-            thread_info['duration'] = ""
+        duration_xpath = thread_xpath + '/stringProp[@name="ThreadGroup.duration"]'
+        duration = self._getText(tree, duration_xpath)
+        thread_info['duration'] = duration
 
         return thread_info
 
@@ -334,10 +339,10 @@ class ReadJmx():
                     header_param_info = tree.xpath(header_temp_xpath)
                     params_list = []
                     for pidx, param in enumerate(header_param_info):
-                        param_name_xpath = f"{header_temp_xpath}[{pidx + 1}]/stringProp[@name='Header.name']"
-                        param_value_xpath = f"{header_temp_xpath}[{pidx + 1}]/stringProp[@name='Header.value']"
-                        param_name = tree.xpath(param_name_xpath)[0].text
-                        param_value = tree.xpath(param_value_xpath)[0].text
+                        param_name_xpath = f'{header_temp_xpath}[{pidx + 1}]/stringProp[@name="Header.name"]'
+                        param_value_xpath = f'{header_temp_xpath}[{pidx + 1}]/stringProp[@name="Header.value"]'
+                        param_name = self._getText(tree, param_name_xpath)
+                        param_value = self._getText(tree, param_value_xpath)
                         header_param = {"key": param_name, "value": param_value}
                         params_list.append(header_param)
                     if not params_list:
@@ -364,7 +369,7 @@ class ReadJmx():
                     rsp_assert_content_list = []
                     for rac in rsp_assert_content:
                         rsp_assert_content_list.append({'key': rac.text})
-                    rsp_assert_type = tree.xpath(rsp_assert_type_xpath)[0].text
+                    rsp_assert_type = self._getText(tree, rsp_assert_type_xpath)
                     assert_type_dict = Tools.assert_type_dict()
                     for key, value in assert_type_dict.items():
                         if str(value) == rsp_assert_type:
@@ -387,18 +392,18 @@ class ReadJmx():
                     json_assert_expected_value_xpath = json_assert_base_xpath + '/stringProp[@name="EXPECTED_VALUE"]'
                     json_assert_expect_null_xpath = json_assert_base_xpath + '/boolProp[@name="EXPECT_NULL"]'
                     json_assert_is_regex_xpath = json_assert_base_xpath + '/boolProp[@name="ISREGEX"]'
-                    expect_null = tree.xpath(json_assert_expect_null_xpath)[0].text
+                    expect_null = self._getText(tree, json_assert_expect_null_xpath)
                     if expect_null == 'true':
                         expect_null = True
                     elif expect_null == 'false':
                         expect_null = False
-                    invert = tree.xpath(json_assert_is_regex_xpath)[0].text
+                    invert = self._getText(tree, json_assert_is_regex_xpath)
                     if invert == 'true':
                         invert = True
                     elif invert == 'false':
                         invert = False
-                    child['params'] = {"json_path": tree.xpath(json_assert_json_path_xpath)[0].text,
-                                       "expected_value": tree.xpath(json_assert_expected_value_xpath)[0].text,
+                    child['params'] = {"json_path": self._getText(tree, json_assert_json_path_xpath),
+                                       "expected_value": self._getText(tree, json_assert_expected_value_xpath),
                                        "expect_null": expect_null,
                                        "invert": invert}
                     json_assert_count += 1
@@ -418,9 +423,9 @@ class ReadJmx():
                     json_extract_params_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.referenceNames"]'
                     json_extract_express_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.jsonPathExprs"]'
                     json_extract_match_num_xpath = json_extract_base_xpath + '/stringProp[@name="JSONPostProcessor.match_numbers"]'
-                    child['params'] = {"params": tree.xpath(json_extract_params_xpath)[0].text,
-                                       "express": tree.xpath(json_extract_express_xpath)[0].text,
-                                       "match_num": tree.xpath(json_extract_match_num_xpath)[0].text}
+                    child['params'] = {"params": self._getText(tree, json_extract_params_xpath),
+                                       "express": self._getText(tree, json_extract_express_xpath),
+                                       "match_num": self._getText(tree, json_extract_match_num_xpath)}
                     json_extract_count += 1
                 if cd.tag == "BeanShellPreProcessor":
                     child['child_type'] = 'pre_beanshell'
@@ -437,8 +442,8 @@ class ReadJmx():
                     pre_beanshell_base_xpath = hashTreeXpath + f'//BeanShellPreProcessor[{pre_beanshell_count}]'
                     pre_beanshell_params_xpath = pre_beanshell_base_xpath + '/stringProp[@name="parameters"]'
                     pre_beanshell_express_xpath = pre_beanshell_base_xpath + '/stringProp[@name="script"]'
-                    child['params'] = {"to_beanshell_param": tree.xpath(pre_beanshell_params_xpath)[0].text,
-                                       "express": tree.xpath(pre_beanshell_express_xpath)[0].text}
+                    child['params'] = {"to_beanshell_param": self._getText(tree, pre_beanshell_params_xpath),
+                                       "express": self._getText(tree, pre_beanshell_express_xpath)}
                     pre_beanshell_count += 1
                 if cd.tag == "BeanShellPostProcessor":
                     child['child_type'] = 'after_beanshell'
@@ -455,8 +460,8 @@ class ReadJmx():
                     after_beanshell_base_xpath = hashTreeXpath + f'//BeanShellPostProcessor[{after_beanshell_count}]'
                     after_beanshell_params_xpath = after_beanshell_base_xpath + '/stringProp[@name="parameters"]'
                     after_beanshell_express_xpath = after_beanshell_base_xpath + '/stringProp[@name="script"]'
-                    child['params'] = {"to_beanshell_param": tree.xpath(after_beanshell_params_xpath)[0].text,
-                                       "express": tree.xpath(after_beanshell_express_xpath)[0].text}
+                    child['params'] = {"to_beanshell_param": self._getText(tree, after_beanshell_params_xpath),
+                                       "express": self._getText(tree, after_beanshell_express_xpath)}
                     after_beanshell_count += 1
                 if cd.tag == "JSR223PreProcessor":
                     child['child_type'] = 'JSR223'
@@ -470,11 +475,11 @@ class ReadJmx():
                     child['child_name'] = old_JSR223_name
                     JSR223_xpath = f'//JSR223PreProcessor[@testname="{new_JSR223_name}"]'
                     child['xpath'] = JSR223_xpath
-                    JSR223_base_xpath = hashTreeXpath + f'//JSR223PreProcessor[{after_beanshell_count}]'
+                    JSR223_base_xpath = hashTreeXpath + f'//JSR223PreProcessor[{JSR223_count}]'
                     JSR223_params_xpath = JSR223_base_xpath + '/stringProp[@name="parameters"]'
                     JSR223_express_xpath = JSR223_base_xpath + '/stringProp[@name="script"]'
-                    child['params'] = {"to_JSR223_param": tree.xpath(JSR223_params_xpath)[0].text,
-                                       "express": tree.xpath(JSR223_express_xpath)[0].text}
+                    child['params'] = {"to_JSR223_param": self._getText(tree, JSR223_params_xpath),
+                                       "express": self._getText(tree, JSR223_express_xpath)}
                     JSR223_count += 1
                 if child:
                     children.append(child)
@@ -639,26 +644,26 @@ class ModifyJMX(OperateJmx):
         thread_xpath = '//ThreadGroup[1]'
 
         # 线程数
-        num_threads_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.num_threads']"
+        num_threads_xpath = thread_xpath + '/stringProp[@name="ThreadGroup.num_threads"]'
         self.tree.xpath(num_threads_xpath)[0].text = num_threads
 
         # Ramp-UP时间
-        ramp_time_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.ramp_time']"
+        ramp_time_xpath = thread_xpath + '/stringProp[@name="ThreadGroup.ramp_time"]'
         self.tree.xpath(ramp_time_xpath)[0].text = ramp_time
 
 
         # 循环次数，-1表示永远
-        loops_xpath = thread_xpath + "/elementProp/stringProp[@name='LoopController.loops']"
+        loops_xpath = thread_xpath + '/elementProp/stringProp[@name="LoopController.loops"]'
         self.tree.xpath(loops_xpath)[0].text = loops
 
 
         # 调度器配置，true or false
-        scheduler_xpath = thread_xpath + "/boolProp[@name='ThreadGroup.scheduler']"
+        scheduler_xpath = thread_xpath + '/boolProp[@name="ThreadGroup.scheduler"]'
         self.tree.xpath(scheduler_xpath)[0].text = scheduler
 
         if duration:
             # 持续时间
-            duration_xpath = thread_xpath + "/stringProp[@name='ThreadGroup.duration']"
+            duration_xpath = thread_xpath + '/stringProp[@name="ThreadGroup.duration"]'
             self.tree.xpath(duration_xpath)[0].text = duration
 
         self.save_change()
@@ -1308,16 +1313,17 @@ class ModifyJMX(OperateJmx):
 if __name__ == '__main__':
     # r = ModifyJMX('/Users/chenlei/jmeter5/jmx_folder/django.jmx')
     # s = r.add_sampler(name='sampler', url='http://www.baidu.com', method="GET")
-    # print(s)
-    jmx = '/Users/chenlei/python-project/jmeter_platform/performance_files/temp/PP7Jxlb3Hs4LQxj1Rjeu1609143914/致用.Jycyn0URD1608722118.jmx'
-    # o = ModifyJMX(jmx)
-    # xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[@testname="xxx"]'
-    # o.add_header(sampler_xpath=xpath, headers={'aaaa': 'bbaa'}, header_name="aaaaaaa")
-    r = ModifyJMX(jmx)
-    r.save_rsp_data(sampler_xpath='//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[@testname="证书管理.S6vWuo0bg1608722119"]', save_path='/Users/chenlei/python-project/jmeter_platform/performance_files/temp/PP7Jxlb3Hs4LQxj1Rjeu1609143914/503')
+    # # print(s)
+    # jmx = '/Users/chenlei/python-project/jmeter_platform/performance_files/temp/PP7Jxlb3Hs4LQxj1Rjeu1609143914/致用.Jycyn0URD1608722118.jmx'
+    # # o = ModifyJMX(jmx)
+    # # xpath = '//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[@testname="xxx"]'
+    # # o.add_header(sampler_xpath=xpath, headers={'aaaa': 'bbaa'}, header_name="aaaaaaa")
+    # r = ModifyJMX(jmx)
+    # r.save_rsp_data(sampler_xpath='//ThreadGroup[1]/following-sibling::hashTree[1]/HTTPSamplerProxy[@testname="证书管理.S6vWuo0bg1608722119"]', save_path='/Users/chenlei/python-project/jmeter_platform/performance_files/temp/PP7Jxlb3Hs4LQxj1Rjeu1609143914/503')
+    #
 
-
-
+    t = ReadJmx('/Users/chenlei/python-project/jmeter_platform/performance_files/jmx/测试修改.zXhKF4tlP1609930122.jmx')
+    print(t.analysis_jmx())
 
 
 
