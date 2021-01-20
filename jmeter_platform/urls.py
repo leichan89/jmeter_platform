@@ -23,5 +23,6 @@ urlpatterns = [
     path('', include('tasks.urls')),
     path('', include('reports.urls')),
     path('login', obtain_jwt_token),
-    path('', include('users.urls'))
+    path('', include('users.urls')),
+    path('', include('params.urls'))
 ]
