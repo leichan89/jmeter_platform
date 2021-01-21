@@ -1,5 +1,5 @@
 from .models import UsersParams
-from .serializer import UserParamsSerializer
+from .serializer import UserParamsSerializer, UserParamsListSerializer
 from rest_framework import generics, filters
 from common.APIResponse import APIRsp
 from rest_framework.exceptions import UnsupportedMediaType
@@ -15,7 +15,7 @@ class UsersParamsPagition(PageNumberPagination):
 
 class UsersParamsList(generics.ListAPIView):
     queryset = UsersParams.objects.all().order_by('-add_time')
-    serializer_class = UserParamsSerializer
+    serializer_class = UserParamsListSerializer
     pagination_class = UsersParamsPagition
     filter_backends = [filters.SearchFilter]
 
