@@ -9,7 +9,7 @@ import random
 import os
 import csv
 import logging
-import hashlib
+import re
 from collections import Counter
 
 logger = logging.getLogger('collect')

@@ -14,7 +14,6 @@ from common.Operate import ModifyJMX
 from celery.utils.log import get_task_logger
 from datetime import datetime
 import json
-import re
 
 logger = get_task_logger('celery_task')
 
@@ -32,7 +31,6 @@ def run_task(taskid, task_flow_str, jmxs):
     from jtls.models import JtlsSummary
     from tasks.models import TaskFlow, FlowTaskAggregateReport, RspResult, PngResult
     from jmxs.models import JmxThreadGroup, Jmxs
-    from params.models import UsersParams
 
     try:
         cmds = []
@@ -40,7 +38,6 @@ def run_task(taskid, task_flow_str, jmxs):
         sampler_id_name_dict = {}
         temp_dir = settings.TEMP_URL + task_flow_str
         jtl = settings.JTL_URL + task_flow_str + '.jtl'
-        pt = re.compile('{{(.*?)}}')
         logger.debug(f'创建临时目录{temp_dir}')
         os.makedirs(temp_dir)
         logger.debug('将jmx复制到临时目录下')
@@ -53,19 +50,7 @@ def run_task(taskid, task_flow_str, jmxs):
             jmx_name = Tools.filename(jmx)
             shutil.copy(jmx, temp_dir)
             # 在这里查找替换变量{{}}
-            temp_jmx = temp_dir + os.sep + jmx_name + '.temp.jmx'
-            temp_temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
-            # 替换全局变量参数
-            with open(temp_jmx, 'w') as write:
-                with open(temp_temp_jmx, 'r') as read:
-                    content = read.readlines()
-                    for line in content:
-                        param_name_list = re.findall(pt, line)
-                        for param_name in param_name_list:
-                            value = UsersParams.objects.get(param_name=param_name).param_value
-                            line = line.replace('{{%s}}' % param_name, str(value))
-                        write.write(line)
-            os.remove(temp_temp_jmx)
+            temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
             ModifyJMX(temp_jmx).add_backendListener(influxdb_url=settings.INFLUXDB_URL, application_name=task_flow_str)
             for sampler in samplers_info:
                 sampler_id = sampler['id']

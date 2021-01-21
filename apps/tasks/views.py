@@ -88,7 +88,7 @@ class JmxBindTask(generics.CreateAPIView):
 
 class RunJmx(APIView):
     """
-    运行当个jmx
+    运行单个jmx
     """
     def post(self, request, userid, jmxid):
         # 判断任务是否存在或者是否绑定了jmx

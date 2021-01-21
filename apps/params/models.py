@@ -9,7 +9,7 @@ class UsersParams(models.Model):
     新增变量时候，可以一次性添加多个环境的
     """
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    param_name = models.CharField("变量名称", max_length=100)
+    param_name = models.CharField("变量名称",unique=True, max_length=100)
     param_value = models.CharField("变量值", default="", max_length=1000)
     param_content = models.CharField("变量备注", default="", max_length=1000)
     add_time = models.DateTimeField(auto_now_add=True)
@@ -18,7 +18,7 @@ class UsersParams(models.Model):
         verbose_name = "用户添加的变量"
         verbose_name_plural = verbose_name
         # 创建人、环境和变量名称作为唯一约束，一个用户在一个环境不能创建同名的变量
-        unique_together = ['user', 'param_name']
+        # unique_together = ['param_name']
 
     def __str__(self):
         return self.param_name

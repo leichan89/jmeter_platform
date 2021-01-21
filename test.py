@@ -278,11 +278,24 @@
 #     print('a')
 #
 
-s = 'asd'.lower()
-print(list(s))
+# s = 'asd'.lower()
+# print(list(s))
+#
+#
+# s = {"aa": True}
+#
+# import json
+# print(json.dumps(s))
 
+import re
+s = """
+dasddad
+dasd{{dad}} dasd{{dadasdaddasdada}}
+dasd
+{{dadasddasd}}dasd
+"""
 
-s = {"aa": True}
+pt = re.compile('{{(.*?)}}')
 
-import json
-print(json.dumps(s))
+x = re.findall(pt, s)
+print(x)

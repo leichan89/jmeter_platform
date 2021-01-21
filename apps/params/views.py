@@ -47,7 +47,7 @@ class UserParamsCreate(generics.CreateAPIView):
             return APIRsp(code=400, msg='不支持的mediaType', status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.exception(f'创建失败\n{e}')
-            return APIRsp(code=400, msg='创建失败', status=status.HTTP_400_BAD_REQUEST)
+            return APIRsp(code=400, msg='创建失败，请检查参数名称是否重复', status=status.HTTP_200_OK)
 
 class UsersParamsDetail(generics.RetrieveAPIView):
     """
