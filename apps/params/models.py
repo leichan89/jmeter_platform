@@ -10,7 +10,7 @@ class UsersParams(models.Model):
     """
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     param_name = models.CharField("变量名称",unique=True, max_length=100)
-    param_value = models.CharField("变量值", default="", max_length=1000)
+    param_value = models.CharField("变量值", default="", max_length=10000)
     param_content = models.CharField("变量备注", default="", max_length=1000)
     add_time = models.DateTimeField(auto_now_add=True)
 

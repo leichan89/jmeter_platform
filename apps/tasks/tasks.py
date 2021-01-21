@@ -56,6 +56,7 @@ def run_task(taskid, task_flow_str, jmxs):
             temp_jmx = temp_dir + os.sep + jmx_name + '.temp.jmx'
             temp_temp_jmx = temp_dir + os.sep + jmx_name + '.jmx'
             # 替换全局变量参数
+            logger.debug('替换全局参数')
             with open(temp_jmx, 'w') as write:
                 with open(temp_temp_jmx, 'r') as read:
                     content = read.readlines()
@@ -63,6 +64,7 @@ def run_task(taskid, task_flow_str, jmxs):
                         param_name_list = re.findall(pt, line)
                         for param_name in param_name_list:
                             value = UsersParams.objects.get(param_name=param_name).param_value
+                            logger.debug(f'全局参数:{param_name}\n{value}')
                             line = line.replace('{{%s}}' % param_name, str(value))
                         write.write(line)
             os.remove(temp_temp_jmx)
