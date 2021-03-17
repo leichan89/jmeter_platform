@@ -16,7 +16,3 @@ influxd -config /usr/local/etc/influxdb.conf
 启动grafana
 brew services start grafana
 admin/jmeter
-
-
-前端页面参考：
-https://testerhome.com/topics/17986
